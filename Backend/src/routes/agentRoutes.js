@@ -3,7 +3,7 @@ import Agent from '../models/Agent.js';
 import Client from '../models/Client.js';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const router = express.Router();
 

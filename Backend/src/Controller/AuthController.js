@@ -426,7 +426,7 @@ export const forgotPassword = async (req, res, next) => {
       return res.status(200).json({ message: "If that email exists, a reset link has been sent." });
     }
 
-    const crypto = await import("crypto");
+    const crypto = await import("node:crypto");
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
 
@@ -478,7 +478,7 @@ export const resetPassword = async (req, res, next) => {
       return res.status(400).json({ message: "Token, email, and new password are required" });
     }
 
-    const crypto = await import("crypto");
+    const crypto = await import("node:crypto");
     const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     const employee = await Employee.findOne({

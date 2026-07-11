@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from 'node:crypto';
 
 // Strong random secret for signing JWT
 export const generateSecret = () => {
