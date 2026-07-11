@@ -9,7 +9,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -18,7 +18,7 @@ export async function runPayrollLifecycle() {
   if (mongoose.connection.readyState === 0) {
     await mongoose.connect(MONGO_URI);
   }
-  
+
   console.log('🔄 Initializing Cache and Policy Cache...');
   const { setCache } = await import('../../utils/cache.js');
   await setCache();
@@ -243,7 +243,7 @@ export async function runPayrollLifecycle() {
 
   // 2. Check invalid transition (Processed directly to Paid)
   console.log('\n2. Testing invalid state transition (Processed directly to Paid)...');
-  
+
   // Create a clean record to test invalid transition
   const newPayrollRecord = await buildQuery({
     role: hrRole._id.toString(),

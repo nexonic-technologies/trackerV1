@@ -14,7 +14,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -177,7 +177,7 @@ export async function runProjectLifecycle() {
 
     // --- STEP 4: CREATE TASK ---
     console.log('\n--- STEP 4: Creating Task under Project/Milestone ---');
-    
+
     let taskType = await TaskType.findOne({ name: 'Development', isActive: true });
     if (!taskType) {
       taskType = await TaskType.create({
@@ -212,7 +212,7 @@ export async function runProjectLifecycle() {
 
     // --- STEP 5: LOG HOURS (TIME ENTRY) ---
     console.log('\n--- STEP 5: Logging Hours via Time Tracker ---');
-    
+
     // Create active session
     const startTime = new Date(Date.now() - 1000 * 3600 * 3); // 3 hours ago
     const session = await buildQuery({

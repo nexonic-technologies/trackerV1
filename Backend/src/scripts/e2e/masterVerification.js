@@ -13,7 +13,7 @@ import { runAttendanceLifecycle } from './attendanceLifecycle.test.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 export async function runAllVerification() {
   const logFilePath = path.join(process.cwd(), 'verification_report.txt');

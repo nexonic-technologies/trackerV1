@@ -14,7 +14,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -134,7 +134,7 @@ export async function runEmployeeLifecycle() {
   try {
     // --- STEP 1: CREATE PREREQUISITES ---
     console.log('\n--- Setup: Creating Leave Type, Policy, Dept, and Shift ---');
-    
+
     const leaveType = await LeaveType.create({
       name: leaveTypeName,
       description: 'E2E Testing',
@@ -345,7 +345,7 @@ export async function runEmployeeLifecycle() {
 
     // --- STEP 7: RUN PAYROLL ---
     console.log('\n--- STEP 7: Creating Salary Structure & Running Payroll ---');
-    
+
     // Create salary structure
     const salaryStructure = await SalaryStructure.create({
       employeeId: employee._id,
@@ -405,7 +405,7 @@ export async function runEmployeeLifecycle() {
 
     // --- STEP 8: ALLOCATE ASSET ---
     console.log('\n--- STEP 8: Allocating Asset to Employee ---');
-    
+
     // Create Asset category
     const assetCategory = await AssetCategory.create({
       name: assetCategoryName,
@@ -529,7 +529,7 @@ export async function runEmployeeLifecycle() {
 
     // --- STEP 10: RETURN ASSET & EXIT CLEARANCE SUCCEEDS ---
     console.log('\n--- STEP 10: Returning Asset & Terminating Employee ---');
-    
+
     // Return asset
     await buildQuery({
       role: superAdminRole._id.toString(),

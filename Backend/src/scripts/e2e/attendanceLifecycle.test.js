@@ -9,7 +9,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -18,7 +18,7 @@ export async function runAttendanceLifecycle() {
   if (mongoose.connection.readyState === 0) {
     await mongoose.connect(MONGO_URI);
   }
-  
+
   console.log('🔄 Initializing Cache and Policy Cache...');
   const { setCache } = await import('../../utils/cache.js');
   await setCache();
@@ -151,7 +151,7 @@ export async function runAttendanceLifecycle() {
       date: { $gte: `${todayStr}T00:00:00.000Z`, $lte: `${todayStr}T23:59:59.999Z` }
     }
   });
-  
+
   const allMatch = listData.every(r => r.employee.toString() === testEmployeeId.toString());
   if (allMatch) {
     console.log(`✓ Secure: List query returned ${listData.length} records, all strictly belonging to testEmployeeId.`);
@@ -185,7 +185,7 @@ export async function runAttendanceLifecycle() {
   console.log('\n🗑️ Cleaning up test verification documents...');
   await models.attendances.deleteMany({ employee: { $in: [testEmployeeId, anotherEmployeeId] } });
   console.log('✓ Test data removed.');
-  
+
   await mongoose.disconnect();
   console.log('\n🔌 MongoDB connection closed. Verification run completed.\n');
   return true;

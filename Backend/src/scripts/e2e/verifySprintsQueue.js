@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dns.setServers(["8.8.8.8", "1.1.1.1", "8.8.4.4"]);
-dotenv.config({ path: join(__dirname, "..", "Config", ".env") });
+dotenv.config();
 
 import "../models/Collection.js";
 import { syncTaskQueueAssignment } from "../services/employeetaskqueues.js";
@@ -96,12 +96,12 @@ async function runTest() {
   if (!queueDoc || queueDoc.queue.length < 2) {
     throw new Error("❌ Verification Failed: Tasks were not synchronized into employee's task queue.");
   }
-  
+
   const firstItem = queueDoc.queue[0];
   if (!firstItem.taskName || !firstItem.clientName || firstItem.estimatedHours !== 4 || firstItem.priorityLevel !== "High") {
     throw new Error("❌ Verification Failed: Queue items do not contain correct denormalized metadata fields.");
   }
-  
+
   console.log("  ✅ Verification Success: Tasks auto-allocated with denormalized fields!");
   console.log(`    Task: "${firstItem.taskName}", Client: "${firstItem.clientName}", Est Hours: ${firstItem.estimatedHours}h, Priority: ${firstItem.priorityLevel}`);
 
@@ -179,7 +179,7 @@ async function runTest() {
   if (finalQueue.queue[0].taskId.toString() !== taskB._id.toString()) {
     throw new Error("❌ Verification Failed: Queue swap was not committed after approval.");
   }
-  
+
   if (finalQueue.queue[0].taskName !== "Task B: Implement API Integration") {
     throw new Error("❌ Verification Failed: Committed queue swap did not write denormalized fields correctly.");
   }

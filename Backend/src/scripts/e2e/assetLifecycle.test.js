@@ -14,7 +14,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -153,7 +153,7 @@ export async function runAssetLifecycle() {
 
     // --- STEP 3: TRANSITION STATUS TO RECEIVED (GRN Hook) ---
     console.log('\n--- STEP 3: Transitioning PO status sequentially ---');
-    
+
     console.log('Transition: Draft -> Pending Approval');
     let updatedPo = await buildQuery({
       role: superAdminRole._id.toString(),
@@ -163,7 +163,7 @@ export async function runAssetLifecycle() {
       docId: po._id.toString(),
       body: { status: 'Pending Approval' }
     });
-    
+
     console.log('Transition: Pending Approval -> Approved');
     updatedPo = await buildQuery({
       role: superAdminRole._id.toString(),
@@ -173,7 +173,7 @@ export async function runAssetLifecycle() {
       docId: po._id.toString(),
       body: { status: 'Approved' }
     });
-    
+
     console.log('Transition: Approved -> Received (GRN Hook - Auto assets & IN ledger)');
     updatedPo = await buildQuery({
       role: superAdminRole._id.toString(),
@@ -259,7 +259,7 @@ export async function runAssetLifecycle() {
       action: 'update',
       modelName: 'assetallocations',
       docId: allocation._id.toString(),
-      body: { 
+      body: {
         status: 'Returned',
         returnedCondition: 'Good',
         returnNotes: 'Good condition return'
@@ -313,7 +313,7 @@ export async function runAssetLifecycle() {
       action: 'update',
       modelName: 'assetrepairs',
       docId: repair._id.toString(),
-      body: { 
+      body: {
         status: 'Repaired',
         repairCondition: 'Good'
       }
@@ -338,7 +338,7 @@ export async function runAssetLifecycle() {
       action: 'update',
       modelName: 'assets',
       docId: targetAsset._id.toString(),
-      body: { 
+      body: {
         status: 'Disposed',
         condition: 'Damaged'
       }
