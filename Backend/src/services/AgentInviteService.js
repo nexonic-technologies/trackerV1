@@ -1,15 +1,15 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import nodemailer from 'nodemailer';
 import models from '../models/Collection.js';
 import mongoose from 'mongoose';
 
 class AgentInviteService {
-  
+
   // Generate invite token and send email
   async sendInvite(agentId) {
     const agent = await models.agents.findById(agentId).populate('client');
     if (!agent) throw new Error('Agent not found');
-    
+
     if (agent.hasSetPassword) throw new Error('Agent already has password set');
 
     // Generate secure token
@@ -25,7 +25,7 @@ class AgentInviteService {
 
     // Send email
     await this.sendInviteEmail(agent, inviteToken);
-    
+
     return { success: true, message: 'Invitation sent successfully' };
   }
 
@@ -50,7 +50,7 @@ class AgentInviteService {
     });
 
     const inviteUrl = `${process.env.NEXTJS_URL || 'http://localhost:3001'}/agent/setup?token=${token}`;
-    
+
     const mailOptions = {
       from: `"${emailConfig.fromName}" <${emailConfig.fromEmail}>`,
       to: agent.email,
@@ -78,12 +78,12 @@ class AgentInviteService {
     if (mongoose.connection.readyState !== 1) {
       throw new Error('Database connection not ready');
     }
-    
-    const agent = await models.agents.findOne({ 
+
+    const agent = await models.agents.findOne({
       inviteToken: token,
       hasSetPassword: { $ne: true }
     });
-    
+
     // Check expiry manually
     if (agent && agent.inviteExpires <= new Date()) {
       throw new Error('Invitation token has expired');
@@ -99,7 +99,7 @@ class AgentInviteService {
   // Set password using invite token
   async setPassword(token, password) {
     const agent = await this.verifyInviteToken(token);
-    
+
     await models.agents.findByIdAndUpdate(agent._id, {
       password,
       hasSetPassword: true,

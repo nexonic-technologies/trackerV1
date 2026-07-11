@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { UAParser } from 'ua-parser-js';
 
 /**
@@ -13,19 +13,19 @@ export const generateDeviceFingerprint = (req) => {
   const components = {
     // Client-provided device UUID (most reliable)
     deviceUuid: req.headers['x-device-uuid'] || null,
-    
+
     // User Agent parsing
     browser: ua.browser.name || 'unknown',
     browserVersion: ua.browser.version || '0',
     os: ua.os.name || 'unknown',
     osVersion: ua.os.version || '0',
     deviceModel: ua.device.model || ua.device.name || 'unknown',
-    
+
     // Network information
-    ipAddress: req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
-               req.socket.remoteAddress || 
-               'unknown',
-    
+    ipAddress: req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      'unknown',
+
     // Additional entropy
     userAgent: req.headers['user-agent'] || 'unknown',
     source: req.headers['x-source'] || req.query.source || 'web'
@@ -43,7 +43,7 @@ export const generateDeviceFingerprint = (req) => {
 
   // Build composite fingerprint from available data
   const fingerprintString = `${components.browser}|${components.browserVersion}|${components.os}|${components.osVersion}|${components.deviceModel}|${components.ipAddress}|${components.source}`;
-  
+
   const hash = crypto
     .createHash('sha256')
     .update(fingerprintString)
@@ -69,10 +69,10 @@ export const getFingerprint = (req) => {
 
   // Generate new fingerprint
   const fpData = generateDeviceFingerprint(req);
-  
+
   // Cache in request for reuse
   req.fingerprint = fpData;
-  
+
   return fpData;
 };
 

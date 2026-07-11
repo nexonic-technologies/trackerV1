@@ -4,7 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
 import stream from 'stream';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,30 +18,30 @@ const CDN_URL = process.env.CDN_URL || null;
 router.get('/serve/:folder/:year/:month/:filename', async (req, res) => {
   try {
     const { folder, year, month, filename } = req.params;
-    
+
     // If CDN is configured, redirect to CDN
     if (CDN_URL) {
       const cdnUrl = `${CDN_URL}/${folder}/${year}/${month}/${filename}`;
       return res.redirect(302, cdnUrl);
     }
-    
+
     const filePath = path.join(UPLOAD_PATH, folder, year, month, filename);
-    
+
     // Security check - ensure file is within upload directory
     const resolvedPath = path.resolve(filePath);
     const uploadDir = path.resolve(UPLOAD_PATH);
     if (!resolvedPath.startsWith(uploadDir)) {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
-    
+
     // Check if file exists
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ success: false, message: 'File not found' });
     }
-    
+
     const stat = fs.statSync(filePath);
     const ext = path.extname(filename).toLowerCase();
-    
+
     // MIME type mapping
     const mimeTypes = {
       '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
@@ -50,9 +50,9 @@ router.get('/serve/:folder/:year/:month/:filename', async (req, res) => {
       '.xls': 'application/vnd.ms-excel', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       '.zip': 'application/zip', '.rar': 'application/x-rar-compressed'
     };
-    
+
     const contentType = mimeTypes[ext] || 'application/octet-stream';
-    
+
     // Handle range requests for large files
     const range = req.headers.range;
     if (range) {
@@ -60,13 +60,13 @@ router.get('/serve/:folder/:year/:month/:filename', async (req, res) => {
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : stat.size - 1;
       const chunksize = (end - start) + 1;
-      
+
       res.status(206);
       res.setHeader('Content-Range', `bytes ${start}-${end}/${stat.size}`);
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Content-Length', chunksize);
       res.setHeader('Content-Type', contentType);
-      
+
       const stream = fs.createReadStream(filePath, { start, end });
       await pipeline(stream, res);
     } else {
@@ -75,18 +75,18 @@ router.get('/serve/:folder/:year/:month/:filename', async (req, res) => {
       res.setHeader('Content-Length', stat.size);
       res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year
       res.setHeader('ETag', `"${stat.mtime.getTime()}-${stat.size}"`);
-      
+
       // Check if client has cached version
       const ifNoneMatch = req.headers['if-none-match'];
       const etag = `"${stat.mtime.getTime()}-${stat.size}"`;
       if (ifNoneMatch === etag) {
         return res.status(304).end();
       }
-      
+
       const stream = fs.createReadStream(filePath);
       await pipeline(stream, res);
     }
-    
+
   } catch (error) {
     console.error('Error serving file:', error);
     res.status(500).json({ success: false, message: 'Error serving file' });
@@ -100,7 +100,7 @@ router.get('/render/:folder/:filename', (req, res) => {
   const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
-  
+
   res.redirect(`/api/files/serve/${folder}/${year}/${month}/${filename}`);
 });
 
@@ -109,18 +109,18 @@ router.get('/info/:folder/:year/:month/:filename', (req, res) => {
   try {
     const { folder, year, month, filename } = req.params;
     const filePath = path.join(UPLOAD_PATH, folder, year, month, filename);
-    
+
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ success: false, message: 'File not found' });
     }
-    
+
     const stat = fs.statSync(filePath);
     const ext = path.extname(filename);
-    
+
     // Generate file hash for integrity check
     const fileBuffer = fs.readFileSync(filePath);
     const hash = crypto.createHash('md5').update(fileBuffer).digest('hex');
-    
+
     res.json({
       success: true,
       data: {
@@ -135,7 +135,7 @@ router.get('/info/:folder/:year/:month/:filename', (req, res) => {
         url: CDN_URL ? `${CDN_URL}/${folder}/${year}/${month}/${filename}` : `/api/files/serve/${folder}/${year}/${month}/${filename}`
       }
     });
-    
+
   } catch (error) {
     console.error('Error getting file info:', error);
     res.status(500).json({ success: false, message: 'Error getting file info' });
@@ -146,26 +146,26 @@ router.get('/info/:folder/:year/:month/:filename', (req, res) => {
 router.post('/upload/chunk', (req, res) => {
   const { chunkIndex, totalChunks, filename, fileId } = req.body;
   const chunk = req.files?.chunk;
-  
+
   if (!chunk) {
     return res.status(400).json({ success: false, message: 'No chunk provided' });
   }
-  
+
   const tempDir = path.join(UPLOAD_PATH, 'temp', fileId);
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
-  
+
   const chunkPath = path.join(tempDir, `chunk-${chunkIndex}`);
-  
+
   chunk.mv(chunkPath, (err) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Failed to save chunk' });
     }
-    
+
     // Check if all chunks are uploaded
     const uploadedChunks = fs.readdirSync(tempDir).length;
-    
+
     if (uploadedChunks === parseInt(totalChunks)) {
       // Combine chunks
       combineChunks(tempDir, filename, totalChunks)
@@ -205,39 +205,39 @@ async function combineChunks(tempDir, filename, totalChunks) {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const finalDir = path.join(UPLOAD_PATH, 'documents', year.toString(), month);
-  
+
   if (!fs.existsSync(finalDir)) {
     fs.mkdirSync(finalDir, { recursive: true });
   }
-  
+
   const finalPath = path.join(finalDir, filename);
   const writeStream = fs.createWriteStream(finalPath);
-  
+
   for (let i = 0; i < totalChunks; i++) {
     const chunkPath = path.join(tempDir, `chunk-${i}`);
     const chunkBuffer = fs.readFileSync(chunkPath);
     writeStream.write(chunkBuffer);
   }
-  
+
   writeStream.end();
-  
+
   // Cleanup temp directory
   fs.rmSync(tempDir, { recursive: true });
-  
+
   return `documents/${year}/${month}/${filename}`;
 }
 
 function getStorageStats(uploadPath) {
   let totalSize = 0;
   let fileCount = 0;
-  
+
   function scanDirectory(dir) {
     const items = fs.readdirSync(dir);
-    
+
     items.forEach(item => {
       const itemPath = path.join(dir, item);
       const stat = fs.statSync(itemPath);
-      
+
       if (stat.isDirectory()) {
         scanDirectory(itemPath);
       } else {
@@ -246,11 +246,11 @@ function getStorageStats(uploadPath) {
       }
     });
   }
-  
+
   if (fs.existsSync(uploadPath)) {
     scanDirectory(uploadPath);
   }
-  
+
   return {
     totalSize,
     totalSizeFormatted: formatFileSize(totalSize),
