@@ -1,0 +1,98 @@
+// models/Employee.js
+import { Schema, model } from 'mongoose';
+
+const EmployeeSchema = new Schema({
+  basicInfo: {
+    firstName: { type: String, trim: true, index: true },
+    lastName: { type: String, trim: true, index: true },
+    dob: { type: Date },
+    doa: { type: Date },
+    maritalStatus: { type: String, enum: ['Single', 'Married', 'Divorced', 'Widowed'] },
+    gender: { type: String, enum: ['male', 'female', 'other'], index: true },
+    phone: { type: String, validate: { validator: function (v) { return /^(\+\d{1,3}[- ]?)?\d{10}$/.test(v); }, message: props => `${props.value} is not a valid phone number!` } },
+    email: { type: String, lowercase: true, trim: true, index: true, validate: { validator: function (v) { return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v); }, message: props => `${props.value} is not a valid email!` } },
+    fatherName: { type: String, trim: true },
+    motherName: { type: String, trim: true },
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      zip: String,
+      country: String
+    },
+    profileImage: { type: String }
+  },
+  professionalInfo: {
+    empId: { type: String, trim: true, unique: true },
+    designation: { type: Schema.Types.ObjectId, ref: 'designations', index: true },
+    department: { type: Schema.Types.ObjectId, ref: 'departments', index: true },
+    role: { type: Schema.Types.ObjectId, ref: 'roles', index: true },
+    reportingManager: { type: Schema.Types.ObjectId, ref: 'employees', index: true },
+    teamLead: { type: Schema.Types.ObjectId, ref: 'employees', index: true },
+    level: { type: String, enum: ['L1', 'L2', 'L3', 'L4'], index: true },
+    doj: { type: Date, index: true },
+    probationPeriod: { type: String },
+    confirmDate: { type: Date },
+    leavePolicyOverride: { type: Schema.Types.ObjectId, ref: 'leavepolicies', index: true },
+  },
+  authInfo: {
+    workEmail: { type: String, lowercase: true, trim: true, unique: true, validate: { validator: function (v) { return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v); }, message: props => `${props.value} is not a valid email!` } },
+    password: { type: String },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date }
+  },
+
+  accountDetails: {
+    accountName: { type: String },
+    accountNo: { type: String },
+    bankName: { type: String },
+    branch: { type: String },
+    ifscCode: { type: String, validate: { validator: function (v) { return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(v); }, message: props => `${props.value} is not a valid IFSC code!` } },
+  },
+  salaryDetails: {
+    package: { type: Number },
+    basic: { type: Number },
+    ctc: { type: Number },
+    allowances: { type: Number },
+    deductions: { type: Number }
+  },
+  personalDocuments: {
+    pan: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(v);
+        },
+        message: props => `${props.value} is not a valid PAN number!`
+      }
+    },
+    aadhar: { type: String, validate: { validator: function (v) { return /^\d{12}$/.test(v); }, message: props => `${props.value} is not a valid Aadhar number!` } },
+    esi: { type: String },
+    pf: { type: String },
+    documentFiles: [{ type: String }]
+  },
+  professionalDocuments: {
+    offerLetter: { type: String },
+    appraisalLetter: { type: String },
+    otherDocuments: [{ type: String }]
+  },
+  leaveStatus: [{
+    leaveType: { type: Schema.Types.ObjectId, ref: "leavetypes" },
+    usedThisMonth: { type: Number, default: 0 },
+    usedThisYear: { type: Number, default: 0 },
+    carriedForward: { type: Number, default: 0 },
+    available: { type: Number, default: 0 }
+  }],
+  status: { type: String, enum: ['Active', 'Inactive', 'Terminated'], default: 'Active', index: true },
+  isActive: { type: Boolean, default: true, index: true }
+}, { timestamps: true });
+
+// Compound indexes for team and role-based filtering
+EmployeeSchema.index({ 'professionalInfo.reportingManager': 1, 'status': 1 });
+EmployeeSchema.index({ 'professionalInfo.teamLead': 1, 'status': 1 });
+EmployeeSchema.index({ 'professionalInfo.department': 1, 'status': 1 });
+EmployeeSchema.index({ 'professionalInfo.role': 1, 'status': 1 });
+EmployeeSchema.index({ 'basicInfo.firstName': 1, 'basicInfo.lastName': 1 }); // Name search
+EmployeeSchema.index({ 'isActive': 1, 'status': 1 }); // Active employee queries
+
+export default model('employees', EmployeeSchema);

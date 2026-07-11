@@ -1,0 +1,199 @@
+export default function expensesService() {
+
+  /**
+   * Check if the given expense date is locked for the given operation.
+   * Reads from PeriodClosure collection. Silently skips if model not seeded yet.
+   *
+   * @param {string} date - ISO date string
+   * @param {string} action - human-readable action for the error message
+   */
+  async function checkExpensePeriodLock(date, action) {
+    try {
+      const { default: models } = await import('../models/Collection.js');
+      if (!models.periodclosures) return; // model not yet registered — skip
+
+      const targetDate = new Date(date);
+      const closure = await models.periodclosures.findOne({
+        startDate: { $lte: targetDate },
+        endDate: { $gte: targetDate },
+        status: { $in: ['Closed', 'In Progress'] },
+        'modules.expenses.closed': true
+      }).lean();
+
+      if (closure) {
+        throw new Error(
+          `Period ${closure.periodLabel} (${new Date(closure.startDate).toLocaleDateString()} to ${new Date(closure.endDate).toLocaleDateString()}) is closed for expenses. ` +
+          `Expenses module was locked on ${closure.modules.expenses.closedAt ? new Date(closure.modules.expenses.closedAt).toLocaleDateString() : 'unknown'}. ` +
+          `To ${action} an expense in a closed period, request a period reopen from Finance.`
+        );
+      }
+    } catch (err) {
+      // Only re-throw errors we created — swallow DB/model errors
+      if (err.message?.includes('Period') && err.message?.includes('closed')) throw err;
+    }
+  }
+
+  /**
+   * Read expense limits from GeneralSettings.
+   * Returns safe defaults if settings not found.
+   */
+  async function getExpenseLimits() {
+    try {
+      const { default: GeneralSettings } = await import('../models/GeneralSettings.js');
+      const settings = await GeneralSettings.findOne()
+        .select('finance.expenseDailyLimit finance.expenseLimitByCategory')
+        .lean();
+      return {
+        daily: settings?.finance?.expenseDailyLimit ?? 10000,
+        byCategory: {
+          travel:        settings?.finance?.expenseLimitByCategory?.travel        ?? 5000,
+          accommodation: settings?.finance?.expenseLimitByCategory?.accommodation ?? 3000,
+          food:          settings?.finance?.expenseLimitByCategory?.food          ?? 1000,
+          miscellaneous: settings?.finance?.expenseLimitByCategory?.miscellaneous ?? 2000
+        }
+      };
+    } catch {
+      return {
+        daily: 10000,
+        byCategory: { travel: 5000, accommodation: 3000, food: 1000, miscellaneous: 2000 }
+      };
+    }
+  }
+
+  return {
+    async beforeCreate(ctx) {
+      const { body, user } = ctx;
+      // Always auto-stamp the employee from the authenticated user
+      body.employeeId = user?.id;
+
+      // Ensure expenses array exists
+      const items = Array.isArray(body.expenses) ? body.expenses : [];
+
+      // Compute derived fields server-side — never trust the client
+      body.dayTotal     = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+      body.totalExpenses = items.length;
+
+      // Validate required fields
+      if (!body.clientId) throw new Error('clientId is required');
+      if (!body.date)     throw new Error('date is required');
+      if (items.length === 0) throw new Error('At least one expense item is required');
+      if (body.dayTotal <= 0) throw new Error('Total expense amount must be greater than zero');
+
+      // ── Derive expensePeriod from date ────────────────────────────────────
+      // 'YYYY-MM' — used for period closure checks and month-end reports
+      const expenseDate = new Date(body.date);
+      const mm = String(expenseDate.getMonth() + 1).padStart(2, '0');
+      body.expensePeriod = `${expenseDate.getFullYear()}-${mm}`;
+
+      // ── Period Lock Check ─────────────────────────────────────────────────
+      await checkExpensePeriodLock(body.date, 'submit');
+
+      // ── Duplicate Detection ───────────────────────────────────────────────
+      // Block same employee + client + date regardless of category
+      const { default: Expense } = await import('../models/Expense.js');
+      const duplicate = await Expense.findOne({
+        employeeId: body.employeeId,
+        clientId:   body.clientId,
+        date:       body.date,
+        status:     { $ne: 'rejected' }
+      }).lean();
+
+      if (duplicate) {
+        throw new Error(
+          `An expense already exists for this employee, client, and date. ` +
+          `Duplicate submissions are blocked. ` +
+          `If this is a correction, reject the original entry first.`
+        );
+      }
+
+      // ── Per-Category and Daily Limit Enforcement ──────────────────────────
+      const limits = await getExpenseLimits();
+
+      for (const item of items) {
+        const categoryLimit = limits.byCategory[item.expenseType];
+        if (categoryLimit && parseFloat(item.amount) > categoryLimit) {
+          throw new Error(
+            `${item.expenseType} expense ₹${item.amount} exceeds the daily category limit of ₹${categoryLimit}. ` +
+            `Contact Finance for pre-approval if this is exceptional.`
+          );
+        }
+      }
+
+      if (body.dayTotal > limits.daily) {
+        throw new Error(
+          `Daily expense total ₹${body.dayTotal} exceeds the maximum allowed ₹${limits.daily}. ` +
+          `Split across dates or contact Finance for pre-approval.`
+        );
+      }
+
+      // Default status
+      body.status      = 'pending';
+      body.submittedAt = new Date();
+    },
+
+    async beforeUpdate(ctx) {
+      const { body, user, existingDoc } = ctx;
+      const role   = user?.role;
+      const userId = user?.id;
+      const { canDo } = await import('../utils/cache.js');
+      const sensitiveFields = ['status', 'approvedBy', 'rejectedBy', 'approvedAt', 'rejectedAt'];
+      const privileged = canDo(role, 'manage:expenses');
+
+      for (const field of sensitiveFields) {
+        if (body[field] !== undefined && !privileged) {
+          throw new Error(`Only HR/Manager can update '${field}'`);
+        }
+      }
+
+      if (body.status === 'approved' && privileged) {
+        // ── Period Lock Check on approval ─────────────────────────────────
+        const date = existingDoc?.date;
+        if (date) await checkExpensePeriodLock(date, 'approve');
+
+        body.approvedBy = userId;
+        body.approvedAt = new Date();
+      }
+
+      if (body.status === 'rejected' && privileged) {
+        body.rejectedBy = userId;
+        body.rejectedAt = new Date();
+      }
+    },
+
+    /**
+     * afterUpdate: Send FCM push to employee when their expense status changes.
+     */
+    async afterUpdate(ctx) {
+      const { docId, data, beforeDoc } = ctx;
+      try {
+        const statusChanged = data.status && data.status !== beforeDoc?.status;
+        if (!statusChanged) return;
+
+        const { default: models } = await import('../models/Collection.js');
+        const { default: fcmService } = await import('./fcmService.js');
+
+        const expense = await models.expenses.findById(docId).lean();
+        if (!expense?.employeeId) return;
+
+        const statusMessages = {
+          approved: 'Your travel expense has been approved.',
+          rejected: `Your travel expense has been rejected.${expense.rejectionReason ? ` Reason: ${expense.rejectionReason}` : ''}`
+        };
+
+        const message = statusMessages[data.status];
+        if (!message) return;
+
+        await fcmService.dispatchNotification({
+          type: 'expense_status',
+          title: `Expense ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}`,
+          message,
+          sender: null,
+          meta: { model: 'expenses', modelId: docId },
+          receiversArray: [expense.employeeId]
+        });
+      } catch (error) {
+        console.error('[expenses service] afterUpdate FCM error:', error);
+      }
+    }
+  };
+}
