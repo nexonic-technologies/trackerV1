@@ -3,7 +3,7 @@
 // Determines which menu items should be visible based on designation + role + capabilities
 
 import { getUserCapabilities } from './cbacCacheService.js';
-import { getCapabilityForRoute } from '../config/pageCapabilityMapping.js';
+import { getCapabilityForRoute } from '../Config/pageCapabilityMapping.js';
 
 /**
  * Check if a menu item should be visible to a user
@@ -30,7 +30,7 @@ export function isMenuItemVisible(menuItem, user, userCapabilities) {
   if (menuItem.visibility === 'protected') {
     // Get capability required for this route
     const requiredCapability = getCapabilityForRoute(menuItem.mainRoute);
-    
+
     if (!requiredCapability) {
       // No capability mapping found - default to visible for backward compatibility
       return true;
@@ -60,7 +60,7 @@ export async function filterMenuItems(menuItems, user) {
   const userCapabilities = await getUserCapabilities(user);
 
   // Filter menu items
-  const visibleItems = menuItems.filter(item => 
+  const visibleItems = menuItems.filter(item =>
     isMenuItemVisible(item, user, userCapabilities)
   );
 
@@ -88,7 +88,7 @@ export async function buildMenuTree(menuItems, user) {
   const tree = parents.map(parent => ({
     ...parent,
     children: children
-      .filter(child => 
+      .filter(child =>
         String(child.parentId) === String(parent._id) ||
         child.parentId === parent.mainRoute?.replace('/', '')
       )
