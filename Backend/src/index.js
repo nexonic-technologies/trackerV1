@@ -69,7 +69,8 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-device-uuid', 'deviceuuid', 'x-source']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-device-uuid', 'deviceuuid', 'x-source'],
+  maxAge: 86400
 }));
 
 app.use(agentAuthMiddleware);

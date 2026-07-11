@@ -2,7 +2,7 @@
 import express from "express";
 import {
   login, logout, refresh, authMiddleware, storePushToken, sendManualTestNotification,
-  forgotPassword, resetPassword, getMe, getContext
+  forgotPassword, resetPassword, getMe, getContext, changePassword
 } from "../Controller/AuthController.js"
 
 const router = express.Router();
@@ -33,6 +33,9 @@ router.post("/forgot-password", forgotPassword);
 
 // Reset password
 router.post("/reset-password", resetPassword);
+
+// Change password
+router.post("/change-password", authMiddleware, changePassword);
 
 // FCM Token Registration
 router.post("/store-push-token", authMiddleware, storePushToken);
