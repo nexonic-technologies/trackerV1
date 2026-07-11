@@ -112,6 +112,6 @@ Core ERP and HRMS modules have been implemented and are continuously being enhan
 
 ## Author
 
-**Arunbharathi Parkkavani**
+**Arunbharathi Parkkavamani**
 
 Building scalable business software with a focus on simplicity, automation, and long-term maintainability.
