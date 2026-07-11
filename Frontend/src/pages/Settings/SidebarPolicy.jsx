@@ -1,0 +1,167 @@
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../api/axiosInstance';
+
+const SidebarPolicy = () => {
+    const [sidebars, setSidebars] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [designations, setDesignations] = useState([]);
+
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [message, setMessage] = useState('');
+
+    // Fetch Data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [sidRes, depRes, desRes] = await Promise.all([
+                    axiosInstance.get('/populate/list/sidebars?limit=100&sort={"order":1}'),
+                    axiosInstance.post('/populate/list/departments'),
+                    axiosInstance.post('/populate/list/designations')
+                ]);
+                setSidebars((sidRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
+                setDepartments((depRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
+                setDesignations((desRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
+            } catch (err) {
+                console.error("Failed to load sidebar data", err);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleSelect = (item) => {
+        setSelectedItem({ ...item }); // Clone to edit
+        setMessage('');
+    };
+
+    const toggleSelection = (listType, id) => {
+        setSelectedItem(prev => {
+            const list = prev[listType] || [];
+            const exists = list.includes(id);
+            const newList = exists ? list.filter(x => x !== id) : [...list, id];
+            return { ...prev, [listType]: newList };
+        });
+    };
+
+    const handleSave = async () => {
+        if (!selectedItem) return;
+        setMessage('Saving...');
+        try {
+            await axiosInstance.put(`/populate/update/sidebars/${selectedItem._id}`, {
+                allowedDepartments: selectedItem.allowedDepartments,
+                allowedDesignations: selectedItem.allowedDesignations
+            });
+
+            // Update local list
+            setSidebars(prev => prev.map(x => x._id === selectedItem._id ? selectedItem : x));
+            setMessage('Saved Sidebar Config!');
+        } catch (err) {
+            console.error(err);
+            setMessage('Error Saving');
+        }
+    };
+
+    const handleRefreshCache = async () => {
+        try {
+            await axiosInstance.post('/config/refresh-policy');
+            alert('Cache Refreshed!');
+        } catch (e) {
+            alert('Refresh Failed');
+        }
+    };
+
+    return (
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow h-full flex gap-6">
+
+            {/* List Column */}
+            <div className="w-1/3 border-r pr-4 flex flex-col">
+                <h2 className="text-xl font-bold mb-4 dark:text-white">Sidebar Items</h2>
+                <div className="flex-1 overflow-auto space-y-2">
+                    {sidebars.map(item => (
+                        <div
+                            key={item._id}
+                            onClick={() => handleSelect(item)}
+                            className={`p-3 rounded cursor-pointer ${selectedItem?._id === item._id ? 'bg-blue-100 dark:bg-blue-900 border-l-4 border-blue-500' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                        >
+                            <div className="font-medium dark:text-white">{item.title}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">{item.mainRoute}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Config Column */}
+            <div className="flex-1 flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold dark:text-white">Permission Config</h2>
+                    <button
+                        onClick={handleRefreshCache}
+                        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                    >
+                        Refresh Cache
+                    </button>
+                </div>
+
+                {selectedItem ? (
+                    <div className="flex-1 overflow-auto">
+                        <h3 className="text-lg font-semibold mb-2 dark:text-gray-200">Editing: {selectedItem.title}</h3>
+
+                        {/* Departments */}
+                        <div className="mb-6">
+                            <label className="block mb-2 font-medium dark:text-gray-300">Allowed Departments</label>
+                            <div className="grid grid-cols-2 gap-2 p-3 border rounded dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                {departments.map(dept => (
+                                    <label key={dept._id} className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedItem.allowedDepartments?.includes(dept._id)}
+                                            onChange={() => toggleSelection('allowedDepartments', dept._id)}
+                                            className="w-4 h-4 accent-blue-600"
+                                        />
+                                        <span className="text-sm dark:text-gray-300">{dept.departmentName}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">If none selected, visible to ALL departments.</p>
+                        </div>
+
+                        {/* Designations */}
+                        <div className="mb-6">
+                            <label className="block mb-2 font-medium dark:text-gray-300">Allowed Designations</label>
+                            <div className="grid grid-cols-2 gap-2 p-3 border rounded dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                {designations.map(des => (
+                                    <label key={des._id} className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedItem.allowedDesignations?.includes(des._id)}
+                                            onChange={() => toggleSelection('allowedDesignations', des._id)}
+                                            className="w-4 h-4 accent-blue-600"
+                                        />
+                                        <span className="text-sm dark:text-gray-300">{des.designationName}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">If none selected, visible to ALL designations.</p>
+                        </div>
+
+                        <div className="flex justify-end items-center gap-4 mt-8">
+                            <span className="text-green-500">{message}</span>
+                            <button
+                                onClick={handleSave}
+                                className="px-8 py-3 bg-blue-600 text-white font-bold rounded shadow hover:bg-blue-700"
+                            >
+                                Save Permissions
+                            </button>
+                        </div>
+
+                    </div>
+                ) : (
+                    <div className="flex-1 flex items-center justify-center text-gray-400">
+                        Select a Sidebar Item to configure permissions
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default SidebarPolicy;
