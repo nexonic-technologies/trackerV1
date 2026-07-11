@@ -220,6 +220,9 @@ export const authMiddleware = async (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: "Token expired", expired: true });
+    }
     return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
@@ -499,6 +502,63 @@ export const resetPassword = async (req, res, next) => {
     await employee.save();
 
     return res.status(200).json({ message: "Password has been reset successfully. Please log in." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ----------------------------- CHANGE PASSWORD ------------------------------ */
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const { id, userType } = req.user;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current password and new password are required" });
+    }
+
+    const { default: models } = await import("../models/Collection.js");
+    let user;
+    if (userType === "employee") {
+      user = await models.employees.findById(id);
+    } else if (userType === "agent") {
+      user = await models.agents.findById(id);
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify current password
+    let isValid = false;
+    if (userType === "employee") {
+      isValid = await bcrypt.compare(currentPassword, user.authInfo.password);
+    } else {
+      if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+        isValid = await user.comparePassword(currentPassword);
+      } else {
+        isValid = currentPassword === user.password;
+      }
+    }
+
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid current password" });
+    }
+
+    // Update to new password
+    const salt = await bcrypt.genSalt(12);
+    const hashed = await bcrypt.hash(newPassword, salt);
+
+    if (userType === "employee") {
+      user.authInfo.password = hashed;
+    } else {
+      user.password = hashed;
+    }
+
+    await user.save();
+
+    return res.json({ message: "Password updated successfully" });
   } catch (err) {
     next(err);
   }

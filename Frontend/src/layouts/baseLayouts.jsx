@@ -6,13 +6,28 @@ import TopNavBar from "./topNavBar.jsx";
 import Login from "../pages/login.jsx";
 import ForgotPassword from "../pages/forgot-password.jsx";
 import ResetPassword from "../pages/reset-password.jsx";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import ModernLoader from "../components/Common/ModernLoader.jsx";
 
 const BaseLayout = () => {
   const location = useLocation();
   const element = useRoutes(routes);
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const prevPathname = useRef(location.pathname);
+
+  // Trigger minimum 300ms loading overlay on page navigation
+  useEffect(() => {
+    if (location.pathname !== prevPathname.current) {
+      prevPathname.current = location.pathname;
+      setIsNavigating(true);
+      const timer = setTimeout(() => {
+        setIsNavigating(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
 
   // Auto-collapse on mobile
   useEffect(() => {
@@ -55,6 +70,8 @@ const BaseLayout = () => {
 
   return (
     <div className="lmx-app-shell">
+      {isNavigating && <ModernLoader message="Loading page..." />}
+
       {sidebarOpen && (
         <div
           className="fixed inset-0 tracker-overlay z-30 lg:hidden"

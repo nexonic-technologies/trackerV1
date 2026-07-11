@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Bell, Menu, Moon, Sun } from "lucide-react";
+import { Search, Bell, Menu, Moon, Sun, KeyRound, LogOut, User } from "lucide-react";
 import { useAuth } from "../context/authProvider";
 import { useTheme } from "../context/themeProvider";
 import NotificationDrawer from "../components/Static/NotificationDrawer.jsx";
@@ -7,12 +7,15 @@ import ProfileImage from "../components/Common/ProfileImage.jsx";
 import { useUserProfile } from "../hooks/useUserProfile.js";
 import { useNotification } from "../context/notificationProvider.jsx";
 import { useNavigate } from "react-router-dom";
+import ChangePasswordModal from "../components/Common/ChangePasswordModal.jsx";
 
 const TopNavBar = ({ onToggleSidebar, sidebarOpen }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { profileImage, roleName } = useUserProfile();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { unReadCount } = useNotification();
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
@@ -90,24 +93,85 @@ const TopNavBar = ({ onToggleSidebar, sidebarOpen }) => {
 
         <div className="h-6 w-px bg-hairline-soft hidden sm:block" />
 
-        <div className="flex items-center gap-2 pl-1">
-          <div className="text-right hidden md:block">
-            <p className="text-sm font-medium leading-none text-ink">{user?.name || "Guest"}</p>
-            <p className="text-[11px] text-ink-subtle mt-0.5 capitalize">{roleName || "Employee"}</p>
+        <div className="relative">
+          <div
+            onClick={() => setProfileMenuOpen((prev) => !prev)}
+            className="flex items-center gap-2 pl-1 cursor-pointer select-none group"
+          >
+            <div className="text-right hidden md:block">
+              <p className="text-sm font-medium leading-none text-ink group-hover:text-[var(--module-accent)] transition-colors">
+                {user?.name || "Guest"}
+              </p>
+              <p className="text-[11px] text-ink-subtle mt-0.5 capitalize">{roleName || "Employee"}</p>
+            </div>
+            <div className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-hairline group-hover:ring-accent transition-all">
+              <ProfileImage
+                profileImage={profileImage}
+                firstName={user?.name?.split(" ")[0]}
+                lastName={user?.name?.split(" ")[1]}
+                size="sm"
+                className="w-full h-full"
+              />
+            </div>
           </div>
-          <div className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-hairline hover:ring-accent transition-all cursor-pointer">
-            <ProfileImage
-              profileImage={profileImage}
-              firstName={user?.name?.split(" ")[0]}
-              lastName={user?.name?.split(" ")[1]}
-              size="sm"
-              className="w-full h-full"
-            />
-          </div>
+
+          {/* Profile Dropdown */}
+          {profileMenuOpen && (
+            <>
+              {/* Click-away overlay */}
+              <div
+                className="fixed inset-0 z-30"
+                onClick={() => setProfileMenuOpen(false)}
+              />
+              <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--tracker-surface)] border border-[var(--tracker-border)] rounded-xl shadow-xl py-1.5 z-40 select-none animate-fade-in">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate("/Profile");
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--tracker-ink)] hover:bg-[var(--tracker-surface-1)] flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <User className="h-3.5 w-3.5 text-[var(--tracker-ink-subtle)]" />
+                  Profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    setChangePasswordOpen(true);
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--tracker-ink)] hover:bg-[var(--tracker-surface-1)] flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <KeyRound className="h-3.5 w-3.5 text-[var(--tracker-ink-subtle)]" />
+                  Edit Password
+                </button>
+                <div className="h-px bg-[var(--tracker-border)] my-1" />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setProfileMenuOpen(false);
+                    await logout();
+                    navigate("/login");
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-500 hover:bg-[var(--tracker-surface-1)] flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Logout
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {isOpen && <NotificationDrawer isOpen={isOpen} setIsOpen={setIsOpen} />}
+
+      {/* Change Password Dialog */}
+      <ChangePasswordModal
+        isOpen={changePasswordOpen}
+        onClose={() => setChangePasswordOpen(false)}
+      />
     </header>
   );
 };

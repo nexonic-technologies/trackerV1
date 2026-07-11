@@ -6,6 +6,20 @@ let maintenanceHandler = null;  // set by App.jsx to avoid circular import
 let failedRequestCount = 0;
 const MAX_FAILED_REQUESTS = 5;
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 /**
  * Called by App.jsx on mount — passes a fn(message, scheduledEnd) that
  * shows the MaintenancePage overlay via React state.
@@ -138,30 +152,62 @@ axiosInstance.interceptors.response.use(
 
     // Handle any 401 response - clear cookies and redirect
     if (error.response?.status === 401) {
-      // Try refresh only once if token is expired
-      if (errorData?.expired && !originalRequest._retry) {
-        originalRequest._retry = true;
+      if (errorData?.expired) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then(token => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return axiosInstance(originalRequest);
+            })
+            .catch(err => {
+              return Promise.reject(err);
+            });
+        }
 
-        try {
-          const refreshResponse = await axios.post(
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        const localRefreshToken = localStorage.getItem('refresh_token') || Cookies.get('refresh_token');
+
+        return new Promise((resolve, reject) => {
+          axios.post(
             `${baseUrl}/api/auth/refresh`,
-            {},
+            { refreshToken: localRefreshToken },
             {
               withCredentials: true,
               headers: { 'x-device-uuid': getDeviceUUID() }
             }
-          );
-
-          if (refreshResponse.data.accessToken) {
-            Cookies.set("auth_token", refreshResponse.data.accessToken);
-            localStorage.setItem('auth_token', refreshResponse.data.accessToken);
-            originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
-            resetFailedCount();
-            return axiosInstance(originalRequest);
-          }
-        } catch (refreshError) {
-          // Refresh failed - proceed to logout
-        }
+          )
+            .then(({ data }) => {
+              if (data.accessToken) {
+                Cookies.set("auth_token", data.accessToken);
+                localStorage.setItem('auth_token', data.accessToken);
+                if (data.refreshToken) {
+                  Cookies.set("refresh_token", data.refreshToken);
+                  localStorage.setItem('refresh_token', data.refreshToken);
+                }
+                originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+                processQueue(null, data.accessToken);
+                resolve(axiosInstance(originalRequest));
+              } else {
+                processQueue(new Error("No access token returned"));
+                reject(error);
+              }
+            })
+            .catch((err) => {
+              processQueue(err);
+              reject(err);
+            })
+            .finally(() => {
+              isRefreshing = false;
+            });
+        })
+          .catch(async (err) => {
+            await forceLogout();
+            return Promise.reject(err);
+          });
       }
 
       await forceLogout();
