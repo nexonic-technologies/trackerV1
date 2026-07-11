@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import Bull from 'bullmq';
+import Bull from 'bull';
 
 class InMemoryQueue extends EventEmitter {
   constructor(name) {
