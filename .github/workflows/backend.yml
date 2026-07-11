@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'
+      - './Backend/**'
       - '.github/workflows/backend.yml'
 
   pull_request:
     branches:
       - main
     paths:
-      - 'backend/**'
+      - './Backend/**'
 
 jobs:
   backend:
@@ -24,7 +24,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend
+        working-directory: ./Backend
 
     steps:
       - name: Checkout Repository
@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: ./Backend/package-lock.json
 
       # 👇 Create backend/.env from Environment Secrets & Variables
       - name: Generate .env
