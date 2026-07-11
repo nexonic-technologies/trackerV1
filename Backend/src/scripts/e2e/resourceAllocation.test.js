@@ -14,7 +14,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -280,7 +280,7 @@ export async function runResourceAllocation() {
 
     // --- STEP 3: CALCULATE UTILIZATION AND COST ---
     console.log('\n--- STEP 3: Verifying Utilization & Cost Calculations ---');
-    
+
     // 1. Calculate allocated hours
     const employeeTasks = await Task.find({ assignedTo: employee._id }).lean();
     const allocatedHours = employeeTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);

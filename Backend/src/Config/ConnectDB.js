@@ -8,7 +8,7 @@ import dns from "dns";
 dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 
 // Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), 'src/Config/.env') });
+dotenv.config();
 
 // Optimize MongoDB connection settings
 mongoose.set("strictPopulate", false);

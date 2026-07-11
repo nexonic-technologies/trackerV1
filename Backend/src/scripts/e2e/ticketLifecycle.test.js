@@ -14,7 +14,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -182,7 +182,7 @@ export async function runTicketLifecycle() {
 
     // --- STEP 5: RESOLVE TICKET ---
     console.log('\n--- STEP 5: Resolving Ticket ---');
-    
+
     // Transition to In Progress first
     await buildQuery({
       role: superAdminRole._id.toString(),

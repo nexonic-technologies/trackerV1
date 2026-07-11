@@ -15,7 +15,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../Config/.env') });
+dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
@@ -139,7 +139,7 @@ async function verify() {
 
   // --- STEP 3: TRANSITION STATUS TO RECEIVED ---
   console.log('\n--- STEP 3: Transitioning PO status sequentially ---');
-  
+
   console.log('Transition: Draft -> Pending Approval');
   let updatedPo = await buildQuery({
     role: superAdminRole._id.toString(),
@@ -150,7 +150,7 @@ async function verify() {
     body: { status: 'Pending Approval' }
   });
   console.log(`   PO Status is: "${updatedPo.status}"`);
-  
+
   console.log('Transition: Pending Approval -> Approved');
   updatedPo = await buildQuery({
     role: superAdminRole._id.toString(),
@@ -179,7 +179,7 @@ async function verify() {
   console.log(`Found ${createdAssets.length} created assets:`);
   for (const asset of createdAssets) {
     console.log(`  - Asset ID: ${asset.assetId}, Name: ${asset.name}, Cost: ${asset.purchaseCost}, Serial: ${asset.serialNumber}, Status: ${asset.status}`);
-    
+
     const ledgerEntries = await AssetStockLedger.find({ assetId: asset._id }).lean();
     console.log(`    Ledger Entries (${ledgerEntries.length}):`);
     for (const entry of ledgerEntries) {
@@ -237,7 +237,7 @@ async function verify() {
     action: 'update',
     modelName: 'assetallocations',
     docId: allocation._id.toString(),
-    body: { 
+    body: {
       status: 'Returned',
       returnedCondition: 'Good',
       returnNotes: 'Good condition return'
@@ -250,7 +250,7 @@ async function verify() {
 
   // --- STEP 5: REPAIR FLOW ---
   console.log(`\n--- STEP 5: Simulating Repair flow for ${targetAsset.assetId} ---`);
-  
+
   console.log('Sending asset for repair (triggers OUT ledger)...');
   const repair = await buildQuery({
     role: superAdminRole._id.toString(),
@@ -276,7 +276,7 @@ async function verify() {
     action: 'update',
     modelName: 'assetrepairs',
     docId: repair._id.toString(),
-    body: { 
+    body: {
       status: 'Repaired',
       repairCondition: 'Excellent'
     }
