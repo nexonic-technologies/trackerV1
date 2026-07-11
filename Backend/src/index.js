@@ -47,7 +47,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 const allowedOrigins = [
-  "https://lmx-tracker--p1hvjsjwqq.expo.app",
+ "https://tracker-backend-qben.onrender.com",
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:5173",
