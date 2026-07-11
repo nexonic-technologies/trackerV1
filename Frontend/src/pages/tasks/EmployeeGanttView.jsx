@@ -1,0 +1,323 @@
+/**
+ * EmployeeGanttView.jsx
+ *
+ * Queue-projected Gantt view for a single employee.
+ * Data source: GET /api/employees/:id/gantt-queue
+ *
+ * Design rules (frontend-ui-tokens):
+ *  - data-module="project"  → sky blue accent (#0EA5E9)
+ *  - All colors via CSS variables — no raw hex except for chart bars
+ *  - Light + dark aware via tokens
+ *  - Stable projectedStart/End anchor (from backend — today 09:00 or activeTask.startedAt)
+ */
+import { useState, useEffect, useCallback } from "react";
+import axiosInstance from "../../api/axiosInstance";
+import { Users, RefreshCw, Clock, Zap, AlertTriangle, CheckCircle2, ChevronDown } from "lucide-react";
+
+// ── Utilization badge ────────────────────────────────────────────────────────
+const UtilizationBadge = ({ percent }) => {
+  if (percent == null) return null;
+  const isHealthy  = percent < 80;
+  const isBusy     = percent >= 80 && percent <= 120;
+  const isOverload = percent > 120;
+
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all"
+      style={{
+        background:   isHealthy  ? "var(--tracker-success-light)"
+                    : isBusy    ? "var(--tracker-warning-light)"
+                    : "var(--tracker-danger-light)",
+        color:        isHealthy  ? "var(--tracker-success)"
+                    : isBusy    ? "var(--tracker-warning)"
+                    : "var(--tracker-danger)",
+        borderColor:  isHealthy  ? "color-mix(in srgb, var(--tracker-success) 30%, transparent)"
+                    : isBusy    ? "color-mix(in srgb, var(--tracker-warning) 30%, transparent)"
+                    : "color-mix(in srgb, var(--tracker-danger) 30%, transparent)",
+      }}
+    >
+      {isHealthy ? <CheckCircle2 size={11} /> : isOverload ? <AlertTriangle size={11} /> : <Zap size={11} />}
+      {percent}% {isHealthy ? "Healthy" : isBusy ? "Busy" : "Overloaded"}
+    </span>
+  );
+};
+
+// ── Priority dot ─────────────────────────────────────────────────────────────
+const PRIORITY_COLORS = {
+  "Weekly Priority": "var(--module-hr)",
+  "High":            "var(--tracker-danger)",
+  "Medium":          "var(--tracker-warning)",
+  "Low":             "var(--tracker-success)",
+};
+
+// ── Gantt bar ─────────────────────────────────────────────────────────────────
+const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
+  if (!entry.projectedStart || !entry.projectedEnd) return null;
+
+  const start   = new Date(entry.projectedStart).getTime();
+  const end     = new Date(entry.projectedEnd).getTime();
+  const left    = Math.max(0, ((start - startEpoch) / totalSpanMs) * 100);
+  const width   = Math.max(1, ((end - start) / totalSpanMs) * 100);
+  const color   = entry.isActive
+    ? "var(--module-project)"
+    : PRIORITY_COLORS[entry.priorityLevel] || "var(--tracker-ink-subtle)";
+
+  return (
+    <div
+      className="absolute top-1/2 -translate-y-1/2 rounded-full h-5 flex items-center px-2 min-w-[6px] transition-all duration-300 group"
+      style={{
+        left: `${left}%`,
+        width: `${Math.min(width, 100 - left)}%`,
+        background: entry.isActive
+          ? "var(--module-project)"
+          : "color-mix(in srgb, " + color + " 30%, transparent)",
+        border: `1.5px solid ${color}`,
+      }}
+    >
+      {width > 6 && (
+        <span
+          className="text-[9px] font-bold truncate select-none"
+          style={{ color: entry.isActive ? "#fff" : color }}
+        >
+          {entry.title}
+        </span>
+      )}
+      {/* Tooltip on hover */}
+      <div className="pointer-events-none absolute left-0 top-7 z-50 hidden group-hover:flex flex-col gap-0.5 min-w-[180px] rounded-tracker-md border border-hairline bg-surface shadow-[var(--tracker-shadow-overlay)] p-2.5 text-xs">
+        <span className="font-semibold text-ink">{entry.title}</span>
+        <span className="text-ink-muted">{entry.estimatedHours}h estimated</span>
+        <span className="text-ink-subtle">
+          {new Date(entry.projectedStart).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+          {" → "}
+          {new Date(entry.projectedEnd).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ── Day axis header ───────────────────────────────────────────────────────────
+const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
+  const days = Array.from({ length: dayCount + 1 }, (_, i) => {
+    const d = new Date(startEpoch + i * 86400000);
+    return { label: d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }), pct: (i / dayCount) * 100 };
+  });
+
+  return (
+    <div className="relative h-7 border-b border-hairline-soft mb-1 overflow-hidden">
+      {days.map((d, i) => (
+        <div
+          key={i}
+          className="absolute top-0 h-full flex items-center"
+          style={{ left: `${d.pct}%` }}
+        >
+          <span className="text-[9px] font-semibold text-ink-subtle whitespace-nowrap pl-1">{d.label}</span>
+          <div className="absolute left-0 top-0 h-full w-px bg-hairline-soft" />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ── Main component ───────────────────────────────────────────────────────────
+const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, onEmployeeChange, onTaskClick }) => {
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(null);
+
+  const fetchQueue = useCallback(async (empId) => {
+    if (!empId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axiosInstance.get(`/employees/${empId}/gantt-queue`);
+      setData(res.data?.data || null);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to load queue");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchQueue(selectedEmployeeId); }, [selectedEmployeeId, fetchQueue]);
+
+  // ── Compute Gantt span ────────────────────────────────────────────────────
+  const ganttBounds = (() => {
+    if (!data?.entries?.length) return null;
+    const starts = data.entries.map(e => new Date(e.projectedStart).getTime()).filter(Boolean);
+    const ends   = data.entries.map(e => new Date(e.projectedEnd).getTime()).filter(Boolean);
+    if (!starts.length) return null;
+    const minEpoch = Math.min(...starts);
+    const maxEpoch = Math.max(...ends);
+    const spanMs   = maxEpoch - minEpoch || 86400000;
+    const dayCount = Math.ceil(spanMs / 86400000);
+    return { startEpoch: minEpoch, totalSpanMs: spanMs, dayCount };
+  })();
+
+  // ── Employee select options ───────────────────────────────────────────────
+  const empOptions = employees.map(e => ({
+    id:   e._id,
+    name: [e.basicInfo?.firstName, e.basicInfo?.lastName].filter(Boolean).join(" ") || "Employee",
+  }));
+
+  const selectedEmpName = empOptions.find(e => e.id === selectedEmployeeId)?.name || "Select Employee";
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden" data-module="project">
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-1 py-3 border-b border-hairline-soft flex-shrink-0">
+        {/* Employee selector */}
+        <div className="relative">
+          <select
+            id="employee-gantt-select"
+            value={selectedEmployeeId || ""}
+            onChange={e => onEmployeeChange?.(e.target.value)}
+            className="lmx-input pr-8 appearance-none text-sm font-semibold min-w-[200px] cursor-pointer"
+          >
+            <option value="">Select Employee</option>
+            {empOptions.map(e => (
+              <option key={e.id} value={e.id}>{e.name}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
+        </div>
+
+        {/* Utilization badge */}
+        {data && <UtilizationBadge percent={data.utilizationPercent} />}
+
+        {/* Stats */}
+        {data && (
+          <div className="flex items-center gap-3 ml-auto text-xs text-ink-muted">
+            <span className="flex items-center gap-1">
+              <Clock size={11} />
+              {data.totalQueueHours}h total
+            </span>
+            <span>·</span>
+            <span>{data.projectionDays} working days</span>
+            <span>·</span>
+            <span>{data.entries.length} tasks</span>
+          </div>
+        )}
+
+        {/* Refresh */}
+        <button
+          onClick={() => fetchQueue(selectedEmployeeId)}
+          disabled={loading}
+          className="tracker-btn-ghost p-2 ml-2 flex-shrink-0"
+          title="Refresh queue"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="flex-1 overflow-auto">
+        {/* Loading */}
+        {loading && (
+          <div className="flex flex-col gap-3 p-4">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="flex gap-4 animate-pulse">
+                <div className="w-40 h-8 bg-surface-1 rounded-tracker-md flex-shrink-0" />
+                <div className="flex-1 h-8 bg-surface-1 rounded-full" style={{ width: `${40 + i * 15}%` }} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error */}
+        {!loading && error && (
+          <div className="flex flex-col items-center justify-center h-64 gap-3 text-sm text-ink-muted">
+            <AlertTriangle size={28} className="text-[var(--tracker-warning)]" />
+            <p>{error}</p>
+            <button onClick={() => fetchQueue(selectedEmployeeId)} className="tracker-btn-secondary text-xs px-3 py-1.5">
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Empty */}
+        {!loading && !error && data && data.entries.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-64 gap-3 text-sm text-ink-muted">
+            <Users size={32} className="text-ink-tertiary" />
+            <p className="font-medium">No tasks in queue</p>
+            <p className="text-xs">Assign tasks to this employee to see their workload timeline.</p>
+          </div>
+        )}
+
+        {/* Gantt chart */}
+        {!loading && !error && data && data.entries.length > 0 && ganttBounds && (
+          <div className="p-4 min-w-[700px]">
+            {/* Day axis */}
+            <div className="flex">
+              {/* Label column spacer */}
+              <div className="w-44 flex-shrink-0" />
+              <div className="flex-1 relative">
+                <DayAxis {...ganttBounds} />
+              </div>
+            </div>
+
+            {/* Rows */}
+            <div className="flex flex-col gap-1.5 mt-1">
+              {data.entries.map((entry, idx) => (
+                <div
+                  key={entry.taskId}
+                  className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
+                  onClick={() => onTaskClick?.(entry)}
+                >
+                  {/* Row label */}
+                  <div className="w-44 flex-shrink-0 flex items-center gap-2 px-2 py-2 cursor-pointer">
+                    {/* Order badge */}
+                    <span
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                      style={{
+                        background: entry.isActive ? "var(--module-project)" : "var(--tracker-surface-chip)",
+                        color:      entry.isActive ? "#fff"                  : "var(--tracker-ink-muted)",
+                      }}
+                    >
+                      {entry.isActive ? "▶" : idx + 1}
+                    </span>
+
+                    {/* Priority dot */}
+                    <span
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ background: PRIORITY_COLORS[entry.priorityLevel] || "var(--tracker-border)" }}
+                    />
+
+                    {/* Title */}
+                    <span className="text-[11.5px] font-semibold text-ink truncate leading-tight">
+                      {entry.title}
+                    </span>
+                  </div>
+
+                  {/* Bar track */}
+                  <div className="flex-1 relative h-9">
+                    {/* Track line */}
+                    <div className="absolute top-1/2 left-0 right-0 h-px bg-hairline-soft -translate-y-1/2" />
+                    <GanttBar entry={entry} {...ganttBounds} />
+                  </div>
+
+                  {/* ETA label */}
+                  <div className="w-20 flex-shrink-0 text-right pr-2">
+                    <span className="text-[10px] font-medium text-ink-muted">
+                      {entry.projectedEnd
+                        ? new Date(entry.projectedEnd).toLocaleDateString([], { month: "short", day: "numeric" })
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Computed at footer */}
+            <p className="mt-4 text-[10px] text-ink-tertiary text-right pr-2">
+              Projected {new Date(data.computedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {" · Anchor: today 09:00 (stable)"}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default EmployeeGanttView;
