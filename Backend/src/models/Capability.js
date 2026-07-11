@@ -1,0 +1,42 @@
+// models/Capability.js
+// Defines UI capability vocabulary for frontend visibility decisions
+// This does NOT replace AccessPolicies - it only controls UI display
+
+import mongoose from "mongoose";
+
+const CapabilitySchema = new mongoose.Schema({
+  key: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
+  module: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  label: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: String,
+    trim: true
+  },
+  status: {
+    type: String,
+    enum: ['active', 'deprecated'],
+    default: 'active'
+  }
+}, { 
+  timestamps: true,
+  collection: 'capabilities'
+});
+
+// Indexes for fast capability lookup
+CapabilitySchema.index({ module: 1, status: 1 });
+CapabilitySchema.index({ status: 1 });
+
+export default mongoose.model("Capability", CapabilitySchema);
