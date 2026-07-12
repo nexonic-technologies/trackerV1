@@ -24,6 +24,7 @@ const EntityFormPage = ({
   loadRecord,
   maxWidth,
   draftModel = null,
+  onChange,
 }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -97,6 +98,7 @@ const EntityFormPage = ({
         activeTab={tabList ? activeTab : null}
         submitButton={submitButton}
         onSubmit={onSubmit}
+        onChange={onChange}
         data={record || {}}
       />
     </FormPageLayout>
