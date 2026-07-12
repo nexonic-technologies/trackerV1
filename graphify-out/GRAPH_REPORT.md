@@ -1,16 +1,16 @@
-# Graph Report - Tracker  (2026-07-09)
+# Graph Report - trackerV1  (2026-07-12)
 
 ## Corpus Check
-- 971 files · ~801,409 words
+- 906 files · ~751,973 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 8446 nodes · 10263 edges · 674 communities (568 shown, 106 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 72 edges (avg confidence: 0.81)
+- 9104 nodes · 11320 edges · 729 communities (619 shown, 110 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 75 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f911ae07`
+- Built from commit: `967fe569`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -428,6 +428,7 @@
 - [[_COMMUNITY_Community 437|Community 437]]
 - [[_COMMUNITY_Community 438|Community 438]]
 - [[_COMMUNITY_Community 439|Community 439]]
+- [[_COMMUNITY_Community 440|Community 440]]
 - [[_COMMUNITY_Community 442|Community 442]]
 - [[_COMMUNITY_Community 443|Community 443]]
 - [[_COMMUNITY_Community 445|Community 445]]
@@ -526,6 +527,7 @@
 - [[_COMMUNITY_Community 584|Community 584]]
 - [[_COMMUNITY_Community 585|Community 585]]
 - [[_COMMUNITY_Community 586|Community 586]]
+- [[_COMMUNITY_Community 587|Community 587]]
 - [[_COMMUNITY_Community 588|Community 588]]
 - [[_COMMUNITY_Community 589|Community 589]]
 - [[_COMMUNITY_Community 590|Community 590]]
@@ -575,6 +577,7 @@
 - [[_COMMUNITY_Community 636|Community 636]]
 - [[_COMMUNITY_Community 637|Community 637]]
 - [[_COMMUNITY_Community 638|Community 638]]
+- [[_COMMUNITY_Community 639|Community 639]]
 - [[_COMMUNITY_Community 640|Community 640]]
 - [[_COMMUNITY_Community 641|Community 641]]
 - [[_COMMUNITY_Community 642|Community 642]]
@@ -592,9 +595,35 @@
 - [[_COMMUNITY_Community 667|Community 667]]
 - [[_COMMUNITY_Community 668|Community 668]]
 - [[_COMMUNITY_Community 670|Community 670]]
+- [[_COMMUNITY_Community 674|Community 674]]
+- [[_COMMUNITY_Community 675|Community 675]]
+- [[_COMMUNITY_Community 676|Community 676]]
+- [[_COMMUNITY_Community 677|Community 677]]
+- [[_COMMUNITY_Community 678|Community 678]]
+- [[_COMMUNITY_Community 679|Community 679]]
+- [[_COMMUNITY_Community 680|Community 680]]
+- [[_COMMUNITY_Community 681|Community 681]]
+- [[_COMMUNITY_Community 682|Community 682]]
+- [[_COMMUNITY_Community 683|Community 683]]
+- [[_COMMUNITY_Community 684|Community 684]]
+- [[_COMMUNITY_Community 685|Community 685]]
+- [[_COMMUNITY_Community 686|Community 686]]
+- [[_COMMUNITY_Community 687|Community 687]]
+- [[_COMMUNITY_Community 688|Community 688]]
+- [[_COMMUNITY_Community 689|Community 689]]
+- [[_COMMUNITY_Community 690|Community 690]]
+- [[_COMMUNITY_Community 691|Community 691]]
+- [[_COMMUNITY_Community 692|Community 692]]
+- [[_COMMUNITY_Community 693|Community 693]]
+- [[_COMMUNITY_Community 694|Community 694]]
+- [[_COMMUNITY_Community 695|Community 695]]
+- [[_COMMUNITY_Community 696|Community 696]]
+- [[_COMMUNITY_Community 697|Community 697]]
+- [[_COMMUNITY_Community 698|Community 698]]
+- [[_COMMUNITY_Community 699|Community 699]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `useAuth()` - 109 edges
+1. `useAuth()` - 111 edges
 2. `13. `tasktypes` Collection` - 63 edges
 3. `14. `clients` Collection` - 63 edges
 4. `15. `projecttypes` Collection` - 63 edges
@@ -606,34 +635,34 @@
 10. `21. `errorlog` Collection` - 63 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ExternalTicketView()` --calls--> `getStatusColor()`  [INFERRED]
-  external/components/ExternalTicketView.jsx → App/components/roles/employee/EmployeeDashboard.tsx
-- `populateHelper` --references--> `Employee Model`  [INFERRED]
-  backend/documentation/backend_Technical_Architecture_Documentation.md → Architecture.md
-- `populateHelper` --calls--> `Attendance Service`  [INFERRED]
-  backend/documentation/backend_Technical_Architecture_Documentation.md → Task.md
 - `runAllVerification()` --calls--> `stripAnsi()`  [INFERRED]
-  backend/src/scripts/e2e/masterVerification.js → backend/businessSystemVerification.js
+  Backend/src/scripts/e2e/masterVerification.js → backend/businessSystemVerification.js
 - `runAllVerification()` --calls--> `restoreConsoleAndCloseLog()`  [INFERRED]
-  backend/src/scripts/e2e/masterVerification.js → backend/businessSystemVerification.js
+  Backend/src/scripts/e2e/masterVerification.js → backend/businessSystemVerification.js
+- `buildQuery()` --calls--> `populateHelper`  [EXTRACTED]
+  Backend/src/utils/policy/policyEngine.js → backend/documentation/backend_Technical_Architecture_Documentation.md
+- `getSummaryFields()` --calls--> `populateHelper`  [EXTRACTED]
+  Backend/src/helper/populateHelper.js → backend/documentation/backend_Technical_Architecture_Documentation.md
+- `getDetailedFields()` --calls--> `populateHelper`  [EXTRACTED]
+  Backend/src/helper/populateHelper.js → backend/documentation/backend_Technical_Architecture_Documentation.md
 
-## Communities (674 total, 106 thin omitted)
+## Communities (729 total, 110 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.01
-Nodes (103): update(), __dirname, __filename, Departments(), Designations(), EmailConfig(), LeaveTypes(), ApprovalWorkflowSchema (+95 more)
+Nodes (102): update(), ALL_MODELS, FULL_ACCESS, seed(), Departments(), Designations(), EmailConfig(), LeaveTypes() (+94 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (35): setAuthLogout(), setMaintenanceHandler(), DailyTracker(), Allocations(), Incidents(), useSocket(), ActivityEntryFrom, AuthProvider() (+27 more)
+Cohesion: 0.14
+Nodes (16): ThemeToggler(), useNotification(), prefersReducedMotion(), runThemeTransition(), ThemeContext, ThemeProvider(), useTheme(), api (+8 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
 Nodes (50): dependencies, axios, expo, expo-constants, expo-dev-client, expo-device, expo-document-picker, expo-font (+42 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.04
-Nodes (48): author, dependencies, archiver, @aws-sdk/client-s3, bcrypt, bcryptjs, bull, cookie-parser (+40 more)
+Cohesion: 0.07
+Nodes (29): dependencies, archiver, @aws-sdk/client-s3, bcrypt, bcryptjs, bull, cookie-parser, cors (+21 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.04
@@ -657,27 +686,27 @@ Nodes (40): 1. Check Rate Limit Headers, 2. Test Rate Limiting, 3. Test Conflict
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
-Nodes (25): OnCreate(), wWinMain(), CreateAndAttachConsole(), GetCommandLineArguments(), Utf8FromUtf16(), Create(), Destroy(), EnableFullDpiSupportIfAvailable() (+17 more)
+Nodes (30): MessageHandler(), OnCreate(), OnDestroy(), wWinMain(), CreateAndAttachConsole(), GetCommandLineArguments(), Utf8FromUtf16(), Create() (+22 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.06
 Nodes (31): 10. Engineering Score Card, 11. `verify [model]` — Scoped, 12. `verify system` — Full, No Exceptions, 1. Architecture Compliance Audit, 1. Audit Severity, 1. Code Philosophy & Quality Audit, 2. Architecture Compliance (🔴), 2. Architecture Compliance Audit (🔴 Blocking) (+23 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.05
-Nodes (22): PriorityTasks(), COLOR_MAP, StatCard(), useAnimatedCounter(), DashboardHero(), getFormattedDate(), getGreeting(), LEAVE_COLORS (+14 more)
+Cohesion: 0.04
+Nodes (27): STATUS_COLORS, PriorityTasks(), COLOR_MAP, StatCard(), useAnimatedCounter(), DashboardHero(), getFormattedDate(), getGreeting() (+19 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.11
-Nodes (12): ACTIVE_STATUS_FILTERS, jobs, nextStepConfig, now, query, sortedHistory, fcmQueue, FCMService (+4 more)
+Cohesion: 0.16
+Nodes (8): ACTIVE_STATUS_FILTERS, jobs, nextStepConfig, now, query, sortedHistory, resolveActor(), EscalationEngine
 
 ### Community 13 - "Community 13"
 Cohesion: 0.05
 Nodes (36): 1. src/utils/deviceFingerprint.js, 2. src/middlewares/rateLimitMiddleware.js, 3. src/services/requestQueue.js, 4. src/services/raceConditionHandler.js, 5. src/routes/adminSystemRoutes.js, Admin Endpoints, 📖 All Documentation Files, ARCHITECTURE_DIAGRAMS.md (+28 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.05
-Nodes (38): dart:async, _activeHours, AttendancePage, _AttendancePageState, build, _buildHeader, _buildHistorySection, _buildLegendItem (+30 more)
+Cohesion: 0.07
+Nodes (45): dart:async, _activeHours, AttendancePage, _AttendancePageState, build, _buildHeader, _buildHistorySection, _buildLegendItem (+37 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.16
@@ -692,75 +721,75 @@ Cohesion: 0.05
 Nodes (21): CapabilitySchema, JobCategorySchema, JobTypeSchema, ResourceSchema, roleSchema, IconSchema, SideBarSchema, __dirname (+13 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.22
-Nodes (13): buildTaskCreateFields(), TASK_CREATE_TABS, FormDraftBanner(), MasterDataFormView(), drainQueue(), enqueueFormSubmit(), queue, wait() (+5 more)
+Cohesion: 0.29
+Nodes (8): FormDraftBanner(), drainQueue(), queue, wait(), clearFormDraft(), listFormDrafts(), loadFormDraft(), saveFormDraft()
 
 ### Community 19 - "Community 19"
-Cohesion: 0.06
-Nodes (36): dependencies, @ant-design/icons, axios, country-state-city, date-fns, dayjs, @dnd-kit/core, @dnd-kit/utilities (+28 more)
+Cohesion: 0.05
+Nodes (37): dependencies, @ant-design/icons, axios, country-state-city, date-fns, dayjs, @dnd-kit/core, @dnd-kit/utilities (+29 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.06
-Nodes (37): Can(), PolicyGuard(), CapabilityGuard(), AuthProvider(), NotificationProvider(), PermissionContext, PermissionProvider(), usePermission() (+29 more)
+Cohesion: 0.07
+Nodes (32): useUserRole(), useUserRole(), MONTHS, PayrollPage(), PayslipModal(), PRIVILEGED, TABS, MONTHS (+24 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.12
-Nodes (19): styles, ParallaxScrollView(), Props, styles, styles, ThemedText(), ThemedTextProps, ThemedView() (+11 more)
+Cohesion: 0.16
+Nodes (15): styles, ParallaxScrollView(), Props, styles, styles, ThemedText(), ThemedTextProps, ThemedView() (+7 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.06
 Nodes (30): 1. **Enhanced Axios Instance** (`api/axiosInstance.js`), 2. **Optimized API Hook** (`hooks/useOptimizedAPI.js`), 3. **Optimized Data Fetching Hook** (`hooks/useOptimizedDataFetching.js`), 4. **OptimizedList Component** (`components/ui/OptimizedList.tsx`), 5. **Performance Monitor Hook** (`hooks/usePerformanceMonitor.js`), 6. **Updated Dashboard** (`app/(protectedRoute)/dashboard/index.tsx`), 7. **Updated Tasks Page** (`app/(protectedRoute)/tasks/index.tsx`), Backend Integration (+22 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.09
-Nodes (16): Attendance Service, CronMonitor, cronStats, hour, jobs, memUsage, monitor, queueStats (+8 more)
+Cohesion: 0.07
+Nodes (17): Attendance Service, CronMonitor, cronStats, hour, jobs, memUsage, monitor, queueStats (+9 more)
 
 ### Community 24 - "Community 24"
-Cohesion: 0.05
-Nodes (29): holidaySchema, payrollSchema, auditEventSchema, payrollRunSchema, deductionSchema, earningSchema, salaryStructureSchema, Shift (+21 more)
+Cohesion: 0.11
+Nodes (21): holidaySchema, payrollSchema, auditEventSchema, payrollRunSchema, deductionSchema, earningSchema, salaryStructureSchema, computeAttendanceSummary() (+13 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.19
-Nodes (8): createMilestoneTask(), getDefaultTaskType(), updateClientMilestone(), afterUpdate(), resolveTicketStatus(), syncLinkedTickets(), syncMilestoneStatus(), updateLinkedTicketStatus()
+Cohesion: 0.32
+Nodes (3): createMilestoneTask(), getDefaultTaskType(), updateClientMilestone()
 
 ### Community 26 - "Community 26"
-Cohesion: 0.14
-Nodes (14): Dashboard(), getFormattedDate(), getGreeting(), ActionCard(), StatCard(), StatCardProps, useAnimatedCounter(), getFormattedDate() (+6 more)
+Cohesion: 0.17
+Nodes (12): Dashboard(), getFormattedDate(), getGreeting(), StatCard(), StatCardProps, useAnimatedCounter(), getFormattedDate(), getGreeting() (+4 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (14): 1. `assetallocations.js`, 2. `assetHooksService.js`, 3. `assetrepairs.js`, 🏗️ Architecture & Component Relations, Assets Module Brain, 🗄️ Backend Models, ⚙️ Backend Services (Business Logic Hooks), code:mermaid (sequenceDiagram) (+6 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.15
-Nodes (11): FormRenderer(), SidebarForm, MENU_FORM_TABS, Menu(), buildDirtyPatch(), getNestedValue(), normalizeForCompare(), setNestedValue() (+3 more)
+Cohesion: 0.06
+Nodes (30): Align, build, _buildControlBar, _buildMembersList, buildNodeWidget, _buildTreeHierarchy, Column, Container (+22 more)
 
 ### Community 29 - "Community 29"
 Cohesion: 0.04
 Nodes (46): 1. Page-to-Capability Mapping Configuration, 1. Seed Capabilities from Sidebar, 2. Menu Visibility Service, 2. Migrate AccessPolicies to CBAC (Optional), 3. Context Builder Integration, 3. Update Frontend AuthContext, 4. Frontend Capability Hook, 4. Use Capability Hook in Components (+38 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.08
+Cohesion: 0.07
 Nodes (25): 4a. RIPPLE CHECK, code:powershell (node -c {affected_js_file}), code:powershell (cd "{PROJECT_ROOT}\{FE_ROOT}" && npx eslint . --no-error-on-), code:powershell (cd "{PROJECT_ROOT}\{BE_ROOT}" && npx jest --verbose), code:powershell (cd "{PROJECT_ROOT}\{FE_ROOT}" && npx eslint . --no-error-on-), code:block5 (Bug: {BUG_ID} — {Title}), code:block6 (✅ Bug {BUG_ID} — {TITLE}), Completion Report (+17 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.16
-Nodes (4): getCountryCode(), getStateCode(), Vendors(), StatusBadge()
+Cohesion: 0.10
+Nodes (18): beforeSnapshot, context, decrypted, doc, encrypted, evaluateCondition(), getPathValue(), output (+10 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.20
 Nodes (9): Agent Execution Cheat Sheet, 🔴 BUG 4: `ticketLifecycle.test.js` — `resolvedAt` not populated on returned object, Bug Catalog, code:block6 (# For any new model, give agent this instruction:), code:js (const freshTicket = await Ticket.findById(ticket._id).lean()), code:bash (node --experimental-vm-modules runSystemVerification.js), E2E Lifecycle Test Fix Plan, Summary (+1 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.10
-Nodes (12): AuthContext, ROLE_MAPPING, MONTHS, PayrollRecord, STATUS_CHIPS, Comment, PRIORITY_COLORS, STATUS_COLORS (+4 more)
+Cohesion: 0.09
+Nodes (14): EXPENSE_TYPES, AuthContext, ROLE_MAPPING, Comment, PRIORITY_COLORS, STATUS_COLORS, TicketDetail, PRIORITY_COLORS (+6 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.05
-Nodes (22): buildCategoryColumns(), ClientKanbanPage(), PRIORITY_COLS, STATUS_COLS, STATUS_COLORS, FALLBACK_TOKEN, PRIORITY_CELL, PRIORITY_TOKENS (+14 more)
+Cohesion: 0.04
+Nodes (48): getDeviceUUID(), Allocations(), Incidents(), buildCategoryColumns(), ClientKanbanPage(), PRIORITY_COLS, STATUS_COLS, AddComment() (+40 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.08
+Cohesion: 0.07
 Nodes (25): code:powershell (node --version), code:powershell (node -c {affected_js_file}), code:powershell (cd "{PROJECT_ROOT}\{FE_ROOT}" && npx eslint . --no-error-on-), code:powershell (# Find existing tests for the module), code:powershell (cd "{PROJECT_ROOT}\{BE_ROOT}" && npx jest {test_file} --verb), code:javascript (const request = require('supertest');), code:powershell (# Lint check), code:powershell (# Backend tests (if they exist)) (+17 more)
 
 ### Community 37 - "Community 37"
@@ -768,12 +797,12 @@ Cohesion: 0.08
 Nodes (23): chunkPath, __dirname, ext, fileBuffer, __filename, filePath, formatFileSize(), getStorageStats() (+15 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.10
-Nodes (18): AppHeader(), NotificationDrawerProps, { width }, DEFAULT_NAV_ITEMS, NavigationContext, NavigationContextType, NavigationProvider(), SidebarItem (+10 more)
+Cohesion: 0.09
+Nodes (19): AppHeader(), NotificationDrawerProps, { width }, DEFAULT_NAV_ITEMS, NavigationContext, NavigationContextType, NavigationProvider(), SidebarItem (+11 more)
 
 ### Community 39 - "Community 39"
-Cohesion: 0.09
-Nodes (16): ExternalTicketView(), EmployeeDashboard(), EmployeeDashboard(), EmployeeDashboardStats, getAttendanceConfig(), getStatusColor(), Props, StatCard() (+8 more)
+Cohesion: 0.14
+Nodes (7): FileViewerModal(), formatBytes(), getFileIcon(), PageProps, CommentThreadProps, TicketForm(), TicketList()
 
 ### Community 40 - "Community 40"
 Cohesion: 0.10
@@ -792,24 +821,24 @@ Cohesion: 0.05
 Nodes (37): AccessPolicy, Asset, AssetAllocation, AssetCategory, AssetPurchase, AssetVendor, Attendance, Client (+29 more)
 
 ### Community 44 - "Community 44"
-Cohesion: 0.13
-Nodes (16): rateLimitMiddleware(), clearedCount, config, entry, health, locks, requireAdmin(), result (+8 more)
+Cohesion: 0.09
+Nodes (18): rateLimitMiddleware(), clearedCount, config, entry, health, locks, requireAdmin(), result (+10 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.10
-Nodes (9): DEFAULT_ROLE_CONFIG, ROLE_CONFIG, WIDGET_GROUPS, WIDGET_MAP, WIDGET_REGISTRY, ACTION_META, ACTIONS, GROUP_COLORS (+1 more)
+Cohesion: 0.09
+Nodes (10): DEFAULT_ROLE_CONFIG, ROLE_CONFIG, WIDGET_GROUPS, WIDGET_MAP, WIDGET_REGISTRY, ACTION_META, ACTIONS, GROUP_COLORS (+2 more)
 
 ### Community 46 - "Community 46"
 Cohesion: 0.10
 Nodes (20): ─── AI AGENT USAGE GUIDE ────────────────────────────────────────────────────, An AI agent building any screen must reference the correct module block., Avoid rounded-2xl (16px+) and rounded-3xl on standard components., ─── COMPONENTS ──────────────────────────────────────────────────────────────, CONCISE DENSITY: prefer compact spacing (xs–md) for all UI., CONCISE: prefer rounded-lg (12px) for cards, rounded-md (8px) for buttons/inputs., CRITICAL MANDATE: Any UI design MUST NOT be planned, proposed, or implemented without first reading and validating this DESIGN.md file. This is a mandatory pre-step for all UI-related tasks., ─── DESIGN TOKENS QUICK REFERENCE ────────────────────────────────────────── (+12 more)
 
 ### Community 47 - "Community 47"
-Cohesion: 0.09
-Nodes (11): runTests(), generateNotification(), EmployeeSchema, notificationSchema, notificationReceptionistSchema, TaskSchema, employeeService(), notifyTaskUpdate() (+3 more)
+Cohesion: 0.08
+Nodes (16): Attendance(), calcDuration(), fmtMonthLabel(), fmtWeekLabel(), formatTime(), getWeekRange(), generateNotification(), CommentSchema (+8 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.13
-Nodes (10): PROFILE_FORM_TABS, PROFILE_SUBMIT_LABELS, profileFormFields(), profileSubmitButton, icons, Profile(), buildEmployeeUpdateFormData(), flatObject() (+2 more)
+Cohesion: 0.16
+Nodes (7): PROFILE_FORM_TABS, PROFILE_SUBMIT_LABELS, profileFormFields(), profileSubmitButton, PROFILE_PAGE, SECTION_GRADIENTS, icons
 
 ### Community 49 - "Community 49"
 Cohesion: 0.12
@@ -820,8 +849,8 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.05
-Nodes (42): build, _buildEmptyState, _buildFilterChips, _buildQueueList, _buildTabSelector, _buildTaskCard, Card, Center (+34 more)
+Cohesion: 0.03
+Nodes (72): build, _buildEmptyState, _buildFilterChips, _buildQueueList, _buildTabSelector, _buildTaskCard, Card, Center (+64 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.20
@@ -832,7 +861,7 @@ Cohesion: 0.10
 Nodes (19): 1. The Populate API Architecture, 2. Common Request Parameters (Query or Request Body), 3. Global Response Envelope, 4. Endpoint Specifications, A. Authentication, B. Tickets Module, C. Tasks Module, code:json ({) (+11 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (18): 10. `dashboardwidgets` & `sidebars` (`DashboardWidget.js`, `SideBar.js`), 11. `expenses` (`Expense.js`), 12. `feedchannels` & `feedcomments` & `feedgroups` (`FeedChannel.js`, `FeedComment.js`, `FeedGroup.js`), 13. `leavetransactions` (`LeaveTransaction.js`), 14. `notifications` & `notificationpreferences` & `NotificationReceptionist` (`notification.js`, `NotificationPreference.js`, `NotificationReceptionist.js`), 15. `statusconfigs` & `statusmappings` (`StatusConfig.js`, `StatusMapping.js`), 16. `ticket_comments` & `ticket_comment_reads` & `ticket_attachments` & `ticket_activity_logs` & `ticket_assignments` & `ticket_participants` & `ticket_status_history` (`TicketComment.js` etc.), 1. `agents` & `AgentToken` (`Agent.js`, `AgentToken.js`) (+10 more)
 
 ### Community 55 - "Community 55"
@@ -840,19 +869,19 @@ Cohesion: 0.12
 Nodes (11): agentLogin(), agentLogout(), agentAuthMiddleware(), AgentSchema, agentTokenSchema, ClientSchema, router, agent (+3 more)
 
 ### Community 56 - "Community 56"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (18): 10. `populateRef`, 1. `isSelf`, 2. `isRef`, 3. `isTeamMember`, 4. `isAssigned`, 5. `isRecipient`, 6. `isSender`, 7. `isCreatedBy` (+10 more)
 
 ### Community 57 - "Community 57"
-Cohesion: 0.10
-Nodes (15): ProfileImage(), CURRENCIES, TIMEZONES, ActivityItem(), Avatar(), CommentCard(), formatDate(), formatRelativeTime() (+7 more)
+Cohesion: 0.13
+Nodes (13): ProfileImage(), ActivityItem(), Avatar(), CommentCard(), formatDate(), formatRelativeTime(), getInitials(), PRIORITY_CLS (+5 more)
 
 ### Community 58 - "Community 58"
 Cohesion: 0.25
 Nodes (16): router, canRead(), computeActionCenter(), computeAlerts(), computeEmployeeStats(), computePulse(), computeStatCards(), computeTeamGrid() (+8 more)
 
 ### Community 59 - "Community 59"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (18): 0a. Detect PROJECT_ROOT, 0b. Detect NODE_PATH, 0d. Detect ISSUE_PLATFORM from Git Remote, 0e. Derive LOCALHOST URLs, 0f. Write .env File, 0g. Display Setup Summary, code:powershell (git rev-parse --show-toplevel), code:powershell ((Get-Command node -ErrorAction SilentlyContinue).Source) (+10 more)
 
 ### Community 60 - "Community 60"
@@ -860,12 +889,12 @@ Cohesion: 0.18
 Nodes (4): runTest(), AttendanceSchema, LeaveSchema, ComputationService
 
 ### Community 61 - "Community 61"
-Cohesion: 0.10
-Nodes (17): clientsConfig, ACCENT_COLORS, Avatar(), avatarColor(), Clients(), initials(), STATUS_CHIP, clientFormFields (+9 more)
+Cohesion: 0.05
+Nodes (34): clientsConfig, ACCENT_COLORS, Avatar(), avatarColor(), Clients(), initials(), STATUS_CHIP, clientFormFields (+26 more)
 
 ### Community 62 - "Community 62"
-Cohesion: 0.06
-Nodes (31): ../../core/widgets/stat_card.dart, _activeHours, build, _calculateActiveHours, Card, Center, Divider, Expanded (+23 more)
+Cohesion: 0.08
+Nodes (39): ../../core/widgets/stat_card.dart, _activeHours, build, _calculateActiveHours, Card, Center, ../../core/theme/app_theme.dart, ../../core/utils/location_helper.dart (+31 more)
 
 ### Community 63 - "Community 63"
 Cohesion: 0.18
@@ -880,7 +909,7 @@ Cohesion: 0.12
 Nodes (16): 1. Framework & Coding Standards, 1. Load the Knowledge Brain skill, 2. API & Data Flow, 2. For UI / styling tasks, 3. Frontend Conventions, 3. THEN proceed with code investigation, 4. Backend Conventions, 5. Safety & Guardrails (+8 more)
 
 ### Community 66 - "Community 66"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (16): 1. Tech Stack, 2. Project Structure, 3.1 Entry Point (`main.jsx`), 3.2 Auth Guard (`baseLayouts.jsx`), 3.3 File-Based Routing (react-pages via vite-plugin-pages), 3.3 File-Based Routing (`vite-plugin-pages`), 3.4 API Layer (`axiosInstance.js`), 3.5 Theme System (`themeProvider.jsx`) (+8 more)
 
 ### Community 67 - "Community 67"
@@ -888,8 +917,8 @@ Cohesion: 0.25
 Nodes (5): clientFormFields, TICKET_FORM_TABS, ticketFormFields, ticketSubmitButton, PRIORITY_OPTS
 
 ### Community 68 - "Community 68"
-Cohesion: 0.08
-Nodes (10): FloatingCard(), formatColumnName(), formatIndianDate(), formatValueForExport(), isDateString(), normalizeData(), sortData(), TableGenerator() (+2 more)
+Cohesion: 0.06
+Nodes (22): FloatingCard(), FormRenderer(), formatColumnName(), formatIndianDate(), formatValueForExport(), isDateString(), normalizeData(), sortData() (+14 more)
 
 ### Community 69 - "Community 69"
 Cohesion: 0.12
@@ -897,7 +926,7 @@ Nodes (17): 1. **Role-Based Component Architecture** (Your Latest Innovation), 2
 
 ### Community 70 - "Community 70"
 Cohesion: 0.13
-Nodes (10): axiosInstance, forceLogout(), getDeviceUUID(), incrementFailedCount(), statusColors, Task, Client, Employee (+2 more)
+Nodes (9): axiosInstance, forceLogout(), getDeviceUUID(), incrementFailedCount(), MONTHS, PayrollRecord, STATUS_CHIPS, statusColors (+1 more)
 
 ### Community 71 - "Community 71"
 Cohesion: 0.12
@@ -912,7 +941,7 @@ Cohesion: 0.14
 Nodes (15): buildType, build, development, preview, production, cli, appVersionSource, version (+7 more)
 
 ### Community 74 - "Community 74"
-Cohesion: 0.08
+Cohesion: 0.14
 Nodes (25): registerPlugins, package:app_links_web/app_links_web.dart, package:audio_session/audio_session_web.dart, package:camera_web/camera_web.dart, package:connectivity_plus/src/connectivity_plus_web.dart, package:device_info_plus/src/device_info_plus_web.dart, package:file_picker/_internal/file_picker_web.dart, package:firebase_core_web/firebase_core_web.dart (+17 more)
 
 ### Community 75 - "Community 75"
@@ -937,7 +966,7 @@ Nodes (16): Architecture Overview, code:block35 (📦 File Upload System), code:
 
 ### Community 80 - "Community 80"
 Cohesion: 0.12
-Nodes (16): 2. **Advanced Validation Framework**, 3. **Query Security & Performance**, 4. **Audit & Compliance System**, 6. **Security Metrics & Monitoring**, auditLogger.js - Change Tracking, code:javascript (// Core Components:), code:javascript (// Global Locked Fields:), code:javascript (// Safety Limits:) (+8 more)
+Nodes (16): 3. **Query Security & Performance**, 4. **Audit & Compliance System**, 5. **Policy Engine & Caching**, 6. **Security Metrics & Monitoring**, auditLogger.js - Change Tracking, cache.js - Performance-Optimized Policy Storage, code:javascript (// Safety Limits:), code:javascript (// Expression Parsing:) (+8 more)
 
 ### Community 81 - "Community 81"
 Cohesion: 0.13
@@ -948,11 +977,11 @@ Cohesion: 0.13
 Nodes (14): 1. High-Level Overview, 2. Key Architectural Patterns, 3. Data Flow & Resilience, 4. Performance Optimization, 5. Directory Structure Map, A. The "Populate" Pattern (Dynamic CRUD), B. Attribute-Based Access Control (ABAC) & Strict Mode, C. Hybrid Service Layer (+6 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.13
-Nodes (14): 10. Files Summary, 11. Brain Update (Post-Implementation), 2. Core Architecture Principle, 5. API Calls (All via Populate Engine), 7. Business Logic Rules, 8. Data Flow Summary, 9. TODO / Extension Points (Do Not Build Now), Changelog from v1.1 (+6 more)
+Cohesion: 0.15
+Nodes (11): 11. Brain Update (Post-Implementation), 2. Core Architecture Principle, 5. API Calls (All via Populate Engine), 7. Business Logic Rules, 8. Data Flow Summary, 9. TODO / Extension Points (Do Not Build Now), Changelog from v1.1, Changelog from v1.2 (+3 more)
 
 ### Community 85 - "Community 85"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (14): Access Policies, code:block1 (POST /populate/create/payrollruns), code:block2 (node seedPayrollPolicies.js), Cross-Module Reads, Data Flow, Engine Functions, Frontend Files, Models (+6 more)
 
 ### Community 86 - "Community 86"
@@ -960,8 +989,8 @@ Cohesion: 0.11
 Nodes (10): statusConfigSchema, statusMappingSchema, __dirname, __filename, __dirname, __filename, __dirname, __filename (+2 more)
 
 ### Community 87 - "Community 87"
-Cohesion: 0.13
-Nodes (14): 1. **API Consistency**, 2. **Real-time Synchronization**, 3. **State Management**, ⚠️ **Areas for Improvement**, code:block42 (Development:), 📊 CURRENT SYSTEM HEALTH, 🚀 DEPLOYMENT ARCHITECTURE, Environment Configuration (+6 more)
+Cohesion: 0.12
+Nodes (14): 1. **Database Optimization**, 2. **API Performance**, 3. **Real-time Efficiency**, ⚠️ **Areas for Improvement**, code:block42 (Development:), 📊 CURRENT SYSTEM HEALTH, 🚀 DEPLOYMENT ARCHITECTURE, Environment Configuration (+6 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.13
@@ -976,19 +1005,19 @@ Cohesion: 0.33
 Nodes (7): checkSyncStatus(), getExpectedTicketStatus(), getTicketWithTask(), notifyTicketConversion(), recalculateEmployeeETA(), tickets(), scheduleETARecalculation()
 
 ### Community 91 - "Community 91"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (13): 1. Request Flow with Rate Limiting & Queuing, 2. UPDATE Request with Race Condition Handling, 3. Concurrent Update Conflict Scenario, 4. Rate Limit Violation Progression, 5. Request Queue State Machine, 6. Complete System State (Per Device), code:block1 (┌───────────────────────────────────────────────────────────), code:block2 (┌──────────────────────────────────────────────────────────┐) (+5 more)
 
 ### Community 92 - "Community 92"
-Cohesion: 0.09
+Cohesion: 0.17
 Nodes (21): ─── AI AGENT USAGE GUIDE ────────────────────────────────────────────────────, An AI agent building any screen must reference the correct module block., Avoid rounded-2xl (16px+) and rounded-3xl on standard components., ─── COMPONENTS ──────────────────────────────────────────────────────────────, CONCISE DENSITY: prefer compact spacing (xs–md) for all UI., CONCISE: prefer rounded-lg (12px) for cards, rounded-md (8px) for buttons/inputs., CRITICAL MANDATE: Any UI design MUST NOT be planned, proposed, or implemented without first reading and validating this DESIGN.md file. This is a mandatory pre-step for all UI-related tasks., ─── DESIGN TOKENS QUICK REFERENCE ────────────────────────────────────────── (+13 more)
 
 ### Community 93 - "Community 93"
-Cohesion: 0.12
-Nodes (16): build, dispose, _handleLogin, Icon, LoginPage, _LoginPageState, Scaffold, SizedBox (+8 more)
+Cohesion: 0.13
+Nodes (21): build, ../../core/widgets/custom_button.dart, ../../core/widgets/custom_text_field.dart, dispose, _handleLogin, Icon, LoginPage, _LoginPageState (+13 more)
 
 ### Community 94 - "Community 94"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (12): code:block1 (✅ Learn & Improve cycle complete), Completion Report, Learn & Improve Workflow, Purpose, Step 0: Quick Impact Assessment [Antigravity], Step 0b: Capture Fix Velocity [Antigravity], Step 1: Update Module Brain [Antigravity], Step 2: Update Pattern Library [Antigravity] (+4 more)
 
 ### Community 95 - "Community 95"
@@ -1000,8 +1029,8 @@ Cohesion: 0.17
 Nodes (6): capitalize(), COLOR_PALETTE, DEFAULT_META_STATUSES, KNOWN_MODELS, META_STATUS_OPTIONS, StatusMappingPanel()
 
 ### Community 97 - "Community 97"
-Cohesion: 0.17
-Nodes (11): Form layout (no FloatingCard), Frontend UI Tokens (Logimax ERP), Implementation anti-patterns, Module accents (one screen = one module), Quick classes, Related, Responsive checklist, Theme-aware checklist (+3 more)
+Cohesion: 0.10
+Nodes (20): Form layout (no FloatingCard), Frontend UI Tokens (Logimax ERP), Implementation anti-patterns, Module accents (one screen = one module), Quick classes, Related, Responsive checklist, Theme-aware checklist (+12 more)
 
 ### Community 98 - "Community 98"
 Cohesion: 0.17
@@ -1012,40 +1041,40 @@ Cohesion: 0.17
 Nodes (11): Code paths (Tracker), code:markdown (# {Module} Module Brain), code:markdown (# Data Flow: {Module}), Cross-module updates, DATA_FLOW.md skeleton, Graphify (optional), Knowledge Brain — Reference, METHOD_INDEX.md rules (+3 more)
 
 ### Community 100 - "Community 100"
-Cohesion: 0.05
-Nodes (40): build, _buildContactSection, _buildEmptyState, _buildFilterChips, _buildTicketCard, Card, Center, ChoiceChip (+32 more)
+Cohesion: 0.03
+Nodes (68): build, _buildContactSection, _buildEmptyState, _buildFilterChips, _buildTicketCard, Card, Center, ChoiceChip (+60 more)
 
 ### Community 101 - "Community 101"
 Cohesion: 0.17
 Nodes (12): Access Control Matrix, **Audit & Compliance**, code:block10 (Request → JWT Validation → Role Extraction → Policy Cache Lo), code:block4 (🛡️ Security Layers:), code:block5 (Role Hierarchy:), Enhanced Policy Engine Flow, **Field-Level Security**, Multi-Layer Security Framework (+4 more)
 
 ### Community 102 - "Community 102"
-Cohesion: 0.20
-Nodes (9): AppBar, build, CustomAppBar, SizedBox, package:flutter/material.dart, package:provider/provider.dart, ../../providers/auth_provider.dart, ../../providers/navigation_provider.dart (+1 more)
+Cohesion: 0.15
+Nodes (14): AppBar, build, CustomAppBar, package:flutter/material.dart, package:provider/provider.dart, ../../providers/auth_provider.dart, ../../providers/navigation_provider.dart, SizedBox (+6 more)
 
 ### Community 103 - "Community 103"
 Cohesion: 0.03
 Nodes (63): 27.10 Architectural Notes, 27.1 Why does this collection exist?, 27.2 What business problem does it solve?, 27.3 What relationships does it build?, 27.4 Which architectural category does it belong to?, 27.5 What is the ultimate purpose of this model?, 27.6 Why was this separated into its own collection?, 27.7 What would happen if this collection disappeared? (+55 more)
 
 ### Community 104 - "Community 104"
-Cohesion: 0.17
+Cohesion: 0.15
 Nodes (11): Allowed Tools, Blocked Tools, Get Requirement Workflow, Impact Table Template, Purpose, Safety Constraints, Step 1: Parse Task Description, Step 2: Read Module Brain (+3 more)
 
 ### Community 105 - "Community 105"
-Cohesion: 0.17
+Cohesion: 0.15
 Nodes (11): Audit Rounds, Module Bug Audit Workflow, Output, Prerequisites, Purpose, Round 1: Security Scan, Round 2: Data Integrity, Round 3: Error Handling (+3 more)
 
 ### Community 106 - "Community 106"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (10): Adapted From, code:block1 (.agent/), Developer Guide — Logimax ERP Tracker Agent System, Directory Structure, Key Workflows, Module Registry, Overview, Quick Start (+2 more)
 
 ### Community 107 - "Community 107"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (10): Build System Brain Workflow, code:block1 (knowledge_brain/_SYSTEM/), code:block2 (✅ System Brain — {MODE} complete), Completion Report, Output, Step 0: Pre-Check, Step 1-3: Read all module brain files, Step 4-8: Generate system brain documents (+2 more)
 
 ### Community 108 - "Community 108"
-Cohesion: 0.04
-Nodes (23): axiosInstance, forceLogout(), getDeviceUUID(), incrementFailedCount(), token, AddComment(), InlineEdit(), InlineEditProps (+15 more)
+Cohesion: 0.03
+Nodes (25): STATUS_CHIP, axiosInstance, failedQueue, forceLogout(), incrementFailedCount(), setAuthLogout(), setMaintenanceHandler(), token (+17 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.18
@@ -1057,27 +1086,23 @@ Nodes (11): 6. Dynamic Workflow and Lifecycle Evolution, Approval Chain Structur
 
 ### Community 111 - "Community 111"
 Cohesion: 0.08
-Nodes (24): AuthWrapper, build, DashboardPage, _incrementCounter, LoginPage, main, MaterialApp, MyApp (+16 more)
+Nodes (30): AuthWrapper, build, core/theme/app_theme.dart, DashboardPage, _incrementCounter, LoginPage, main, MaterialApp (+22 more)
 
 ### Community 112 - "Community 112"
 Cohesion: 0.18
 Nodes (11): devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, @types/react, @types/react-dom (+3 more)
-
-### Community 113 - "Community 113"
-Cohesion: 0.19
-Nodes (6): api, useRealtimeSync(), api, useTaskMutations(), SocketService, useTaskStore
 
 ### Community 114 - "Community 114"
 Cohesion: 0.18
 Nodes (10): Form layout (no FloatingCard), Frontend UI Tokens (Logimax ERP), Implementation anti-patterns, Mandatory rules, Module accents (one screen = one module), Quick classes, Related, Responsive checklist (+2 more)
 
 ### Community 115 - "Community 115"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (10): Architecture Overview, AWS API Gateway-Style Rate Limiting & Queueing System - Implementation Summary, code:block1 (┌─────────────────────────────────────────────────────┐), Executive Summary, Future Enhancements, Integration Checklist, Key Achievements, Security Features (+2 more)
 
 ### Community 116 - "Community 116"
-Cohesion: 0.18
-Nodes (10): Architecture Document: Logimax HR Tracker System, code:block1 (┌─────────────────┐    ┌─────────────────┐    ┌─────────────), **Current Logging:**, **Current Security Measures:**, High-Level Architecture, **Missing Observability:**, Monitoring and Observability, Security Considerations (+2 more)
+Cohesion: 0.22
+Nodes (7): Architecture Document: Logimax HR Tracker System, code:block1 (┌─────────────────┐    ┌─────────────────┐    ┌─────────────), **Current Security Measures:**, High-Level Architecture, Security Considerations, **Security Gaps to Address:**, System Overview
 
 ### Community 117 - "Community 117"
 Cohesion: 0.18
@@ -1089,26 +1114,26 @@ Nodes (11): **Backend Rules**, **Frontend Rules**, Simple Rules of Thumb (Update
 
 ### Community 119 - "Community 119"
 Cohesion: 0.13
-Nodes (14): build, dispose, _handleSignup, Scaffold, SignupPage, _SignupPageState, SizedBox, SnackBar (+6 more)
+Nodes (19): build, ../../core/widgets/custom_button.dart, ../../core/widgets/custom_text_field.dart, dispose, _handleSignup, package:flutter/material.dart, package:provider/provider.dart, ../../providers/auth_provider.dart (+11 more)
 
 ### Community 120 - "Community 120"
 Cohesion: 0.17
-Nodes (17): authMiddleware(), forgotPassword(), getMe(), login(), logout(), refresh(), resetPassword(), sendManualTestNotification() (+9 more)
+Nodes (18): authMiddleware(), changePassword(), forgotPassword(), getMe(), login(), logout(), refresh(), resetPassword() (+10 more)
 
 ### Community 121 - "Community 121"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (10): Checklist for new forms, code:javascript (// onSubmit signature), code:javascript (const handleSubmit = (payload, meta) => {), Draft recovery on failure, Files, Form submit patterns (POST / PATCH), Loading UX, PATCH — send only changed fields (+2 more)
 
 ### Community 122 - "Community 122"
-Cohesion: 0.07
-Nodes (19): ApprovalWorkflows(), APPROVER_ICONS, LEVEL_COLORS, MODEL_LABELS, ESCALATE_ICONS, EscalationWorkflows(), LEVEL_COLORS, MODEL_LABELS (+11 more)
+Cohesion: 0.16
+Nodes (7): approvalWorkflowsConfig, ApprovalWorkflows(), APPROVER_ICONS, LEVEL_COLORS, MODEL_LABELS, approvalWorkflowFormFields, approvalWorkflowSubmit
 
 ### Community 124 - "Community 124"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): Appendix A: AccessPolicy Schema Reference, Appendix B: Registry Function Contract, Appendix C: Service Hook Contract, Appendix D: Execution Flow Diagram, Backend Platform Architecture Documentation, code:javascript ({), code:javascript (// Function Signature), code:javascript (// Service file structure) (+1 more)
 
 ### Community 125 - "Community 125"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (13): 1. `feedposts.js`, 2. `feedcomments.js`, 3. `feedgroups.js`, 4. `feedchannels.js`, 🏗️ Architecture & Component Relations, 🗄️ Backend Models, ⚙️ Backend Services (Business Logic Hooks), code:mermaid (graph TD) (+5 more)
 
 ### Community 126 - "Community 126"
@@ -1124,7 +1149,7 @@ Cohesion: 0.20
 Nodes (10): Admin Management, Check Lock Status, code:bash (curl -X GET http://localhost:3000/api/admin/locks/all \), code:json ({), code:bash (curl -X GET http://localhost:3000/api/admin/locks/status/507), code:bash (curl -X POST http://localhost:3000/api/admin/locks/force-rel), code:bash (curl -X PUT http://localhost:3000/api/admin/locks/config \), Force Release Lock (+2 more)
 
 ### Community 129 - "Community 129"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): 🚀 Deployment Checklist, 📚 Documentation Files, 🔮 Future Enhancements, 🚀 Loigmax Backend - Rate Limiting & Queue System Implementation, 📊 Quick Stats, 🔐 Security Features, ✅ Sign-Off, 📞 Support (+1 more)
 
 ### Community 130 - "Community 130"
@@ -1132,11 +1157,11 @@ Cohesion: 0.31
 Nodes (10): Backend Documentation Diagrams, Google C2PA Core Time-Stamping ICA G3, Google C2PA Media Services 1P ICA G3, Google C2PA Root CA G3, C2PA Provenance Metadata (Request Lifecycle), Request Lifecycle Diagram, Google Generative AI (Request Lifecycle), C2PA Provenance Metadata (Ticket Task Conversion) (+2 more)
 
 ### Community 131 - "Community 131"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): 10. Dark Mode — Minimal Rules, 11. Action Center — Urgency Algorithm (Unchanged from V1), 13. What Was Cut — And Why You Shouldn't Miss It, 15. Designation → Role Mapping, 3. Unified Widget Registry — Survival Table, 9. Color System — Simplified, code:block6 (URGENCY_SCORE = BASE_SCORE + TIME_MODIFIER + IMPACT_MODIFIER), TRACKER DASHBOARD UX ARCHITECTURE — OPTIMIZED (+1 more)
 
 ### Community 132 - "Community 132"
-Cohesion: 0.40
+Cohesion: 0.39
 Nodes (4): referenceTypeFormFields, referenceTypeSubmitButton, referenceTypeSchema, referenceTypesConfig
 
 ### Community 133 - "Community 133"
@@ -1144,19 +1169,19 @@ Cohesion: 0.22
 Nodes (3): conflictResolver, delay(), OptimisticQueue
 
 ### Community 134 - "Community 134"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): 1. Asset Registry (`register.jsx`), 2. Allocations (`allocations.jsx`), 3. Incidents & Damages (`incidents.jsx`), 4. Repairs (`repairs.jsx`), 5. Procurement / GRN (`grn.jsx`), Data Flow: Assets, Dynamic API Payloads
 
 ### Community 135 - "Community 135"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): Completion, Fix Architecture Bug Workflow, Purpose, Step 1: Load Bug Context, Step 2: Category-Specific Investigation, Step 3: Apply Fix (AI-led), Step 4: Present Diff for Approval, Steps (+1 more)
 
 ### Community 136 - "Community 136"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): Completion, Fix Business Bug Workflow, Purpose, Step 1: State the Business Rule, Step 2: DB Truth Protocol, Step 3: Layer-by-Layer Value Trace, Step 4: Present Fix Proposal to Human, Step 5: Apply Fix (+1 more)
 
 ### Community 137 - "Community 137"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (9): Setup New Client Project, Step 1: Copy Workflow Files, Step 2: Update Project-Specific Config, Step 3: Initialize Pattern Library, Step 4: Set Up GitHub Tracking, Step 5: Build First Module Brain, Step 6: Run First Audit, Step 7: Verify Setup (+1 more)
 
 ### Community 138 - "Community 138"
@@ -1164,7 +1189,7 @@ Cohesion: 0.09
 Nodes (15): runTests(), ALLOWED_TRANSITIONS, allowedKeys, assetUpdate, invalidKeys, keys, VALID_CONDITIONS, handleGRNReceipt() (+7 more)
 
 ### Community 139 - "Community 139"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): [ADR-001] Generic CRUD instead of Module-Specific CRUD, Architecture Decision Records (ADRs), Category, Consequences, Context, Decision, Status
 
 ### Community 141 - "Community 141"
@@ -1189,18 +1214,18 @@ Nodes (8): name, private, scripts, build, dev, lint, start, version
 
 ### Community 146 - "Community 146"
 Cohesion: 0.14
-Nodes (13): api.dart, ApiService, FcmService, _handleNotificationNavigation, _registerTokenOnBackend, package:firebase_messaging/firebase_messaging.dart, package:flutter_local_notifications/flutter_local_notifications.dart, ../core/api_config.dart (+5 more)
+Nodes (17): api.dart, ApiService, ../core/api_config.dart, FcmService, _handleNotificationNavigation, package:provider/provider.dart, package:shared_preferences/shared_preferences.dart, ../providers/navigation_provider.dart (+9 more)
 
 ### Community 147 - "Community 147"
 Cohesion: 0.33
 Nodes (6): FileViewerModal(), formatBytes(), getFileIcon(), FileViewerModal(), formatBytes(), getFileIcon()
 
 ### Community 148 - "Community 148"
-Cohesion: 0.14
-Nodes (13): ../core/models/user_model.dart, AuthProvider, fetchUserCapabilities, hasCapability, _initializeServices, _parseError, package:jwt_decoder/jwt_decoder.dart, ../services/api.dart (+5 more)
+Cohesion: 0.16
+Nodes (16): ../core/models/user_model.dart, AuthProvider, fetchUserCapabilities, hasCapability, _initializeServices, package:dio/dio.dart, package:flutter/material.dart, _parseError (+8 more)
 
 ### Community 149 - "Community 149"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (8): Backend Models, code:block1 (metaStatuses[]:   { key, label, color, order, isDefault }  /), code:block2 (mappings[]: { sourceStatus: String, targetStatus: String }), Dynamic API Usage, Master-Data Module Brain, Overview, StatusConfig Schema Detail, StatusMapping Schema Detail
 
 ### Community 150 - "Community 150"
@@ -1224,7 +1249,7 @@ Cohesion: 0.22
 Nodes (9): 4. Race Condition Handling, code:javascript (// Document schema must include __v field), code:javascript (// Lock acquired automatically on mutation requests), code:json ({), code:json ({), Conflict Detection, Lock Acquisition, Optimistic Locking (+1 more)
 
 ### Community 156 - "Community 156"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (8): 1. Device Fingerprinting, 8. Security Considerations, code:http (HTTP/1.1 200 OK), Files Modified/Created, Overview, Rate Limiting, Request Queueing & Race Condition Handling, Response Headers, What is Device Fingerprinting?
 
 ### Community 157 - "Community 157"
@@ -1244,8 +1269,8 @@ Cohesion: 0.36
 Nodes (5): ACTIVE_TASK_STATUSES, NON_ACTIVE_TASK_STATUSES, TASK_STATUS, taskStatusRules, TaskStatusService
 
 ### Community 161 - "Community 161"
-Cohesion: 0.22
-Nodes (8): Phase 1: Core HR & Employee Management, Phase 2: Expense Tracker, Phase 3: Performance & Reporting, Phase 4: Payroll Management, Phase 5: Future-proof Extensions, 📌 Project Overview, 🛠 Tech Stack, Tracker
+Cohesion: 0.07
+Nodes (26): Phase 1: Core HR & Employee Management, Phase 2: Expense Tracker, Phase 3: Performance & Reporting, Phase 4: Payroll Management, Phase 5: Future-proof Extensions, 📌 Project Overview, 🛠 Tech Stack, Tracker (+18 more)
 
 ### Community 162 - "Community 162"
 Cohesion: 0.22
@@ -1260,19 +1285,19 @@ Cohesion: 0.22
 Nodes (9): code:block11 (🎨 Design Components:), code:block12 (👤 Profile Features:), code:block13 (📋 Kanban Improvements:), code:block14 (📅 Daily Tracker Features:), Daily Tracker Enhancements, Enhanced Kanban Board, Modern Design System, Profile Management System (+1 more)
 
 ### Community 165 - "Community 165"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (8): 1. **Client-Side Access Control**, 2. **Token Management**, code:javascript (switch (userRole) {), Frontend Architecture Strengths, Frontend Security Patterns, Training Document: Understanding Your HR Tracker Architecture, What Your System Really Is, Your Complete Architecture Assessment
 
 ### Community 166 - "Community 166"
-Cohesion: 0.05
-Nodes (41): AlertDialog, build, _buildEmptyState, _buildFeedPostCard, _buildFilterChips, Card, Center, _ComposePostSheet (+33 more)
+Cohesion: 0.06
+Nodes (52): AlertDialog, build, _buildEmptyState, _buildFeedPostCard, _buildFilterChips, Card, Center, _ComposePostSheet (+44 more)
 
 ### Community 167 - "Community 167"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): Agent Behavioral Rules, Central Configuration — Logimax ERP Tracker System, Directory Structure, Environment Paths, Module Registry, Project Identity, Tech Stack
 
 ### Community 168 - "Community 168"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): Example Queries, Graph Location, Graphify Skill Configuration, Important Paths, Instructions, Purpose, Skill Name
 
 ### Community 169 - "Community 169"
@@ -1288,8 +1313,8 @@ Cohesion: 0.25
 Nodes (8): 4. Backend Philosophy: Why We Do This, code:javascript (// Hardcoded approval logic), code:javascript (// Policy-driven), code:javascript (// Frontend request), Why Backend Code Must Remain Boring and Stable, Why Business Logic Must Move to Data, Why Enterprise Systems Evolve via Documents, Not Code, Why Frontend Should Never Require Backend Redeploys
 
 ### Community 172 - "Community 172"
-Cohesion: 0.08
-Nodes (20): run(), run(), run(), run(), run(), run(), run(), run() (+12 more)
+Cohesion: 0.07
+Nodes (21): run(), run(), run(), run(), run(), run(), run(), run() (+13 more)
 
 ### Community 173 - "Community 173"
 Cohesion: 0.32
@@ -1308,8 +1333,8 @@ Cohesion: 0.32
 Nodes (7): ASSET_MODELS, buildPolicy(), __dirname, __filename, resolveLevel(), ROLE_LEVEL_FALLBACK, seed()
 
 ### Community 177 - "Community 177"
-Cohesion: 0.09
-Nodes (22): ActivityPage, _ActivityPageState, build, Center, Container, dispose, Divider, Duration (+14 more)
+Cohesion: 0.11
+Nodes (27): ActivityPage, _ActivityPageState, build, Center, Container, ../../core/theme/app_theme.dart, dispose, Divider (+19 more)
 
 ### Community 178 - "Community 178"
 Cohesion: 0.25
@@ -1324,7 +1349,7 @@ Cohesion: 0.25
 Nodes (8): 1. Device Fingerprinting ✅, 2. Rate Limiting ✅, 3. Request Queueing ✅, 4. Race Condition Handling ✅, 5. Admin Management ✅, 6. Response Enrichment ✅, 7. Documentation ✅, 🎯 Features Implemented
 
 ### Community 181 - "Community 181"
-Cohesion: 0.25
+Cohesion: 0.39
 Nodes (7): configVersion, flutterRoot, flutterVersion, generator, generatorVersion, packages, pubCache
 
 ### Community 182 - "Community 182"
@@ -1340,27 +1365,27 @@ Cohesion: 0.46
 Nodes (5): buildEmployeeFormFields(), EMPLOYEE_FORM_TABS, employeeSubmitButton, employeesConfig, EmployeeFormPage()
 
 ### Community 185 - "Community 185"
-Cohesion: 0.38
-Nodes (9): buildAST(), normalizeNode(), parseFilter(), tokenize(), convertValue(), isIdField(), looksLikeObjectId(), OP_MAP (+1 more)
+Cohesion: 0.12
+Nodes (28): Employee Model, Express.js API, JWT Authentication, Mobile Client (React Native), MongoDB Atlas, populateHelper, Socket.io, Web Client (React) (+20 more)
 
 ### Community 187 - "Community 187"
-Cohesion: 0.04
-Nodes (41): getCapabilityForRoute(), PAGE_CAPABILITY_MAPPING, getContext(), GrantSchema, PermissionAuditSchema, PermissionVersionSchema, UserOverrideSchema, SchedulerProvider (+33 more)
+Cohesion: 0.07
+Nodes (22): getCapabilityForRoute(), PAGE_CAPABILITY_MAPPING, GrantSchema, PermissionAuditSchema, PermissionVersionSchema, UserOverrideSchema, getCachedCapabilities(), getUserCapabilities() (+14 more)
 
 ### Community 188 - "Community 188"
-Cohesion: 0.07
-Nodes (30): approvalWorkflowsConfig, attendancePoliciesConfig, approvalWorkflowFormFields, approvalWorkflowSubmit, attendancePolicyFormFields, attendancePolicySubmit, escalationWorkflowFormFields, escalationWorkflowSubmit (+22 more)
+Cohesion: 0.15
+Nodes (12): hrPolicyFormFields, hrPolicySubmit, leavePolicyFormFields, leavePolicySubmit, leaveTypeFormFields, leaveTypeSubmit, quotationFormFields, quotationSubmit (+4 more)
 
 ### Community 189 - "Community 189"
-Cohesion: 0.05
-Nodes (63): Employee Model, Policy Engine, populateHelper, Registry System, cleanup(), runCrossFunctionalVerification(), runVerification(), runVerification() (+55 more)
+Cohesion: 0.04
+Nodes (69): Policy Engine, Registry System, cleanup(), runCrossFunctionalVerification(), runVerification(), runVerification(), run(), getContext() (+61 more)
 
 ### Community 190 - "Community 190"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): Build → Audit → Triage (Per Module), Cross-Module (After 3+ Module Brains), Fix → Test → Learn (Per Bug), Reporting & Maintenance, Requirements (Support Team), Setup (One-Time), Workflow Index
 
 ### Community 191 - "Community 191"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): GitHub Bug Tracking Workflow, Part 1: One-Time Setup, Part 2: Create Issue (from /bug-intake-triage), Part 3: Update Issue (during /fix-single-bug), Part 4: Close Issue (from /learn-and-improve), Platform Dispatch, Purpose
 
 ### Community 192 - "Community 192"
@@ -1372,15 +1397,15 @@ Cohesion: 0.29
 Nodes (6): compilerOptions, paths, strict, extends, include, @/*
 
 ### Community 195 - "Community 195"
-Cohesion: 0.17
-Nodes (12): 1.1 `Designation` Schema Enhancements, 1.2 `Department` Schema Enhancements, 1. Schema Enhancements & Missing Flows (Designation, Department, Mutation Logs), 2.1 Global Concurrency Middleware Bypass, 2.2 In-Memory Locking Limits, 2.3 Dynamic Import Overhead, 2.4 Missing Audit Paths, 2. Known Constraints (Confirmed Bottlenecks) (+4 more)
+Cohesion: 0.33
+Nodes (6): 1.1 `Designation` Schema Enhancements, 1.2 `Department` Schema Enhancements, 1. Schema Enhancements & Missing Flows (Designation, Department, Mutation Logs), code:javascript (// Recommended extensions for DepartmentSchema), Governing Rules & Workflow Logic, Governing Rules & Workflow Logic
 
 ### Community 196 - "Community 196"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (6): Data Flow (Post/Reaction Example), FCM Notification Architecture (Core), Models, Overview, Services & Middlewares, Session Integration
 
 ### Community 197 - "Community 197"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (13): 1. The Core Files, 2. Request Lifecycle (The "One API" Flow), 3. How Business Logic is Injected, 4. Debugging & Error Tracing, 5. Populate Strategy: Flat Populate (Not Tree-Based), 6. sanitizeRead: Path Collision Guard, 7. Default Populate Fields, code:javascript (// backend/src/services/tasks.js) (+5 more)
 
 ### Community 198 - "Community 198"
@@ -1392,7 +1417,7 @@ Cohesion: 0.29
 Nodes (4): geistMono, geistSans, inter, metadata
 
 ### Community 200 - "Community 200"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (6): code:javascript (// Add push request to the Job Queue), Execution Example, FCM Job Queue Integration Skill, Overview, Standards, Why Use JobQueue for FCM?
 
 ### Community 201 - "Community 201"
@@ -1440,7 +1465,7 @@ Cohesion: 0.29
 Nodes (7): code:block1 (src/utils/deviceFingerprint.js           (180 lines)), code:block2 (src/index.js                             (+20 lines)), code:block3 (README_IMPLEMENTATION.md                 (400 lines)), Core Implementation (5 files), Documentation (8 files), 📁 File Listing, Modified Files (2 files)
 
 ### Community 213 - "Community 213"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (16): 1.1 Inbound & Outbound Reference Graph, 1. Dependency Encyclopedia (Reference Mapping), 2. Dynamic Status & Workflow State System, 3.1 Role Modification Impact, 3.2 Department Deletion Impact, 3.3 Employee Status Change Impact, 3. Relational Impact & Dependency Analysis, code:block1 (node src/scripts/seedStatusConfigs.js) (+8 more)
 
 ### Community 214 - "Community 214"
@@ -1468,19 +1493,19 @@ Cohesion: 0.43
 Nodes (3): departmentFormFields, departmentSubmitButton, departmentsConfig
 
 ### Community 220 - "Community 220"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (6): Backend (Express + Mongoose), Frontend (React + JavaScript), Manage Bug Patterns Workflow, Output, Purpose, Seed Patterns (React + Vite + Node.js/Express)
 
 ### Community 221 - "Community 221"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (5): Attendance Module Brain, Backend Models, Backend Services (Business Logic Hooks), Dynamic API Usage, Overview
 
 ### Community 223 - "Community 223"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (5): 1. Fetching Work Metadata & Activity Log, 2. Activity Creation Form Flow, code:block1 ([Daily Tracker index.tsx]), code:block2 ([Form Input] ──> User details, Client, Project Type, Task Ty), Data Flow - DailyTracker
 
 ### Community 224 - "Community 224"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (5): Backend Models, Dashboard Module Brain, Dynamic API Usage, Overview, Role-Based Layouts
 
 ### Community 225 - "Community 225"
@@ -1496,16 +1521,16 @@ Cohesion: 0.33
 Nodes (6): 10. Known Drawbacks and Trade-Offs, Cognitive Complexity, Debugging Challenges, Governance Requirements, Onboarding Cost, When NOT to Use This System
 
 ### Community 228 - "Community 228"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (5): Backend Models, Backend Services (Business Logic Hooks), Dynamic API Usage, HR Module Brain, Overview
 
 ### Community 229 - "Community 229"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (5): API Payloads, Data Flow: Master-Data, Status-Master UI (added 2026-06-10), StatusConfig Panel, StatusMapping Panel
 
 ### Community 230 - "Community 230"
-Cohesion: 0.25
-Nodes (5): FlutterAppDelegate, FlutterImplicitEngineDelegate, AppDelegate, AppDelegate, AppDelegate
+Cohesion: 0.22
+Nodes (7): AppDelegate, AppDelegate, FlutterAppDelegate, FlutterImplicitEngineDelegate, AppDelegate, AppDelegate, AppDelegate
 
 ### Community 231 - "Community 231"
 Cohesion: 0.33
@@ -1532,7 +1557,7 @@ Cohesion: 0.33
 Nodes (6): code:block17 (Per Second:   10 req/s (burst: 15)), code:env (RATE_LIMIT_PER_SECOND=100), code:env (RATE_LIMIT_PER_SECOND=50), 🔄 Configuration, Custom Profiles, Default Limits (Production Ready)
 
 ### Community 237 - "Community 237"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (12): 1. `tickets.js`, 2. `ticket_comments.js`, 3. `ticket_attachments.js`, 4. `ticketTaskSync.js`, 🏗️ Architecture & Component Relations, 🗄️ Backend Models, ⚙️ Backend Services (Business Logic Hooks), code:mermaid (sequenceDiagram) (+4 more)
 
 ### Community 238 - "Community 238"
@@ -1559,13 +1584,17 @@ Nodes (6): 1. **Intelligent Loading States**, 2. **Optimistic UI Updates**, 3. *
 Cohesion: 0.33
 Nodes (6): 1. **Frontend Performance Optimization** (High Priority), 2. **Advanced React Patterns** (Medium Priority), 3. **Testing Strategy** (High Priority), 4. **Accessibility (a11y)** (Medium Priority), 5. **State Management Evolution** (Low Priority), What You Should Learn Next (Updated Priorities)
 
+### Community 244 - "Community 244"
+Cohesion: 0.15
+Nodes (11): Can(), PolicyGuard(), CapabilityGuard(), PermissionContext, PermissionProvider(), usePermission(), useCapability(), Sidebar() (+3 more)
+
 ### Community 245 - "Community 245"
 Cohesion: 0.18
 Nodes (11): [ADR-004] Historical Records Remain Immutable after Financial Approval, Category, Category, Consequences, Consequences, Context, Context, Decision (+3 more)
 
 ### Community 246 - "Community 246"
-Cohesion: 0.25
-Nodes (5): deptIds, desigIds, jobs, merged, today
+Cohesion: 0.10
+Nodes (12): bucket, jobs, newAvailable, deptIds, desigIds, jobs, merged, today (+4 more)
 
 ### Community 247 - "Community 247"
 Cohesion: 0.23
@@ -1576,7 +1605,7 @@ Cohesion: 0.18
 Nodes (11): [ADR-005] Metadata-Driven Policies Preferred over Handwritten Service Logic, Category, Category, Consequences, Consequences, Context, Context, Decision (+3 more)
 
 ### Community 249 - "Community 249"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): code:block1 (# Sprint Status Report — {DATE}), Report Format, Sprint Status Workflow, Steps
 
 ### Community 250 - "Community 250"
@@ -1584,8 +1613,8 @@ Cohesion: 0.40
 Nodes (4): config, { getDefaultConfig }, path, { withNativeWind }
 
 ### Community 251 - "Community 251"
-Cohesion: 0.18
-Nodes (11): 1.1 Mutation Execution Pathway, 1. Current Behaviour, 3. Performance Assumptions (600 Concurrent Users), 4. Capacity Planning & Limits, 5.1 Relocate Locking Middleware, 5.2 Transition to Redis Distributed Locking, 5.3 Static Service Caching at Bootstrap, 5.4 Centralized Mongoose Audit Plugin (+3 more)
+Cohesion: 0.29
+Nodes (6): 1.1 Mutation Execution Pathway, 1. Current Behaviour, 3. Performance Assumptions (600 Concurrent Users), 4. Capacity Planning & Limits, Infrastructure Threshold Table, Tracker Platform: Flow & Scalability Analysis
 
 ### Community 252 - "Community 252"
 Cohesion: 0.22
@@ -1608,15 +1637,15 @@ Cohesion: 0.29
 Nodes (7): Agent Behavioral Rules, Directory Structure, Environment Paths, Module Registry, Project Identity, Section-by-Section Review:, Tech Stack
 
 ### Community 257 - "Community 257"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Common Module Brain, Dynamic API Usage, Overview
 
 ### Community 258 - "Community 258"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, CRM Module Brain, Dynamic API Usage, Overview
 
 ### Community 259 - "Community 259"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, DailyTracker Module Brain, Dynamic API Usage, Overview
 
 ### Community 260 - "Community 260"
@@ -1628,7 +1657,7 @@ Cohesion: 0.40
 Nodes (5): 11. Architectural Law, Non-Negotiable Rules, What Future Developers Are Forbidden From Doing, What Must Always Be Reviewed, What Must Never Be Dynamic
 
 ### Community 262 - "Community 262"
-Cohesion: 0.33
+Cohesion: 0.38
 Nodes (5): main, package:flutter_test/flutter_test.dart, package:tracker_mobile/main.dart, package:work_hub/main.dart, package:flutter/material.dart
 
 ### Community 263 - "Community 263"
@@ -1636,19 +1665,19 @@ Cohesion: 0.40
 Nodes (4): code:bash (npm run dev), Deploy on Vercel, Getting Started, Learn More
 
 ### Community 264 - "Community 264"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, [model] Module Brain, Overview
 
 ### Community 265 - "Community 265"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Overview, Profile Module Brain
 
 ### Community 266 - "Community 266"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Overview, Travel-Expenses Module Brain
 
 ### Community 267 - "Community 267"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Masters Module Brain, Overview
 
 ### Community 268 - "Community 268"
@@ -1660,11 +1689,11 @@ Cohesion: 0.40
 Nodes (5): Employee Payslips & Self-View, PayrollEngine Service, PayrollRun Model, Payroll System — Full Implementation Plan, SalaryStructure Model
 
 ### Community 270 - "Community 270"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Overview, PlayGround Module Brain
 
 ### Community 271 - "Community 271"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Overview, role Module Brain
 
 ### Community 272 - "Community 272"
@@ -1676,7 +1705,7 @@ Cohesion: 0.22
 Nodes (9): 2.2 Concurrency Analysis: 600 Concurrent Users, 2.3 Response Time Targets & Infrastructure Thresholds, 2.4 Asynchronous Task Processing (FCM & Audit Offloading), 2. Scalability, Concurrency, & Performance Modeling, code:block11 (600 Concurrent Users (Dashboard Load)), code:block12 (HTTP Request ────► Populate CRUD Write ────► Read DB Context), Database Workload Multiplication, Mitigation Strategies for 600+ Users (+1 more)
 
 ### Community 274 - "Community 274"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (13): Backend Models, Backend Services, Cache Invalidation Flow, CBAC Architecture (Capability-Based Access Control), code:block1 (Role.capabilities[] → buildUserContext() → context.uiCapabil), code:block2 (Role updated → roles.service afterUpdate → $inc permissionVe), Dynamic API Usage, Frontend Pages (+5 more)
 
 ### Community 275 - "Community 275"
@@ -1704,11 +1733,11 @@ Cohesion: 0.40
 Nodes (5): Core Implementation Files, ✅ Deliverables Checklist, Documentation (7 Files, 2,500+ Lines), Integration Files, Total Code & Documentation
 
 ### Community 281 - "Community 281"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Overview, Static Module Brain
 
 ### Community 282 - "Community 282"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Backend Models, Dynamic API Usage, Overview, tasks Module Brain
 
 ### Community 283 - "Community 283"
@@ -1720,8 +1749,8 @@ Cohesion: 0.40
 Nodes (4): images, info, author, version
 
 ### Community 285 - "Community 285"
-Cohesion: 0.40
-Nodes (5): 5. **Policy Engine & Caching**, cache.js - Performance-Optimized Policy Storage, code:javascript (// Features:), code:javascript (// Registry System:), registryExecutor.js - Dynamic Context Validation
+Cohesion: 0.23
+Nodes (11): CUSTOM_RESOLVERS, DynamicNotificationDispatcher, evaluateCondition(), evaluateGroup(), getOldValue(), getPathValue(), interpolateFilterValue(), interpolateTemplate() (+3 more)
 
 ### Community 286 - "Community 286"
 Cohesion: 0.40
@@ -1748,11 +1777,11 @@ Cohesion: 0.40
 Nodes (4): editor.codeActionsOnSave, source.fixAll, source.organizeImports, source.sortMembers
 
 ### Community 292 - "Community 292"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Dashboard includes:, Overall Bug Dashboard Workflow, Steps
 
 ### Community 293 - "Community 293"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Report includes:, Steps, System Health Workflow
 
 ### Community 295 - "Community 295"
@@ -1760,7 +1789,7 @@ Cohesion: 0.50
 Nodes (3): Asset Lifecycle Test, System Business Verification, Ticket Lifecycle Test
 
 ### Community 296 - "Community 296"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Method & Model Index: Attendance, Models (Alphabetical), Service Functions (Alphabetical)
 
 ### Community 298 - "Community 298"
@@ -1768,7 +1797,7 @@ Cohesion: 0.06
 Nodes (30): Architecture, Cache Strategy, Capability, CBAC UI Visibility Layer Design, code:block1 ({), code:block2 ({), code:block3 ({), code:block4 ({) (+22 more)
 
 ### Community 299 - "Community 299"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Method & Model Index: Core, Models (Alphabetical), Service Functions (Alphabetical)
 
 ### Community 301 - "Community 301"
@@ -1776,7 +1805,7 @@ Cohesion: 0.50
 Nodes (3): firebaseConfig, messaging, notificationOptions
 
 ### Community 303 - "Community 303"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Method & Model Index: HR, Models (Alphabetical), Service Functions (Alphabetical)
 
 ### Community 305 - "Community 305"
@@ -1788,28 +1817,28 @@ Cohesion: 0.50
 Nodes (3): app, sampleData, server
 
 ### Community 307 - "Community 307"
-Cohesion: 0.25
-Nodes (4): RunnerTests, RunnerTests, RunnerTests, XCTestCase
+Cohesion: 0.14
+Nodes (6): RunnerTests, RunnerTests, RunnerTests, RunnerTests, RunnerTests, XCTestCase
 
 ### Community 308 - "Community 308"
-Cohesion: 0.04
-Nodes (49): ActivityDetailPage(), AttendanceApprovalPage(), fmt12(), fmtHM(), getDaysInMonth(), MONTH_NAMES, MonthlySummary(), STATUS_MAP (+41 more)
+Cohesion: 0.03
+Nodes (58): ActivityDetailPage(), DailyTracker(), AttendanceApprovalPage(), fmt12(), fmtHM(), getDaysInMonth(), MONTH_NAMES, MonthlySummary() (+50 more)
 
 ### Community 309 - "Community 309"
 Cohesion: 0.05
 Nodes (38): 10.10 Architectural Notes, 10.1 Why does this collection exist?, 10.2 What business problem does it solve?, 10.3 What relationships does it build?, 10.4 Which architectural category does it belong to?, 10.5 What is the ultimate purpose of this model?, 10.6 Why was this separated into its own collection?, 10.7 What would happen if this collection disappeared? (+30 more)
 
 ### Community 310 - "Community 310"
-Cohesion: 0.14
-Nodes (7): initialStats, localIP, startServer(), activeConnections, app, server, MemoryMonitor
+Cohesion: 0.12
+Nodes (15): 1. Pre-task (read), 1a. System brain (`knowledge_brain/_SYSTEM/`), 1b. Module brain (`knowledge_brain/{Module}/`), 1c. Related project skills (`.agent/skills/`), 1d. UI / styling tasks, 2. Post-task (write), 3. Tracker stack (this repo), 4. Brain layout (+7 more)
 
 ### Community 311 - "Community 311"
-Cohesion: 0.04
-Nodes (54): ../activity/activity_page.dart, ../attendance/attendance_page.dart, ../../core/widgets/custom_app_bar.dart, ../dashboard/home_tab.dart, AppBar, BottomNavigationBarItem, build, _buildAgentProfileTab (+46 more)
+Cohesion: 0.03
+Nodes (70): ../activity/activity_page.dart, ../attendance/attendance_page.dart, ../../core/widgets/custom_app_bar.dart, ../dashboard/home_tab.dart, AppBar, BottomNavigationBarItem, build, _buildAgentProfileTab (+62 more)
 
 ### Community 312 - "Community 312"
-Cohesion: 0.11
-Nodes (7): fl_register_plugins(), main(), my_application_activate(), my_application_new(), _MyApplication, dart_entrypoint_arguments, parent_instance
+Cohesion: 0.12
+Nodes (14): fl_register_plugins(), main(), first_frame_cb(), my_application_activate(), my_application_class_init(), my_application_dispose(), my_application_init(), my_application_local_command_line() (+6 more)
 
 ### Community 313 - "Community 313"
 Cohesion: 0.05
@@ -1848,7 +1877,7 @@ Cohesion: 0.50
 Nodes (4): Immediate (Week 1), Medium-term (Week 4+), Short-term (Week 2-3), 🔄 What's Next
 
 ### Community 322 - "Community 322"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Method & Model Index: Tickets, Models (Alphabetical), Service Functions (Alphabetical), Service Hooks & Helper Functions
 
 ### Community 323 - "Community 323"
@@ -1876,7 +1905,7 @@ Cohesion: 0.50
 Nodes (4): **Phase 1: Optimization (0-1000 users)**, **Phase 2: Horizontal Scaling (1000-5000 users)**, **Phase 3: Microservices (5000+ users)**, Scaling Strategy Roadmap
 
 ### Community 329 - "Community 329"
-Cohesion: 0.50
+Cohesion: 0.60
 Nodes (3): configVersion, packages, roots
 
 ### Community 330 - "Community 330"
@@ -1884,8 +1913,8 @@ Cohesion: 0.50
 Nodes (4): code:block43 (Backend:), Current Test Coverage, Recommended Test Implementation, 🔍 TESTING STRATEGY
 
 ### Community 331 - "Community 331"
-Cohesion: 0.50
-Nodes (4): 1. **Database Optimization**, 2. **API Performance**, 3. **Real-time Efficiency**, 📈 SCALABILITY CONSIDERATIONS
+Cohesion: 0.19
+Nodes (11): ActionCard(), ExternalTicketView(), EmployeeDashboard(), EmployeeDashboard(), EmployeeDashboardStats, getAttendanceConfig(), getStatusColor(), Props (+3 more)
 
 ### Community 332 - "Community 332"
 Cohesion: 0.50
@@ -1896,39 +1925,39 @@ Cohesion: 0.50
 Nodes (4): 8. Visual Design — Compressed Specs, Spacing (Reduced from V1), Typography (Compressed), What's Removed from Card Design
 
 ### Community 352 - "Community 352"
-Cohesion: 0.38
-Nodes (4): __dirname, __filename, runTest(), syncTaskQueueAssignment()
+Cohesion: 0.24
+Nodes (7): __dirname, __filename, runTest(), __dirname, __filename, runTest(), syncTaskQueueAssignment()
 
 ### Community 375 - "Community 375"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Cross Module Map: Tickets, Outbound References (Mongoose), Outbound References (Mongoose Schema relations)
 
 ### Community 387 - "Community 387"
-Cohesion: 0.36
-Nodes (6): Attendance(), calcDuration(), fmtMonthLabel(), fmtWeekLabel(), formatTime(), getWeekRange()
+Cohesion: 0.13
+Nodes (4): STATE_MACHINE, FROZEN_FIELDS, VALID_TRANSITIONS, canDo()
 
 ### Community 388 - "Community 388"
 Cohesion: 0.25
 Nodes (8): 3.3 System-Wide Remediation: The Automated Soft-Delete & Reference Lock Plugin, code:javascript (import { contextStorage } from './context.js';), code:javascript (import mongoose from 'mongoose';), code:javascript (mongoose.plugin(softDeletePlugin);), code:javascript (// Inside buildDeleteQuery.js), Step 1: Automated Soft-Delete Schema Plugin (`/backend/src/utils/softDeletePlugin.js`), Step 2: Dynamic Reference Locking Engine (`/backend/src/utils/referenceLock.js`), Step 3: Global Application Integration
 
 ### Community 389 - "Community 389"
-Cohesion: 0.08
-Nodes (39): Audit Logger, buildCreateQuery(), buildDeleteQuery(), buildReadQuery(), buildUpdateQuery(), flattenObject(), isPlainObject(), maintenanceMiddleware() (+31 more)
+Cohesion: 0.06
+Nodes (46): Audit Logger, buildCreateQuery(), buildDeleteQuery(), buildReadQuery(), buildUpdateQuery(), flattenObject(), isPlainObject(), maintenanceMiddleware() (+38 more)
 
 ### Community 390 - "Community 390"
-Cohesion: 0.22
-Nodes (8): disconnect, emit, init, off, on, SocketService, package:socket_io_client/socket_io_client.dart, ../core/api_config.dart
+Cohesion: 0.29
+Nodes (9): ../core/api_config.dart, disconnect, emit, init, off, on, SocketService, package:socket_io_client/socket_io_client.dart (+1 more)
 
 ### Community 391 - "Community 391"
 Cohesion: 0.33
 Nodes (6): 11. Cross-Module Impact Analysis, 12. Workflow Compliance, 13. Cross-Conversation Context, 14. System Brain — Mandatory Reference (`knowledge_brain/_SYSTEM/`), 15. Mandatory Knowledge Brain Verification & Maintenance, Specific Feedback and Suggestions:
 
 ### Community 392 - "Community 392"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): Cross-Module Map: Settings, Downstream Dependents (depends on Settings), Outbound References (Mongoose), Upstream Dependencies (Settings depends on)
 
 ### Community 393 - "Community 393"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (10): API Payloads, Capabilities Auto-Generation Flow, code:block1 (Admin → Menu/index.jsx (list) → POST /populate/read/sidebars), code:block2 (Admin selects Linked Resource (e.g., "employees")), code:block3 (Admin → designation-permissions.jsx), code:block4 (Admin → role-permissions.jsx), Data Flow: Settings, Menu Management Flow (+2 more)
 
 ### Community 395 - "Community 395"
@@ -1948,12 +1977,12 @@ Cohesion: 0.67
 Nodes (3): Deployment Ready, 🚀 Production Readiness, Requirements Met
 
 ### Community 402 - "Community 402"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (7): 1. Support Dashboard (`tickets/index.jsx` & `my-tickets.jsx`), 2. Comments Thread & Internal Notes, 3. Attachments & Logs, 4. Developer Task Synchronization, API Payloads, Data Flow: Tickets, Dynamic API Payloads
 
 ### Community 403 - "Community 403"
-Cohesion: 0.08
-Nodes (19): hrPolicyFormFields, hrPolicySubmit, holidaysConfig, hrPoliciesConfig, jobCategoriesConfig, jobCategoryFormFields, jobCategorySubmit, statusField (+11 more)
+Cohesion: 0.16
+Nodes (9): shiftFormFields, shiftSubmit, hrPoliciesConfig, jobTypeFormFields, jobTypesConfig, jobTypeSubmit, statusField, createFormPage() (+1 more)
 
 ### Community 405 - "Community 405"
 Cohesion: 0.67
@@ -1971,16 +2000,20 @@ Nodes (62): 12.10 Architectural Notes, 12.1 Why does this collection exist?, 12.
 Cohesion: 0.03
 Nodes (63): 28.10 Architectural Notes, 28.1 Why does this collection exist?, 28.2 What business problem does it solve?, 28.3 What relationships does it build?, 28.4 Which architectural category does it belong to?, 28.5 What is the ultimate purpose of this model?, 28.6 Why was this separated into its own collection?, 28.7 What would happen if this collection disappeared? (+55 more)
 
+### Community 440 - "Community 440"
+Cohesion: 0.17
+Nodes (4): FALLBACK_TOKEN, PRIORITY_CELL, PRIORITY_TOKENS, STATUS_TOKENS
+
 ### Community 445 - "Community 445"
 Cohesion: 0.09
-Nodes (22): build, _buildDetailRow, _buildEmptyState, _buildPayslipCard, Card, Center, Divider, initState (+14 more)
+Nodes (29): build, _buildDetailRow, _buildEmptyState, _buildPayslipCard, Card, Center, ../../core/theme/app_theme.dart, ../../core/widgets/shimmer_loading.dart (+21 more)
 
 ### Community 446 - "Community 446"
 Cohesion: 0.10
-Nodes (20): build, _buildInfoTile, _buildSwitchTile, Divider, initState, ListTile, onPressed, OutlinedButton (+12 more)
+Nodes (27): build, _buildInfoTile, _buildSwitchTile, ../../core/theme/app_theme.dart, ../../core/widgets/cached_avatar.dart, Divider, initState, ListTile (+19 more)
 
 ### Community 456 - "Community 456"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): 1. Module Coverage Matrix, System Coverage, System Module and Directory Coverage
 
 ### Community 501 - "Community 501"
@@ -1988,11 +2021,11 @@ Cohesion: 0.03
 Nodes (63): 29.10 Architectural Notes, 29.1 Why does this collection exist?, 29.2 What business problem does it solve?, 29.3 What relationships does it build?, 29.4 Which architectural category does it belong to?, 29.5 What is the ultimate purpose of this model?, 29.6 Why was this separated into its own collection?, 29.7 What would happen if this collection disappeared? (+55 more)
 
 ### Community 502 - "Community 502"
-Cohesion: 0.40
+Cohesion: 0.33
 Nodes (4): 1. Feed Dashboard (`feed/index.jsx`), 2. Post Details & Comments (`feedposts/[id].jsx`), Data Flow: Feed, Dynamic API Payloads
 
 ### Community 503 - "Community 503"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Method & Model Index: Assets, Models (Alphabetical), Service Hooks & Helper Functions
 
 ### Community 504 - "Community 504"
@@ -2000,7 +2033,7 @@ Cohesion: 0.03
 Nodes (62): 30.10 Architectural Notes, 30.1 Why does this collection exist?, 30.2 What business problem does it solve?, 30.3 What relationships does it build?, 30.4 Which architectural category does it belong to?, 30.5 What is the ultimate purpose of this model?, 30.6 Why was this separated into its own collection?, 30.7 What would happen if this collection disappeared? (+54 more)
 
 ### Community 505 - "Community 505"
-Cohesion: 0.50
+Cohesion: 0.40
 Nodes (3): Method & Model Index: Feed, Models (Alphabetical), Service Hooks & Helper Functions
 
 ### Community 506 - "Community 506"
@@ -2016,7 +2049,7 @@ Cohesion: 0.03
 Nodes (63): 14.10 Architectural Notes, 14.1 Why does this collection exist?, 14.2 What business problem does it solve?, 14.3 What relationships does it build?, 14.4 Which architectural category does it belong to?, 14.5 What is the ultimate purpose of this model?, 14.6 Why was this separated into its own collection?, 14.7 What would happen if this collection disappeared? (+55 more)
 
 ### Community 511 - "Community 511"
-Cohesion: 0.10
+Cohesion: 0.12
 Nodes (20): target_ndk_api, assets, ar, cc, ld, android, c_compiler, link_mode_preference (+12 more)
 
 ### Community 512 - "Community 512"
@@ -2104,8 +2137,8 @@ Cohesion: 0.05
 Nodes (38): 9.10 Architectural Notes, 9.1 Why does this collection exist?, 9.2 What business problem does it solve?, 9.3 What relationships does it build?, 9.4 Which architectural category does it belong to?, 9.5 What is the ultimate purpose of this model?, 9.6 Why was this separated into its own collection?, 9.7 What would happen if this collection disappeared? (+30 more)
 
 ### Community 533 - "Community 533"
-Cohesion: 0.12
-Nodes (16): AttendanceCalendar, build, Column, _DayStyle, Expanded, GestureDetector, _isFuture, _isToday (+8 more)
+Cohesion: 0.17
+Nodes (18): AttendanceCalendar, build, Column, _DayStyle, Expanded, GestureDetector, _isFuture, _isToday (+10 more)
 
 ### Community 534 - "Community 534"
 Cohesion: 0.03
@@ -2125,7 +2158,7 @@ Nodes (63): 33.10 Architectural Notes, 33.1 Why does this collection exist?, 33.
 
 ### Community 538 - "Community 538"
 Cohesion: 0.06
-Nodes (33): dart:io, dart:math, build, _buildViewer, Center, FileViewerPage, _getFileIcon, launchUrl (+25 more)
+Nodes (43): dart:io, dart:math, build, _buildViewer, Center, FileViewerPage, _getFileIcon, launchUrl (+35 more)
 
 ### Community 539 - "Community 539"
 Cohesion: 0.03
@@ -2136,8 +2169,8 @@ Cohesion: 0.60
 Nodes (5): ActionCard(), ManagerDashboard(), ManagerDashboardStats, Props, StatCard()
 
 ### Community 541 - "Community 541"
-Cohesion: 0.36
-Nodes (5): EntityFormPage(), listFormDrafts(), loadFormDraft(), shouldUseTabs(), splitFieldsIntoTabs()
+Cohesion: 0.48
+Nodes (3): EntityFormPage(), shouldUseTabs(), splitFieldsIntoTabs()
 
 ### Community 542 - "Community 542"
 Cohesion: 0.38
@@ -2148,12 +2181,12 @@ Cohesion: 0.60
 Nodes (5): ActionCard(), Props, StatCard(), SuperAdminDashboard(), SuperAdminDashboardStats
 
 ### Community 544 - "Community 544"
-Cohesion: 0.21
-Nodes (11): getToken(), ThemeToggler(), prefersReducedMotion(), runThemeTransition(), ThemeContext, ThemeProvider(), useTheme(), Login() (+3 more)
+Cohesion: 0.17
+Nodes (11): Code paths (Tracker), code:markdown (# {Module} Module Brain), code:markdown (# Data Flow: {Module}), Cross-module updates, DATA_FLOW.md skeleton, Graphify (optional), Knowledge Brain — Reference, METHOD_INDEX.md rules (+3 more)
 
 ### Community 545 - "Community 545"
-Cohesion: 0.26
-Nodes (11): DEFAULT_POPULATE_FIELDS, getDefaultPopulateFields(), buildReportQuery(), getModelForField(), aggregateValidator(), bodyValidator(), conditionsValidator(), fieldsValidator() (+3 more)
+Cohesion: 0.36
+Nodes (9): buildReportQuery(), getModelForField(), aggregateValidator(), bodyValidator(), conditionsValidator(), fieldsValidator(), filterValidator(), resolveConditions() (+1 more)
 
 ### Community 546 - "Community 546"
 Cohesion: 0.16
@@ -2164,12 +2197,12 @@ Cohesion: 0.33
 Nodes (4): __dirname, __filename, RESOURCES_TO_SEED, ROUTE_RESOURCE_MAP
 
 ### Community 548 - "Community 548"
-Cohesion: 0.17
-Nodes (11): build, Color, dispose, initState, Scaffold, SizedBox, SplashPage, _SplashPageState (+3 more)
+Cohesion: 0.21
+Nodes (13): build, Color, ../core/theme/app_theme.dart, dispose, initState, package:flutter/material.dart, Scaffold, SizedBox (+5 more)
 
 ### Community 549 - "Community 549"
-Cohesion: 0.12
-Nodes (15): build, dispose, _formatDuration, Icon, _initCountdown, initState, MaintenancePage, _MaintenancePageState (+7 more)
+Cohesion: 0.07
+Nodes (26): build, dispose, _formatDuration, Icon, _initCountdown, initState, MaintenancePage, _MaintenancePageState (+18 more)
 
 ### Community 551 - "Community 551"
 Cohesion: 0.20
@@ -2180,12 +2213,12 @@ Cohesion: 0.43
 Nodes (3): productFormFields, productSubmitButton, productsConfig
 
 ### Community 554 - "Community 554"
-Cohesion: 0.33
-Nodes (5): build, Container, CustomButton, SizedBox, package:flutter/material.dart
+Cohesion: 0.36
+Nodes (6): build, Container, CustomButton, package:flutter/material.dart, SizedBox, package:flutter/material.dart
 
 ### Community 555 - "Community 555"
-Cohesion: 0.33
-Nodes (5): build, CustomTextField, _CustomTextFieldState, TextFormField, package:flutter/material.dart
+Cohesion: 0.36
+Nodes (6): build, CustomTextField, _CustomTextFieldState, package:flutter/material.dart, TextFormField, package:flutter/material.dart
 
 ### Community 556 - "Community 556"
 Cohesion: 0.17
@@ -2212,15 +2245,15 @@ Cohesion: 0.25
 Nodes (7): fieldMap, modelNames, ops, paths, perms, router, topLevel
 
 ### Community 563 - "Community 563"
-Cohesion: 0.50
+Cohesion: 0.53
 Nodes (3): leadTypeFormFields, leadTypeSubmitButton, leadTypesConfig
 
 ### Community 564 - "Community 564"
-Cohesion: 0.18
+Cohesion: 0.30
 Nodes (10): background_color, description, display, icons, name, orientation, prefer_related_applications, short_name (+2 more)
 
 ### Community 565 - "Community 565"
-Cohesion: 0.20
+Cohesion: 0.29
 Nodes (9): assets, config, build_asset_types, linking_enabled, out_dir_shared, out_file, package_name, package_root (+1 more)
 
 ### Community 566 - "Community 566"
@@ -2228,12 +2261,12 @@ Cohesion: 0.22
 Nodes (8): content, __dirname, __filename, filePath, lines, serviceFiles, servicesDir, sideEffectPatterns
 
 ### Community 567 - "Community 567"
-Cohesion: 0.22
-Nodes (8): AppColors, AppRadius, AppSpacing, AppTheme, _buildTextTheme, ThemeData, package:google_fonts/google_fonts.dart, package:flutter/material.dart
+Cohesion: 0.29
+Nodes (9): AppColors, AppRadius, AppSpacing, AppTheme, _buildTextTheme, package:flutter/material.dart, ThemeData, package:google_fonts/google_fonts.dart (+1 more)
 
 ### Community 568 - "Community 568"
-Cohesion: 0.08
-Nodes (15): MONTHS, PayrollPage(), PayslipModal(), PRIVILEGED, TABS, MONTHS, MyPayslipsTab(), STATUS_CHIP (+7 more)
+Cohesion: 0.22
+Nodes (5): computePreview(), DEDUCTION_TYPES, EARNING_TYPES, SalaryStructureForm(), STATUTORY_NAMES
 
 ### Community 569 - "Community 569"
 Cohesion: 0.40
@@ -2244,11 +2277,11 @@ Cohesion: 0.25
 Nodes (7): allowedSystemRoutes, content, __dirname, __filename, filePath, routeFiles, routesDir
 
 ### Community 571 - "Community 571"
-Cohesion: 0.17
-Nodes (11): build, CachedAvatar, Color, Container, _getInitials, _getInitialsColor, _wrapWithBorder, ../../core/api_config.dart (+3 more)
+Cohesion: 0.16
+Nodes (15): build, CachedAvatar, Color, Container, ../../core/api_config.dart, ../../core/theme/app_theme.dart, _getInitials, _getInitialsColor (+7 more)
 
 ### Community 572 - "Community 572"
-Cohesion: 0.50
+Cohesion: 0.53
 Nodes (3): milestoneFormFields, milestoneSubmitButton, milestonesConfig
 
 ### Community 573 - "Community 573"
@@ -2256,8 +2289,8 @@ Cohesion: 0.50
 Nodes (4): 1. Classification of Audits, 🔴 Blocking (Must Pass), 🟢 Informational, 🟠 Warning (Must Document / Report)
 
 ### Community 574 - "Community 574"
-Cohesion: 0.29
-Nodes (6): build, Container, SizedBox, StatCard, package:flutter/material.dart, ../theme/app_theme.dart
+Cohesion: 0.27
+Nodes (8): build, Container, package:flutter/material.dart, SizedBox, StatCard, ../theme/app_theme.dart, package:flutter/material.dart, ../theme/app_theme.dart
 
 ### Community 575 - "Community 575"
 Cohesion: 0.33
@@ -2272,23 +2305,23 @@ Cohesion: 0.67
 Nodes (3): 0. Platform Philosophy Check (First Gate), Decision (pick exactly one), Platform Philosophy Decision
 
 ### Community 578 - "Community 578"
-Cohesion: 0.33
+Cohesion: 0.25
 Nodes (3): RegisterGeneratedPlugins(), NSWindow, MainFlutterWindow
 
 ### Community 579 - "Community 579"
-Cohesion: 0.17
-Nodes (11): box, build, Builder, Card, circle, list, ShimmerLoading, SizedBox (+3 more)
+Cohesion: 0.21
+Nodes (13): box, build, Builder, Card, circle, list, package:flutter/material.dart, ShimmerLoading (+5 more)
 
 ### Community 581 - "Community 581"
-Cohesion: 0.40
-Nodes (4): navigateTo, NavigationProvider, toggleTheme, package:flutter/material.dart
+Cohesion: 0.25
+Nodes (7): navigateTo, NavigationProvider, toggleTheme, navigateTo, NavigationProvider, toggleTheme, package:flutter/material.dart
 
 ### Community 582 - "Community 582"
 Cohesion: 0.40
 Nodes (4): images, info, author, version
 
 ### Community 583 - "Community 583"
-Cohesion: 0.50
+Cohesion: 0.60
 Nodes (3): assets_for_linking, status, timestamp
 
 ### Community 593 - "Community 593"
@@ -2312,12 +2345,12 @@ Cohesion: 0.18
 Nodes (4): sessionsSchema, __dirname, __filename, run()
 
 ### Community 598 - "Community 598"
-Cohesion: 0.25
-Nodes (5): EXPENSE_TYPES, Client, ExpenseLine, ExpenseRecord, STATUS_COLORS
+Cohesion: 0.27
+Nodes (5): dummyFields, leaveTransactionsConfig, buildSimpleModule(), createModuleConfig(), serviceProvidersConfig
 
 ### Community 599 - "Community 599"
-Cohesion: 0.50
-Nodes (3): designationFormFields, designationSubmitButton, designationsConfig
+Cohesion: 0.18
+Nodes (10): author, description, devDependencies, nodemon, keywords, license, main, name (+2 more)
 
 ### Community 600 - "Community 600"
 Cohesion: 0.20
@@ -2334,6 +2367,10 @@ Nodes (6): __dirname, __filename, getDatePath(), handleFileUpload(), storage, up
 ### Community 603 - "Community 603"
 Cohesion: 0.22
 Nodes (9): Fix 1: `employeeLifecycle.test.js`, Fix 2: `assetLifecycle.test.js`, Fix 3: `projectLifecycle.test.js`, Fix 4: `ticketLifecycle.test.js`, [MODIFY] [assetLifecycle.test.js](file:///e:/Loigmax/Tracker/backend/src/scripts/e2e/assetLifecycle.test.js), [MODIFY] [employeeLifecycle.test.js](file:///e:/Loigmax/Tracker/backend/src/scripts/e2e/employeeLifecycle.test.js), [MODIFY] [projectLifecycle.test.js](file:///e:/Loigmax/Tracker/backend/src/scripts/e2e/projectLifecycle.test.js), [MODIFY] [ticketLifecycle.test.js](file:///e:/Loigmax/Tracker/backend/src/scripts/e2e/ticketLifecycle.test.js) (+1 more)
+
+### Community 604 - "Community 604"
+Cohesion: 0.18
+Nodes (11): scripts, backup, cron:stats, db:analyze, db:reindex, dev, dev:monitor, queue:health (+3 more)
 
 ### Community 606 - "Community 606"
 Cohesion: 0.29
@@ -2352,8 +2389,8 @@ Cohesion: 0.33
 Nodes (6): __dirname, __filename, ROUTE_TO_MODEL_NAME, ROUTE_TO_MODEL_PREFIX, routeToCapabilityKey(), seed()
 
 ### Community 610 - "Community 610"
-Cohesion: 0.33
-Nodes (6): Express.js API, JWT Authentication, Mobile Client (React Native), MongoDB Atlas, Socket.io, Web Client (React)
+Cohesion: 0.20
+Nodes (5): ProviderRegistry, registry, send(), pushQueue, sendPush()
 
 ### Community 611 - "Community 611"
 Cohesion: 0.29
@@ -2368,8 +2405,8 @@ Cohesion: 0.50
 Nodes (3): __dirname, __filename, seed()
 
 ### Community 614 - "Community 614"
-Cohesion: 0.25
-Nodes (8): dependencies, framer-motion, lucide-react, next, react, react-dom, react-hot-toast, xlsx
+Cohesion: 0.22
+Nodes (9): dependencies, framer-motion, lucide-react, next, react, react-dom, react-hot-toast, @vercel/analytics (+1 more)
 
 ### Community 615 - "Community 615"
 Cohesion: 0.33
@@ -2380,16 +2417,16 @@ Cohesion: 0.28
 Nodes (5): EXPENSE_TYPES, blankDay(), blankExpense(), EXPENSE_TYPES, ExpenseTracker()
 
 ### Community 617 - "Community 617"
-Cohesion: 0.40
-Nodes (4): DEFAULT_CATEGORIES, __dirname, __filename, seed()
+Cohesion: 0.36
+Nodes (8): buildTaskCreateFields(), TASK_CREATE_TABS, MasterDataFormView(), Profile(), enqueueFormSubmit(), TaskFormPage(), TicketsFormPage(), formDraftKey()
 
 ### Community 618 - "Community 618"
 Cohesion: 0.40
 Nodes (4): __dirname, __filename, REQUIRED_RESOURCES, seed()
 
 ### Community 620 - "Community 620"
-Cohesion: 0.40
-Nodes (4): dart:convert, jsonDecode, LocalCache, package:shared_preferences/shared_preferences.dart
+Cohesion: 0.38
+Nodes (5): dart:convert, jsonDecode, LocalCache, package:shared_preferences/shared_preferences.dart, package:shared_preferences/shared_preferences.dart
 
 ### Community 622 - "Community 622"
 Cohesion: 0.50
@@ -2400,15 +2437,15 @@ Cohesion: 0.29
 Nodes (3): BRAND_GRADIENT, Props, { width, height }
 
 ### Community 624 - "Community 624"
-Cohesion: 0.33
-Nodes (4): bucket, jobs, newAvailable, LeaveTransactionSchema
+Cohesion: 0.20
+Nodes (6): ctx, filters, router, service, updateData, validModules
 
 ### Community 625 - "Community 625"
 Cohesion: 0.40
 Nodes (4): main, name, private, version
 
 ### Community 626 - "Community 626"
-Cohesion: 0.33
+Cohesion: 0.48
 Nodes (5): build_end, build_start, code_assets, data_assets, dependencies
 
 ### Community 627 - "Community 627"
@@ -2416,7 +2453,7 @@ Cohesion: 0.50
 Nodes (3): children, kids, parents
 
 ### Community 628 - "Community 628"
-Cohesion: 0.50
+Cohesion: 0.60
 Nodes (3): FeedPostModel, FeedReactionModel, FeedViewedByModel
 
 ### Community 629 - "Community 629"
@@ -2451,6 +2488,10 @@ Nodes (4): Backend (~30 min — just 2 models + Collection.js), DAY 13 — P8: W
 Cohesion: 0.50
 Nodes (4): Backend: Zero — everything uses existing populate API, DAY 15 — P10: Mobile App (28% → 58%), ✅ End of Day 15: Mobile at **~58%**, Flutter (~Full Day — copy [attendance_page.dart](file:///e:/Loigmax/Tracker/tracker_mobile/lib/pages/attendance/attendance_page.dart) pattern)
 
+### Community 639 - "Community 639"
+Cohesion: 0.32
+Nodes (5): ClosureDetailDrawer(), formatCurrency(), formatDate(), MODULE_LABELS, STATUS_CHIP
+
 ### Community 640 - "Community 640"
 Cohesion: 0.67
 Nodes (3): Backend (~2 hrs — this is the one module with real computation), DAY 11 — P7: Payroll (70% → 82%), Frontend (~Rest of Day)
@@ -2484,44 +2525,132 @@ Cohesion: 0.67
 Nodes (3): **Current Deployment:**, Deployment Architecture, **Production Readiness Gaps:**
 
 ### Community 657 - "Community 657"
-Cohesion: 0.50
+Cohesion: 0.60
 Nodes (3): assets_for_linking, status, timestamp
 
 ### Community 658 - "Community 658"
-Cohesion: 0.09
-Nodes (18): apiHitLogger(), errorHandler(), requestTracer(), ApiHitLogSchema, ErrorLogSchema, ifscBankMap, router, cities (+10 more)
+Cohesion: 0.07
+Nodes (21): initialStats, localIP, startServer(), apiHitLogger(), errorHandler(), requestTracer(), ApiHitLogSchema, ErrorLogSchema (+13 more)
 
 ### Community 666 - "Community 666"
-Cohesion: 0.50
-Nodes (3): ALL_MODELS, FULL_ACCESS, seed()
+Cohesion: 0.25
+Nodes (6): CURRENCIES, MODEL_CHOICES, NOTIF_TYPES, OPERATOR_CHOICES, TIMEZONES, TRIGGER_CHOICES
 
 ### Community 668 - "Community 668"
-Cohesion: 0.50
-Nodes (3): CommentSchema, CommentsThreadSchema, ReplySchema
+Cohesion: 0.43
+Nodes (4): IconMapping, IconSymbol(), IconSymbolName, MAPPING
 
 ### Community 670 - "Community 670"
 Cohesion: 0.50
 Nodes (3): __dirname, __filename, updatePassword()
 
+### Community 675 - "Community 675"
+Cohesion: 0.38
+Nodes (4): jobCategoriesConfig, jobCategoryFormFields, jobCategorySubmit, statusField
+
+### Community 676 - "Community 676"
+Cohesion: 0.33
+Nodes (4): Client, Employee, ProjectType, TaskType
+
+### Community 677 - "Community 677"
+Cohesion: 0.47
+Nodes (3): attendancePoliciesConfig, attendancePolicyFormFields, attendancePolicySubmit
+
+### Community 678 - "Community 678"
+Cohesion: 0.40
+Nodes (3): escalationWorkflowFormFields, escalationWorkflowSubmit, escalationWorkflowsConfig
+
+### Community 679 - "Community 679"
+Cohesion: 0.47
+Nodes (3): holidayFormFields, holidaySubmit, holidaysConfig
+
+### Community 680 - "Community 680"
+Cohesion: 0.40
+Nodes (4): buildEmployeeUpdateFormData(), flatObject(), SKIP_EXACT, SKIP_ROOTS
+
+### Community 681 - "Community 681"
+Cohesion: 0.33
+Nodes (6): 2.1 Global Concurrency Middleware Bypass, 2.2 In-Memory Locking Limits, 2.3 Dynamic Import Overhead, 2.4 Missing Audit Paths, 2. Known Constraints (Confirmed Bottlenecks), code:javascript (app.use(raceConditionMiddleware({ enabled: true }));)
+
+### Community 682 - "Community 682"
+Cohesion: 0.40
+Nodes (4): ApprovalEntrySchema, QuotationItemSchema, QuotationLineItemSchema, QuotationSchema
+
+### Community 683 - "Community 683"
+Cohesion: 0.40
+Nodes (4): cities, countries, router, states
+
+### Community 684 - "Community 684"
+Cohesion: 0.50
+Nodes (3): projectTypeFormFields, projectTypeSubmit, projectTypesConfig
+
+### Community 685 - "Community 685"
+Cohesion: 0.50
+Nodes (3): taskTypeFormFields, taskTypeSubmit, taskTypesConfig
+
+### Community 686 - "Community 686"
+Cohesion: 0.40
+Nodes (4): images, info, author, version
+
+### Community 687 - "Community 687"
+Cohesion: 0.40
+Nodes (4): images, info, author, version
+
+### Community 688 - "Community 688"
+Cohesion: 0.40
+Nodes (5): 5.1 Relocate Locking Middleware, 5.2 Transition to Redis Distributed Locking, 5.3 Static Service Caching at Bootstrap, 5.4 Centralized Mongoose Audit Plugin, 5. Architectural Recommendations
+
+### Community 689 - "Community 689"
+Cohesion: 0.40
+Nodes (5): 2. **Advanced Validation Framework**, code:javascript (// Core Components:), code:javascript (// Global Locked Fields:), validateFieldUpdateRules.js - Final Security Gate, Validator.js - Multi-Layer Validation Engine
+
+### Community 691 - "Community 691"
+Cohesion: 0.50
+Nodes (3): __dirname, __filename, verify()
+
+### Community 692 - "Community 692"
+Cohesion: 0.50
+Nodes (3): siblingInvoiceIds, totalPaidForInvoice, totalPaidForPo
+
+### Community 693 - "Community 693"
+Cohesion: 0.50
+Nodes (3): DAY_NAMES, DEFAULT_SHIFT, getEmployeeShiftSchedule()
+
+### Community 694 - "Community 694"
+Cohesion: 0.50
+Nodes (3): check(), __dirname, __filename
+
+### Community 695 - "Community 695"
+Cohesion: 0.50
+Nodes (4): 1. **API Consistency**, 2. **Real-time Synchronization**, 3. **State Management**, 🔄 INTEGRATION POINTS
+
+### Community 697 - "Community 697"
+Cohesion: 0.67
+Nodes (3): 10. Files Summary, Modified Files, New Files
+
+### Community 698 - "Community 698"
+Cohesion: 0.67
+Nodes (3): **Current Logging:**, **Missing Observability:**, Monitoring and Observability
+
 ## Knowledge Gaps
-- **5052 isolated node(s):** `salesOnApril4th`, `cSpell.words`, `postman.settings.dotenv-detection-notification-visibility`, `__filename`, `__dirname` (+5047 more)
+- **4962 isolated node(s):** `name`, `version`, `main`, `type`, `test` (+4957 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **106 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **110 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Tracker Mongoose Collections Reference` connect `Community 54` to `Community 512`, `Community 513`, `Community 514`, `Community 515`, `Community 516`, `Community 517`, `Community 518`, `Community 519`, `Community 520`, `Community 521`, `Community 522`, `Community 523`, `Community 524`, `Community 525`, `Community 526`, `Community 527`, `Community 528`, `Community 529`, `Community 530`, `Community 531`, `Community 532`, `Community 534`, `Community 535`, `Community 408`, `Community 537`, `Community 539`, `Community 429`, `Community 309`, `Community 313`, `Community 103`, `Community 501`, `Community 504`, `Community 506`, `Community 509`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
-- **Why does `useAuth()` connect `Community 1` to `Community 544`, `Community 89`, `Community 34`, `Community 615`, `Community 616`, `Community 11`, `Community 108`, `Community 48`, `Community 49`, `Community 18`, `Community 20`, `Community 308`, `Community 247`, `Community 568`, `Community 57`, `Community 122`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `LeaveAndRegularization()` connect `Community 89` to `Community 1`, `Community 33`, `Community 70`, `Community 308`, `Community 247`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **What connects `salesOnApril4th`, `cSpell.words`, `postman.settings.dotenv-detection-notification-visibility` to the rest of the system?**
-  _5059 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **Why does `sendNotification()` connect `Community 47` to `Community 0`, `Community 1`, `Community 194`, `Community 34`, `Community 38`, `Community 12`, `Community 89`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `LeaveAndRegularization()` connect `Community 89` to `Community 33`, `Community 34`, `Community 70`, `Community 308`, `Community 247`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **What connects `name`, `version`, `main` to the rest of the system?**
+  _4969 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.011212696222183889 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.011327698234719108 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07401129943502825 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14245014245014245 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.04 - nodes in this community are weakly interconnected._

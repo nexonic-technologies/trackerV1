@@ -2,6 +2,7 @@ import models from "../../models/Collection.js";
 import fcmService from "../../services/fcmService.js";
 import { sendNotification } from "../notificationService.js";
 import { resolveActor } from "../workflow/actorResolver.js";
+import NotificationDispatcher from "../../services/NotificationDispatcher.js";
 
 class ApprovalEngine {
   /**
@@ -297,25 +298,15 @@ class ApprovalEngine {
         ? `Escalated: Review ${document.employeeName || 'employee'}'s pending ${typeLabel} request.`
         : `${document.employeeName || 'An employee'} submitted a ${typeLabel} request requiring your review.`;
 
-      // Dispatch Push
-      await fcmService.dispatchNotification({
-        type: `${modelName}_request`,
+      // Dispatch unified notification
+      await NotificationDispatcher.dispatch({
+        recipients: [approverId.toString()],
+        sender: document.employeeId || document.createdBy,
         title,
         message,
-        sender: document.employeeId || document.createdBy,
+        type: `${modelName}_request`,
         meta: { model: modelName, modelId: document._id },
-        receiversArray: [approverId.toString()]
-      });
-
-      // Dispatch In-app
-      await sendNotification({
-        sender: document.employeeId || document.createdBy,
-        receiver: approverId,
-        type: `${modelName}_request`,
-        title,
-        message,
-        relatedModel,
-        relatedId: document._id,
+        path: `/${modelName}`
       });
     } catch (e) {
       console.error(`[ApprovalEngine] Notify approver failed:`, e.message);
@@ -350,25 +341,15 @@ class ApprovalEngine {
       const title = `${typeLabel} Request ${status}`;
       const message = `Your ${typeLabel} request has been ${actionName}.`;
 
-      // Dispatch Push
-      await fcmService.dispatchNotification({
-        type: `${modelName}_status`,
+      // Dispatch unified notification
+      await NotificationDispatcher.dispatch({
+        recipients: [(document.employeeId || document.createdBy).toString()],
+        sender: actionerId,
         title,
         message,
-        sender: actionerId,
+        type: `${modelName}_status`,
         meta: { model: modelName, modelId: document._id },
-        receiversArray: [(document.employeeId || document.createdBy).toString()]
-      });
-
-      // Dispatch In-app
-      await sendNotification({
-        sender: actionerId,
-        receiver: document.employeeId || document.createdBy,
-        type: `${modelName}_status`,
-        title,
-        message,
-        relatedModel,
-        relatedId: document._id,
+        path: `/${modelName}`
       });
     } catch (e) {
       console.error(`[ApprovalEngine] Notify employee failed:`, e.message);

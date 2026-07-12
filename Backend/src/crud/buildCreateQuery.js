@@ -109,5 +109,23 @@ export default async function buildCreateQuery(ctx) {
     await afterCreate(ctx);
   }
 
+  // Safe background domain event emission
+  try {
+    const { default: domainEventService } = await import("../services/domainEventService.js");
+    const docsToEmit = Array.isArray(createdDocument) ? createdDocument : [createdDocument];
+    for (const doc of docsToEmit) {
+      if (doc && doc._id) {
+        domainEventService.emit("create", {
+          eventId: `create_${modelName}_${doc._id}_${Date.now()}`,
+          modelName,
+          modelId: doc._id,
+          actorId: userId
+        });
+      }
+    }
+  } catch (err) {
+    console.error(`[DomainEvent] Failed to emit create event for ${modelName}:`, err.message);
+  }
+
   return createdDocument;
 }

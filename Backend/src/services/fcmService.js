@@ -1,22 +1,48 @@
 import admin from 'firebase-admin';
 import models from '../models/Collection.js';
 import JobQueue from './jobQueue.js';
+import { decrypt } from '../utils/cryptoHelper.js';
 
-// ─── Firebase Initialization ─────────────────────────────────────────────────
-// Firebase Admin is optional. If GOOGLE_APPLICATION_CREDENTIALS is not set
-// (e.g. local dev / CI), FCM push is skipped gracefully — all other workflow
-// data operations are completely unaffected.
+// ─── Firebase Dynamic Initialization ─────────────────────────────────────────
 let firebaseReady = false;
-try {
-  admin.initializeApp();
-  firebaseReady = true;
-} catch (error) {
-  console.warn(
-    '[FCM] Firebase Admin SDK not initialised — push notifications will be skipped. ' +
-    'Set GOOGLE_APPLICATION_CREDENTIALS to enable FCM in this environment.\n' +
-    `  Reason: ${error.message}`
-  );
+let firebaseAdminApp = null;
+
+export async function getFirebaseAdmin() {
+  if (firebaseAdminApp) return firebaseAdminApp;
+
+  // 1. Try default credentials first
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    try {
+      firebaseAdminApp = admin.initializeApp();
+      firebaseReady = true;
+      console.log('[FCM] Firebase Admin SDK initialized using GOOGLE_APPLICATION_CREDENTIALS.');
+      return firebaseAdminApp;
+    } catch (error) {
+      console.warn('[FCM] Failed to initialize default credentials app:', error.message);
+    }
+  }
+
+  // 2. Fallback to database-stored encrypted service account key
+  try {
+    const settings = await models.generalsettings.findOne().lean();
+    const encKey = settings?.notification?.firebase?.serviceAccountKeyEncrypted;
+    if (encKey) {
+      const decJson = decrypt(encKey);
+      const serviceAccount = JSON.parse(decJson);
+      firebaseAdminApp = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      firebaseReady = true;
+      console.log('[FCM] Firebase Admin SDK initialized dynamically using database credentials.');
+      return firebaseAdminApp;
+    }
+  } catch (error) {
+    console.warn('[FCM] Dynamic database-driven initialization failed:', error.message);
+  }
+
+  return null;
 }
+
 
 // ─── Non-retriable error patterns ────────────────────────────────────────────
 // These indicate missing configuration, not transient network issues.
@@ -59,9 +85,12 @@ class FCMService {
   async sendMulticast(contentDoc, receptionistDocs, tokens) {
     const receptionistIds = receptionistDocs.map(r => r._id);
 
+    // Try dynamic/env initialization first
+    await getFirebaseAdmin();
+
     // ── Guard: Firebase not ready ──────────────────────────────────────────
     if (!firebaseReady) {
-      console.warn('[FCM] sendMulticast skipped: Firebase not initialised (GOOGLE_APPLICATION_CREDENTIALS missing).');
+      console.warn('[FCM] sendMulticast skipped: Firebase not initialised (Credentials missing in database/env).');
       await models.NotificationReceptionist.updateMany(
         { _id: { $in: receptionistIds } },
         { $set: { fcmStatus: 'failed', fcmErrorReason: 'Firebase not configured in this environment' } }
@@ -162,6 +191,12 @@ class FCMService {
    */
   async dispatchNotification({ type, title, message, sender, meta, receiversArray }) {
     try {
+      // ─── Centralized Dynamic Notification Bypass Check ───────────────────────
+      const settings = await models.generalsettings.findOne().lean();
+      if (settings?.notification?.useDynamicNotifications) {
+        return; // Bypassed: dynamic rules evaluator is active
+      }
+
       if (!receiversArray || receiversArray.length === 0) return;
 
       // Deduplicate and remove sender from receivers
@@ -336,6 +371,15 @@ class FCMService {
         }
       })
     );
+  }
+
+  enqueueMulticast(contentDoc, receptionistDocs, tokens) {
+    fcmQueue.add({
+      handler: async (data) => {
+        await this.sendMulticast(data.contentDoc, data.receptionistDocs, data.tokens);
+      },
+      data: { contentDoc, receptionistDocs, tokens },
+    });
   }
 }
 

@@ -77,10 +77,21 @@ const GeneralSettingsSchema = new mongoose.Schema({
   },
   
   notification: {
-    channels: [{
-      event: { type: String, required: true }, // e.g., "ticket_assignment"
-      providers: { type: [String], enum: ['firebase', 'email', 'sms', 'whatsapp'], default: ['firebase'] }
-    }]
+    enabled: { type: Boolean, default: true },
+    useDynamicNotifications: { type: Boolean, default: false },
+    defaultProviders: { type: [String], default: ['socket'] },
+    firebase: {
+      enabled: { type: Boolean, default: false },
+      apiKey: { type: String },
+      authDomain: { type: String },
+      projectId: { type: String },
+      storageBucket: { type: String },
+      messagingSenderId: { type: String },
+      appId: { type: String },
+      measurementId: { type: String },
+      vapidKey: { type: String },
+      serviceAccountKeyEncrypted: { type: String } // AES-256 encrypted string
+    }
   },
   
   payroll: {

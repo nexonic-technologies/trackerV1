@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "WorkHub — Support Portal",
-  description: "WorkHub external client support portal for ticket management and tracking.",
+  description: "WorkHub - A company provide Future solution.",
 };
 
 export default function RootLayout({

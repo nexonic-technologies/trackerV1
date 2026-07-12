@@ -2,6 +2,7 @@ import models from "../../models/Collection.js";
 import fcmService from "../../services/fcmService.js";
 import { sendNotification } from "../notificationService.js";
 import { resolveActor } from "./actorResolver.js";
+import NotificationDispatcher from "../../services/NotificationDispatcher.js";
 
 class EscalationEngine {
   /**
@@ -143,25 +144,15 @@ class EscalationEngine {
       const title = `Escalated: ${typeLabel} SLA Breach (L${level})`;
       const message = `Attention: ${typeLabel} request ${document.ticketId || document._id} has breached SLA limits and is escalated to you (Level ${level}).`;
 
-      // Dispatch In-app Notification
-      await sendNotification({
+      // Dispatch unified escalation notification
+      await NotificationDispatcher.dispatch({
+        recipients: [targetUserId.toString()],
         sender: document.employeeId || document.createdBy,
-        receiver: targetUserId,
-        type: `${modelName}_escalation`,
         title,
         message,
-        relatedModel: modelName === 'tickets' ? 'Ticket' : (modelName === 'tasks' ? 'tasks' : 'System'),
-        relatedId: document._id
-      });
-
-      // Dispatch Push Notification
-      await fcmService.dispatchNotification({
         type: `${modelName}_escalation`,
-        title,
-        message,
-        sender: document.employeeId || document.createdBy,
-        meta: { model: modelName, modelId: document._id.toString() },
-        receiversArray: [targetUserId.toString()]
+        meta: { model: modelName, modelId: document._id },
+        path: `/${modelName === 'tickets' ? 'tickets' : 'tasks'}/${document._id}`
       });
     } catch (error) {
       console.error("[EscalationEngine] Failed to dispatch notifications:", error.message);

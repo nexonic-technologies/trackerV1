@@ -63,6 +63,8 @@ import leavetransactions from "./LeaveTransaction.js";
 import payments from "./Payment.js";
 import generalsettings from "./GeneralSettings.js";
 import operationalevents from "./OperationalEvent.js";
+import notificationrules from "./NotificationRule.js";
+import notificationdeliveries from "./NotificationDelivery.js";
 
 // Activity-Centric Work Model
 import jobcategories from "./JobCategory.js";
@@ -152,6 +154,8 @@ const models = {
   feedcomments,
   NotificationReceptionist,
   notificationpreferences,
+  notificationrules,
+  notificationdeliveries,
   products,
   quotations,
   crmmeetings,

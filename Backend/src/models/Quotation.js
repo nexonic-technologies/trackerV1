@@ -61,9 +61,7 @@ const QuotationSchema = new mongoose.Schema({
   approvalHistory: [ApprovalEntrySchema]
 }, { timestamps: true });
 
-QuotationSchema.index({ quotationNumber: 1 });
 QuotationSchema.index({ clientId: 1, status: 1 });
-QuotationSchema.index({ preparedBy: 1 });
 QuotationSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model('quotations', QuotationSchema);

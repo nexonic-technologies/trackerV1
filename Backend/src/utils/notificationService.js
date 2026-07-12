@@ -18,6 +18,17 @@ export const sendNotification = async ({
   path,
 }) => {
   try {
+    // ─── Centralized Dynamic Notification Bypass Check ───────────────────────
+    try {
+      const { default: models } = await import('../models/Collection.js');
+      const settings = await models.generalsettings.findOne().lean();
+      if (settings?.notification?.useDynamicNotifications) {
+        return; // Bypassed: dynamic rules evaluator is active
+      }
+    } catch (e) {
+      console.warn('[NotificationService] Dynamic bypass check failed:', e.message);
+    }
+
     const finalReceiver = receiver || recipient;
     if (!finalReceiver) {
       throw new Error("Receiver/Recipient is required to send notification");
