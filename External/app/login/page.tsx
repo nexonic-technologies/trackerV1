@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
       const response = await fetch(`${API_URL}/api/agent/login`, {
         method: 'POST',
         headers: {
@@ -59,8 +59,8 @@ export default function LoginPage() {
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-[10px] bg-white/15 border border-white/25 flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="m9 12 2 2 4-4"/>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
               </svg>
             </div>
             <span className="text-white/90 font-semibold text-lg tracking-tight">WorkHub</span>
@@ -90,8 +90,8 @@ export default function LoginPage() {
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-[10px] lmx-gradient-hero flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="m9 12 2 2 4-4"/>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
               </svg>
             </div>
             <span className="text-ink font-semibold text-lg tracking-tight">WorkHub</span>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 }}
               >
                 <svg className="w-5 h-5 mt-0.5 shrink-0" style={{ color: 'var(--lmx-error)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                  <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
                 </svg>
                 <span>{error}</span>
               </div>
@@ -132,7 +132,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="lmx-input"
                 placeholder="agent@company.com"
               />
@@ -146,7 +146,7 @@ export default function LoginPage() {
                 type="password"
                 required
                 value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="lmx-input"
                 placeholder="Enter your password"
               />

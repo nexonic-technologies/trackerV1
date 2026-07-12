@@ -28,7 +28,7 @@ export default function TicketDetailsPage({ params }: PageProps) {
   useEffect(() => {
     if (ticket) {
       document.title = `${ticket.ticketId || 'Ticket'} | ${ticket.title} - WorkHub Support`;
-      
+
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute('content', `${ticket.title} - ${ticket.description?.substring(0, 150)}`);
@@ -64,7 +64,7 @@ export default function TicketDetailsPage({ params }: PageProps) {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('agentToken');
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
       await fetch(`${API_URL}/api/agent/logout`, {
         method: 'POST',
         headers: {
@@ -89,8 +89,8 @@ export default function TicketDetailsPage({ params }: PageProps) {
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg lmx-gradient-hero flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 12 2 2 4-4"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 12 2 2 4-4" />
             </svg>
           </div>
           <div>
