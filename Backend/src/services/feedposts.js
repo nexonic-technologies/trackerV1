@@ -178,20 +178,30 @@ export default function feedpostsService() {
       }
 
       const visibilityFilter = {
-        $or: [
-          { group: { $in: userGroupIds } },
-          { channel: { $in: userChannelIds } },
-          { channels: { $in: userChannelIds } },
-          { author: userObjectId },
-          { mentions: userObjectId },
-          // General posts (only for employees, agents only see external channels)
-          ...(role !== 'agent' ? [{
-            $and: [
-              { $or: [{ group: { $exists: false } }, { group: null }] },
-              { $or: [{ channel: { $exists: false } }, { channel: null }] },
-              { $or: [{ channels: { $exists: false } }, { channels: null }, { channels: { $size: 0 } }] }
+        $and: [
+          {
+            $or: [
+              { isDraft: { $ne: true } },
+              { author: userObjectId }
             ]
-          }] : [])
+          },
+          {
+            $or: [
+              { group: { $in: userGroupIds } },
+              { channel: { $in: userChannelIds } },
+              { channels: { $in: userChannelIds } },
+              { author: userObjectId },
+              { mentions: userObjectId },
+              // General posts (only for employees, agents only see external channels)
+              ...(role !== 'agent' ? [{
+                $and: [
+                  { $or: [{ group: { $exists: false } }, { group: null }] },
+                  { $or: [{ channel: { $exists: false } }, { channel: null }] },
+                  { $or: [{ channels: { $exists: false } }, { channels: null }, { channels: { $size: 0 } }] }
+                ]
+              }] : [])
+            ]
+          }
         ]
       };
 
