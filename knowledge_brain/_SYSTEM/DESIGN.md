@@ -878,7 +878,7 @@ agent-instructions:
   description: >
     This DESIGN.md is intended to be consumed by an AI coding agent (e.g.
     Claude Code, Cursor, GitHub Copilot Workspace) generating Flutter or
-    React screens for the Logimax ERP application. Follow these rules exactly.
+    React screens for the Workhub ERP application. Follow these rules exactly.
 
     CRITICAL MANDATE: No UI design or interface implementation should be planned
     or proposed before reading and validating this DESIGN.md file first.

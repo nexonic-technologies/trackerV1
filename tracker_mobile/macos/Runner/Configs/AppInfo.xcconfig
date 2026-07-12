@@ -8,7 +8,7 @@
 PRODUCT_NAME = work_hub
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.logimax.tracker.workHub
+PRODUCT_BUNDLE_IDENTIFIER = com.Workhub.tracker.workHub
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.logimax.tracker. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.Workhub.tracker. All rights reserved.

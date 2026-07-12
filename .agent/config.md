@@ -1,4 +1,4 @@
-# Central Configuration — Logimax ERP Tracker System
+# Central Configuration — Workhub ERP Tracker System
 
 > **All workflows reference this file for project-level values.**
 > **Local/machine-specific values are auto-detected in `.agent/.env` (see Pre-Flight in `/validate-workflows`).**
@@ -9,7 +9,7 @@
 |----------|-------|
 | `{PROJECT_ROOT}` | `E:\Loigmax\Tracker` |
 | `{PROJECT_NAME}` | `tracker` |
-| `{REPO_OWNER}` | `Logimax-Hub` |
+| `{REPO_OWNER}` | `Workhub-Hub` |
 | `{REPO_NAME}` | `Tracker` |
 | `{FRAMEWORK}` | `React 19 + Vite 7 (Frontend) / Express 5 + Mongoose 8 (Backend)` |
 | `{LOCALHOST_FE}` | `http://localhost:5173` |

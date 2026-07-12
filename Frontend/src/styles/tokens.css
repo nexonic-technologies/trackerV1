@@ -1,5 +1,5 @@
 /**
- * Logimax ERP design tokens — source: backend/DESIGN.md v2.0
+ * Workhub ERP design tokens — source: backend/DESIGN.md v2.0
  * Use semantic utilities: bg-canvas, text-ink, border-default, tracker-btn-brand, etc.
  * Theme: .dark on html (ThemeProvider). Module: data-module="hr|project|ticket|payroll"
  */
@@ -51,48 +51,60 @@
    * ─────────────────────────────────────────────────────────────────────── */
 
   /* Currency surfaces */
-  --pay-surface:          var(--tracker-surface);
-  --pay-surface-tint:     var(--module-payroll-light);   /* section bg tint */
-  --pay-border:           var(--tracker-border);
-  --pay-border-accent:    var(--module-payroll);         /* left-bar accent */
+  --pay-surface: var(--tracker-surface);
+  --pay-surface-tint: var(--module-payroll-light);
+  /* section bg tint */
+  --pay-border: var(--tracker-border);
+  --pay-border-accent: var(--module-payroll);
+  /* left-bar accent */
 
   /* Currency ink */
-  --pay-ink-earn:         #059669;   /* earnings — payroll green */
-  --pay-ink-deduct:       #ef4444;   /* deductions — danger red */
-  --pay-ink-net:          #059669;   /* net salary — same as earn */
-  --pay-ink-gross:        var(--tracker-ink);            /* gross — neutral ink */
-  --pay-ink-label:        var(--tracker-ink-subtle);     /* field labels */
-  --pay-ink-muted:        var(--tracker-ink-muted);      /* secondary values */
+  --pay-ink-earn: #059669;
+  /* earnings — payroll green */
+  --pay-ink-deduct: #ef4444;
+  /* deductions — danger red */
+  --pay-ink-net: #059669;
+  /* net salary — same as earn */
+  --pay-ink-gross: var(--tracker-ink);
+  /* gross — neutral ink */
+  --pay-ink-label: var(--tracker-ink-subtle);
+  /* field labels */
+  --pay-ink-muted: var(--tracker-ink-muted);
+  /* secondary values */
 
   /* Currency status chips */
-  --pay-status-draft-bg:       var(--tracker-warning-light);
-  --pay-status-draft-text:     var(--tracker-warning);
-  --pay-status-processing-bg:  var(--tracker-info-light);
+  --pay-status-draft-bg: var(--tracker-warning-light);
+  --pay-status-draft-text: var(--tracker-warning);
+  --pay-status-processing-bg: var(--tracker-info-light);
   --pay-status-processing-text: var(--tracker-info);
-  --pay-status-processed-bg:   #dbeafe;
+  --pay-status-processed-bg: #dbeafe;
   --pay-status-processed-text: #1e40af;
-  --pay-status-approved-bg:    #ede9fe;
-  --pay-status-approved-text:  #7c3aed;
-  --pay-status-paid-bg:        var(--tracker-success-light);
-  --pay-status-paid-text:      var(--tracker-success);
+  --pay-status-approved-bg: #ede9fe;
+  --pay-status-approved-text: #7c3aed;
+  --pay-status-paid-bg: var(--tracker-success-light);
+  --pay-status-paid-text: var(--tracker-success);
 
   /* Currency gradient — payroll hero / modal headers */
-  --pay-gradient:         linear-gradient(135deg, #064E3B 0%, #059669 100%);
-  --pay-gradient-deep:    linear-gradient(135deg, #022c22 0%, #064E3B 50%, #059669 100%);
+  --pay-gradient: linear-gradient(135deg, #064E3B 0%, #059669 100%);
+  --pay-gradient-deep: linear-gradient(135deg, #022c22 0%, #064E3B 50%, #059669 100%);
 
   /* Salary figure sizing */
-  --pay-figure-xl:        32px;   /* hero net salary */
-  --pay-figure-lg:        24px;   /* card net salary */
-  --pay-figure-md:        18px;   /* table net salary */
-  --pay-figure-sm:        14px;   /* breakdown rows */
+  --pay-figure-xl: 32px;
+  /* hero net salary */
+  --pay-figure-lg: 24px;
+  /* card net salary */
+  --pay-figure-md: 18px;
+  /* table net salary */
+  --pay-figure-sm: 14px;
+  /* breakdown rows */
 
   /* Summary bar */
-  --pay-summary-bg:       var(--module-payroll-light);
-  --pay-summary-border:   color-mix(in srgb, var(--module-payroll) 25%, transparent);
+  --pay-summary-bg: var(--module-payroll-light);
+  --pay-summary-border: color-mix(in srgb, var(--module-payroll) 25%, transparent);
 
   /* Run progress bar */
-  --pay-progress-track:   var(--tracker-border);
-  --pay-progress-fill:    var(--module-payroll);
+  --pay-progress-track: var(--tracker-border);
+  --pay-progress-fill: var(--module-payroll);
 
   /* Active module (override per page via data-module) */
   --module-accent: var(--module-hr);
@@ -148,13 +160,13 @@
 
 .dark {
   /* Payroll dark overrides */
-  --pay-ink-earn:          #34d399;
-  --pay-ink-deduct:        #f87171;
-  --pay-ink-net:           #34d399;
-  --pay-status-processed-bg:  rgb(30 64 175 / 0.2);
-  --pay-status-approved-bg:   rgb(124 58 237 / 0.2);
-  --pay-summary-bg:        rgb(5 150 105 / 0.12);
-  --pay-summary-border:    rgb(5 150 105 / 0.25);
+  --pay-ink-earn: #34d399;
+  --pay-ink-deduct: #f87171;
+  --pay-ink-net: #34d399;
+  --pay-status-processed-bg: rgb(30 64 175 / 0.2);
+  --pay-status-approved-bg: rgb(124 58 237 / 0.2);
+  --pay-summary-bg: rgb(5 150 105 / 0.12);
+  --pay-summary-border: rgb(5 150 105 / 0.25);
 
   --tracker-canvas: #0f111a;
   --tracker-canvas-muted: #0f111a;
@@ -190,10 +202,25 @@
   --tracker-btn-secondary-bg: var(--tracker-surface-1);
 }
 
-[data-module="hr"] { --module-accent: var(--module-hr); --module-accent-light: var(--module-hr-light); }
-[data-module="project"] { --module-accent: var(--module-project); --module-accent-light: var(--module-project-light); }
-[data-module="ticket"] { --module-accent: var(--module-ticket); --module-accent-light: var(--module-ticket-light); }
-[data-module="payroll"] { --module-accent: var(--module-payroll); --module-accent-light: var(--module-payroll-light); }
+[data-module="hr"] {
+  --module-accent: var(--module-hr);
+  --module-accent-light: var(--module-hr-light);
+}
+
+[data-module="project"] {
+  --module-accent: var(--module-project);
+  --module-accent-light: var(--module-project-light);
+}
+
+[data-module="ticket"] {
+  --module-accent: var(--module-ticket);
+  --module-accent-light: var(--module-ticket-light);
+}
+
+[data-module="payroll"] {
+  --module-accent: var(--module-payroll);
+  --module-accent-light: var(--module-payroll-light);
+}
 
 @theme inline {
   --color-canvas: var(--tracker-canvas);
@@ -278,9 +305,11 @@
     box-shadow: 0 2px 8px rgb(108 61 232 / 0.3);
     @apply rounded-tracker-md text-sm font-medium px-5 py-2.5 transition-all duration-200;
   }
+
   .tracker-btn-brand:hover {
     filter: brightness(1.05);
   }
+
   .tracker-btn-brand:disabled {
     @apply opacity-70 cursor-not-allowed;
   }
@@ -290,6 +319,7 @@
     color: var(--tracker-on-brand);
     @apply rounded-tracker-md text-sm font-medium px-4 py-2 transition-colors duration-200;
   }
+
   .tracker-btn-primary:hover {
     background-color: var(--tracker-btn-primary-hover);
   }
@@ -299,6 +329,7 @@
     color: var(--tracker-on-brand);
     @apply rounded-tracker-md text-sm font-medium px-4 py-2 transition-colors duration-200;
   }
+
   .tracker-btn-accent:hover {
     background-color: var(--tracker-btn-accent-hover);
   }
@@ -309,6 +340,7 @@
     border: 1px solid var(--tracker-border);
     @apply rounded-tracker-md text-sm font-medium px-4 py-2 transition-colors duration-200;
   }
+
   .tracker-btn-secondary:hover {
     background-color: var(--tracker-surface-1);
   }
@@ -316,6 +348,7 @@
   .tracker-btn-ghost {
     @apply rounded-tracker-md text-sm font-medium px-4 py-2 text-ink-muted transition-colors;
   }
+
   .tracker-btn-ghost:hover {
     background-color: var(--tracker-surface-1);
     color: var(--tracker-ink);
@@ -330,6 +363,7 @@
     @apply placeholder:text-ink-subtle focus:outline-none focus:border-[var(--tracker-border-focus)];
     box-shadow: 0 0 0 0 transparent;
   }
+
   .lmx-input:focus {
     box-shadow: 0 0 0 3px rgb(139 92 246 / 0.15);
   }
@@ -345,6 +379,7 @@
     transition: background-color 5000s ease-in-out 0s !important;
     box-shadow: inset 0 0 0 30px var(--tracker-surface) !important;
   }
+
   input {
     caret-color: var(--tracker-ink);
   }
@@ -356,10 +391,12 @@
     color: var(--tracker-ink-muted);
     background-color: var(--tracker-surface);
   }
+
   .lmx-feed-composer__dest-pill:hover {
     border-color: var(--module-accent);
     color: var(--module-accent);
   }
+
   .lmx-feed-composer__dest-pill--active {
     border-color: var(--module-accent);
     color: var(--module-accent);
@@ -391,9 +428,11 @@
     @apply flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-left transition-colors;
     color: var(--tracker-ink);
   }
+
   .lmx-feed-composer__picker-option:hover {
     background-color: var(--tracker-surface-1);
   }
+
   .lmx-feed-composer__picker-option--active {
     background-color: var(--module-accent-light);
     color: var(--module-accent);
@@ -403,13 +442,16 @@
   .lmx-feed-composer__type-tabs {
     @apply inline-flex items-center gap-0.5;
   }
+
   .lmx-feed-composer__type-tab {
     @apply px-3 py-1.5 text-xs font-semibold rounded-tracker-md transition-all whitespace-nowrap;
     color: var(--tracker-ink-muted);
   }
+
   .lmx-feed-composer__type-tab:hover {
     color: var(--tracker-ink);
   }
+
   .lmx-feed-composer__type-tab--active {
     background-color: var(--module-accent);
     color: var(--tracker-on-brand);
@@ -420,6 +462,7 @@
     border: none;
     border-bottom: 1px solid #fca5a5;
   }
+
   .lmx-feed-composer__subject:focus,
   .lmx-feed-composer__subject--filled {
     border-bottom-color: var(--module-accent);
@@ -430,6 +473,7 @@
     @apply px-3 py-2 text-sm font-medium transition-colors;
     color: var(--tracker-ink-muted);
   }
+
   .lmx-feed-composer__footer-link:hover {
     color: var(--tracker-ink);
   }
@@ -440,6 +484,7 @@
     color: var(--tracker-ink);
     background-color: var(--tracker-surface);
   }
+
   .lmx-feed-composer__draft-btn:hover {
     background-color: var(--tracker-surface-1);
   }
@@ -449,6 +494,7 @@
     background-color: var(--module-accent);
     color: var(--tracker-on-brand);
   }
+
   .lmx-feed-composer__post-btn:hover:not(:disabled) {
     filter: brightness(1.05);
   }
@@ -525,6 +571,7 @@
     @apply flex items-center gap-1 p-1 rounded-[14px] border border-hairline bg-surface overflow-x-auto;
     scrollbar-width: none;
   }
+
   .lmx-tab-bar::-webkit-scrollbar {
     display: none;
   }
@@ -532,10 +579,12 @@
   .lmx-tab {
     @apply flex items-center gap-1.5 px-4 py-2 rounded-tracker-md text-xs font-semibold whitespace-nowrap transition-all text-ink-muted;
   }
+
   .lmx-tab:hover {
     @apply text-ink;
     background-color: var(--tracker-surface-1);
   }
+
   .lmx-tab-active {
     background-color: var(--module-accent-light);
     color: var(--module-accent);
@@ -573,6 +622,7 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
+
   .pay-amount-xl {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
@@ -580,6 +630,7 @@
     font-size: var(--pay-figure-xl);
     color: var(--pay-ink-net);
   }
+
   .pay-amount-lg {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
@@ -587,6 +638,7 @@
     font-size: var(--pay-figure-lg);
     color: var(--pay-ink-net);
   }
+
   .pay-amount-md {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
@@ -594,15 +646,25 @@
     font-size: var(--pay-figure-md);
     color: var(--pay-ink-net);
   }
+
   .pay-amount-sm {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
     font-size: var(--pay-figure-sm);
     color: var(--pay-ink-gross);
   }
-  .pay-amount-earn   { color: var(--pay-ink-earn) !important; }
-  .pay-amount-deduct { color: var(--pay-ink-deduct) !important; }
-  .pay-amount-gross  { color: var(--pay-ink-gross) !important; }
+
+  .pay-amount-earn {
+    color: var(--pay-ink-earn) !important;
+  }
+
+  .pay-amount-deduct {
+    color: var(--pay-ink-deduct) !important;
+  }
+
+  .pay-amount-gross {
+    color: var(--pay-ink-gross) !important;
+  }
 
   /* Section card — payroll left accent */
   .pay-card {
@@ -632,11 +694,31 @@
     font-weight: 600;
     white-space: nowrap;
   }
-  .pay-status-chip--draft      { background: var(--pay-status-draft-bg);      color: var(--pay-status-draft-text); }
-  .pay-status-chip--processing { background: var(--pay-status-processing-bg); color: var(--pay-status-processing-text); }
-  .pay-status-chip--processed  { background: var(--pay-status-processed-bg);  color: var(--pay-status-processed-text); }
-  .pay-status-chip--approved   { background: var(--pay-status-approved-bg);   color: var(--pay-status-approved-text); }
-  .pay-status-chip--paid       { background: var(--pay-status-paid-bg);       color: var(--pay-status-paid-text); }
+
+  .pay-status-chip--draft {
+    background: var(--pay-status-draft-bg);
+    color: var(--pay-status-draft-text);
+  }
+
+  .pay-status-chip--processing {
+    background: var(--pay-status-processing-bg);
+    color: var(--pay-status-processing-text);
+  }
+
+  .pay-status-chip--processed {
+    background: var(--pay-status-processed-bg);
+    color: var(--pay-status-processed-text);
+  }
+
+  .pay-status-chip--approved {
+    background: var(--pay-status-approved-bg);
+    color: var(--pay-status-approved-text);
+  }
+
+  .pay-status-chip--paid {
+    background: var(--pay-status-paid-bg);
+    color: var(--pay-status-paid-text);
+  }
 
   /* Breakdown row (payslip earnings/deductions line) */
   .pay-row {
@@ -647,11 +729,16 @@
     padding-bottom: 0.625rem;
     border-bottom: 1px solid var(--pay-border);
   }
-  .pay-row:last-child { border-bottom: none; }
+
+  .pay-row:last-child {
+    border-bottom: none;
+  }
+
   .pay-row__label {
     font-size: 13px;
     color: var(--pay-ink-label);
   }
+
   .pay-row__value {
     font-size: 13px;
     font-weight: 600;
@@ -659,11 +746,29 @@
     letter-spacing: -0.01em;
     color: var(--pay-ink-gross);
   }
-  .pay-row--earn   .pay-row__value { color: var(--pay-ink-earn); }
-  .pay-row--deduct .pay-row__value { color: var(--pay-ink-deduct); }
-  .pay-row--total  .pay-row__label { font-size: 14px; font-weight: 600; color: var(--tracker-ink); }
-  .pay-row--total  .pay-row__value { font-size: 15px; }
-  .pay-row--net    .pay-row__value { color: var(--pay-ink-net); font-size: 16px; }
+
+  .pay-row--earn .pay-row__value {
+    color: var(--pay-ink-earn);
+  }
+
+  .pay-row--deduct .pay-row__value {
+    color: var(--pay-ink-deduct);
+  }
+
+  .pay-row--total .pay-row__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tracker-ink);
+  }
+
+  .pay-row--total .pay-row__value {
+    font-size: 15px;
+  }
+
+  .pay-row--net .pay-row__value {
+    color: var(--pay-ink-net);
+    font-size: 16px;
+  }
 
   /* Run progress bar */
   .pay-progress {
@@ -673,6 +778,7 @@
     height: 6px;
     background-color: var(--pay-progress-track);
   }
+
   .pay-progress__fill {
     height: 100%;
     background-color: var(--pay-progress-fill);
@@ -695,6 +801,7 @@
     box-shadow: var(--tracker-shadow-card);
     padding: 1.25rem;
   }
+
   .pay-stat-card__label {
     font-size: 11px;
     font-weight: 600;
@@ -703,6 +810,7 @@
     margin-bottom: 0.25rem;
     color: var(--pay-ink-label);
   }
+
   .pay-stat-card__value {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
@@ -710,6 +818,7 @@
     font-size: 26px;
     color: var(--pay-ink-net);
   }
+
   .pay-stat-card__sub {
     font-size: 12px;
     margin-top: 0.125rem;
@@ -766,25 +875,30 @@ html.theme-transition .lmx-login-shell {
   0% {
     opacity: 0;
   }
+
   40% {
     opacity: 0.28;
   }
+
   100% {
     opacity: 0;
   }
 }
 
 @keyframes lmx-login-theme-fade {
+
   0%,
   100% {
     opacity: 1;
   }
+
   45% {
     opacity: 0.92;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   html.theme-transition::before,
   html.theme-transition .lmx-login-shell {
     animation: none;

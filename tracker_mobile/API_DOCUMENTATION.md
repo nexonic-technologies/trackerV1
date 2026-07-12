@@ -108,7 +108,7 @@ All populate endpoints return a unified JSON response payload:
           "userStory": "Steps to reproduce: ...",
           "priority": "High", // 'Low', 'Medium', 'High', 'Critical'
           "type": "Bug", // 'Bug', 'Feature', 'Enhancement', 'Support'
-          "product": "Logimax ERP",
+          "product": "Workhub ERP",
           "dueDate": "2026-06-25",
           "createdBy": "current_user_id",
           "status": "Open"

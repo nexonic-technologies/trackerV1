@@ -1,5 +1,5 @@
 ---
-description: Index of all workflows available for the Logimax ERP Tracker Agent System
+description: Index of all workflows available for the Workhub ERP Tracker Agent System
 ---
 
 # Workflow Index

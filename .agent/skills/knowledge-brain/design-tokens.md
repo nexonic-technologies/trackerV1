@@ -1,8 +1,8 @@
-# UI Design Tokens (Logimax ERP)
+# UI Design Tokens (Workhub ERP)
 
 | Layer | Path |
 |-------|------|
-| Canonical spec | `backend/DESIGN.md` v2.0 (Logimax-ERP-design-system) |
+| Canonical spec | `backend/DESIGN.md` v2.0 (Workhub-ERP-design-system) |
 | CSS + Tailwind | `frontend/src/styles/tokens.css` |
 | JS module map | `frontend/src/constants/uiTokens.js` |
 | Agent skill | `.agent/skills/frontend-ui-tokens/SKILL.md` |

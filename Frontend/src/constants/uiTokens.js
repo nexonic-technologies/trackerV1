@@ -1,5 +1,5 @@
 /**
- * Logimax ERP UI tokens — maps to backend/DESIGN.md v2.0 module accents.
+ * Workhub ERP UI tokens — maps to backend/DESIGN.md v2.0 module accents.
  */
 
 export const MODULES = {

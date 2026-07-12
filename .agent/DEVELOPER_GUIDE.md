@@ -1,8 +1,8 @@
-# Developer Guide — Logimax ERP Tracker Agent System
+# Developer Guide — Workhub ERP Tracker Agent System
 
 ## Overview
 
-This `.agent/` directory contains the AI-assisted development system for the **Logimax ERP Tracker** project. Built for the **React + Vite + Express + MongoDB** tech stack.
+This `.agent/` directory contains the AI-assisted development system for the **Workhub ERP Tracker** project. Built for the **React + Vite + Express + MongoDB** tech stack.
 
 ## Tech Stack
 

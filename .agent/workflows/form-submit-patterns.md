@@ -54,7 +54,7 @@ const handleSubmit = (payload, meta) => {
 
 ## Draft recovery on failure
 
-- Key: `formDraftKey(model, id || "new")` → `logimax:form-draft:{model}:{id}`
+- Key: `formDraftKey(model, id || "new")` → `Workhub:form-draft:{model}:{id}`
 - Failed queue jobs call `saveFormDraft(key, { formData, ... })`.
 - List pages show `FormDraftBanner` → **Restore** opens form with `state.restoreDraft: true`.
 - Successful save clears draft via `clearFormDraft` in queue.

@@ -26,7 +26,7 @@ async function runTest() {
   let employee = await models.employees.findOne({ status: "Active" });
   if (!employee) {
     employee = await models.employees.create({
-      basicInfo: { firstName: "Test", lastName: "Developer", email: "test-dev@logimax.com" },
+      basicInfo: { firstName: "Test", lastName: "Developer", email: "test-dev@Workhub.com" },
       professionalInfo: { empId: "TEST001" },
       status: "Active"
     });

@@ -120,7 +120,7 @@ const MaintenancePage = ({ message, scheduledEnd, onRetry }) => {
 
         {/* Subtitle */}
         <p className="text-sm text-ink-muted leading-relaxed max-w-xs mb-6">
-          {message || "Logimax Tracker is undergoing scheduled maintenance. We're working hard to restore service."}
+          {message || "Workhub Tracker is undergoing scheduled maintenance. We're working hard to restore service."}
         </p>
 
         {/* Countdown */}
@@ -128,9 +128,9 @@ const MaintenancePage = ({ message, scheduledEnd, onRetry }) => {
           <div
             className="flex items-center gap-2 px-4 py-2.5 rounded-tracker-lg border mb-6 text-sm font-semibold"
             style={{
-              background:   "var(--module-project-light)",
-              borderColor:  "color-mix(in srgb, var(--module-project) 30%, transparent)",
-              color:        "var(--module-project)",
+              background: "var(--module-project-light)",
+              borderColor: "color-mix(in srgb, var(--module-project) 30%, transparent)",
+              color: "var(--module-project)",
             }}
           >
             <Clock size={14} />
@@ -166,7 +166,7 @@ const MaintenancePage = ({ message, scheduledEnd, onRetry }) => {
 
       {/* Footer */}
       <p className="absolute bottom-6 text-[11px] text-ink-tertiary">
-        Logimax ERP · Tracker
+        Workhub ERP · Tracker
       </p>
     </div>
   );

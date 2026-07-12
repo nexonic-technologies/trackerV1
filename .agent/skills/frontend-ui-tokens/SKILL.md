@@ -1,7 +1,7 @@
 ---
 name: frontend-ui-tokens
 description: |
-  Applies Logimax ERP design tokens from backend/DESIGN.md v2, frontend/src/styles/tokens.css, and uiTokens.js. 
+  Applies Workhub ERP design tokens from backend/DESIGN.md v2, frontend/src/styles/tokens.css, and uiTokens.js. 
   Enforces theme-aware (light/dark) and responsive layouts on every page. 
   Apply these tokens and rules to all new or modified React components in the frontend codebase (including login, shell, forms, and dashboards). 
   Do not retroactively change third-party vendor components unless explicitly migrating them to use tokens.
@@ -9,7 +9,7 @@ description: |
   Include automated contrast checks in CI and add tests that validate token contrast in both .light and .dark modes.
 ---
 
-# Frontend UI Tokens (Logimax ERP)
+# Frontend UI Tokens (Workhub ERP)
 
 ## Mandatory rules (enforce by CI/linting)
 
@@ -30,7 +30,7 @@ description: |
 
 ## Token sources (priority)
 
-1. **`backend/DESIGN.md` v2** — Logimax ERP system (canonical)
+1. **`backend/DESIGN.md` v2** — Workhub ERP system (canonical)
 2. **`frontend/src/styles/tokens.css`** — CSS variables + component classes
 3. **`frontend/src/constants/uiTokens.js`** — module map, `APP_SHELL`, `STAT_CARD`
 
