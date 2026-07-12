@@ -1,16 +1,16 @@
 # Graph Report - trackerV1  (2026-07-12)
 
 ## Corpus Check
-- 906 files · ~751,973 words
+- 906 files · ~751,978 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 9104 nodes · 11320 edges · 729 communities (619 shown, 110 thin omitted)
+- 9104 nodes · 11320 edges · 728 communities (618 shown, 110 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 75 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `967fe569`
+- Built from commit: `c34f2c57`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -553,7 +553,6 @@
 - [[_COMMUNITY_Community 612|Community 612]]
 - [[_COMMUNITY_Community 613|Community 613]]
 - [[_COMMUNITY_Community 614|Community 614]]
-- [[_COMMUNITY_Community 615|Community 615]]
 - [[_COMMUNITY_Community 616|Community 616]]
 - [[_COMMUNITY_Community 617|Community 617]]
 - [[_COMMUNITY_Community 618|Community 618]]
@@ -646,15 +645,15 @@
 - `getDetailedFields()` --calls--> `populateHelper`  [EXTRACTED]
   Backend/src/helper/populateHelper.js → backend/documentation/backend_Technical_Architecture_Documentation.md
 
-## Communities (729 total, 110 thin omitted)
+## Communities (728 total, 110 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.01
 Nodes (102): update(), ALL_MODELS, FULL_ACCESS, seed(), Departments(), Designations(), EmailConfig(), LeaveTypes() (+94 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.14
-Nodes (16): ThemeToggler(), useNotification(), prefersReducedMotion(), runThemeTransition(), ThemeContext, ThemeProvider(), useTheme(), api (+8 more)
+Cohesion: 0.39
+Nodes (5): api, useRealtimeSync(), api, useTaskMutations(), useTaskStore
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
@@ -693,8 +692,8 @@ Cohesion: 0.06
 Nodes (31): 10. Engineering Score Card, 11. `verify [model]` — Scoped, 12. `verify system` — Full, No Exceptions, 1. Architecture Compliance Audit, 1. Audit Severity, 1. Code Philosophy & Quality Audit, 2. Architecture Compliance (🔴), 2. Architecture Compliance Audit (🔴 Blocking) (+23 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.04
-Nodes (27): STATUS_COLORS, PriorityTasks(), COLOR_MAP, StatCard(), useAnimatedCounter(), DashboardHero(), getFormattedDate(), getGreeting() (+19 more)
+Cohesion: 0.05
+Nodes (20): PriorityTasks(), COLOR_MAP, StatCard(), useAnimatedCounter(), DashboardHero(), getFormattedDate(), getGreeting(), LEAVE_COLORS (+12 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.16
@@ -785,8 +784,8 @@ Cohesion: 0.09
 Nodes (14): EXPENSE_TYPES, AuthContext, ROLE_MAPPING, Comment, PRIORITY_COLORS, STATUS_COLORS, TicketDetail, PRIORITY_COLORS (+6 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.04
-Nodes (48): getDeviceUUID(), Allocations(), Incidents(), buildCategoryColumns(), ClientKanbanPage(), PRIORITY_COLS, STATUS_COLS, AddComment() (+40 more)
+Cohesion: 0.05
+Nodes (48): getDeviceUUID(), Allocations(), Incidents(), AddComment(), InlineEdit(), getToken(), ThemeToggler(), InlineEditProps (+40 more)
 
 ### Community 35 - "Community 35"
 Cohesion: 0.07
@@ -889,8 +888,8 @@ Cohesion: 0.18
 Nodes (4): runTest(), AttendanceSchema, LeaveSchema, ComputationService
 
 ### Community 61 - "Community 61"
-Cohesion: 0.05
-Nodes (34): clientsConfig, ACCENT_COLORS, Avatar(), avatarColor(), Clients(), initials(), STATUS_CHIP, clientFormFields (+26 more)
+Cohesion: 0.04
+Nodes (35): clientsConfig, ACCENT_COLORS, Avatar(), avatarColor(), Clients(), initials(), STATUS_CHIP, STATUS_COLORS (+27 more)
 
 ### Community 62 - "Community 62"
 Cohesion: 0.08
@@ -1030,7 +1029,7 @@ Nodes (6): capitalize(), COLOR_PALETTE, DEFAULT_META_STATUSES, KNOWN_MODELS, MET
 
 ### Community 97 - "Community 97"
 Cohesion: 0.10
-Nodes (20): Form layout (no FloatingCard), Frontend UI Tokens (Logimax ERP), Implementation anti-patterns, Module accents (one screen = one module), Quick classes, Related, Responsive checklist, Theme-aware checklist (+12 more)
+Nodes (20): Form layout (no FloatingCard), Frontend UI Tokens (Workhub ERP), Implementation anti-patterns, Module accents (one screen = one module), Quick classes, Related, Responsive checklist, Theme-aware checklist (+12 more)
 
 ### Community 98 - "Community 98"
 Cohesion: 0.17
@@ -1066,7 +1065,7 @@ Nodes (11): Audit Rounds, Module Bug Audit Workflow, Output, Prerequisites, Purp
 
 ### Community 106 - "Community 106"
 Cohesion: 0.17
-Nodes (10): Adapted From, code:block1 (.agent/), Developer Guide — Logimax ERP Tracker Agent System, Directory Structure, Key Workflows, Module Registry, Overview, Quick Start (+2 more)
+Nodes (10): Adapted From, code:block1 (.agent/), Developer Guide — Workhub ERP Tracker Agent System, Directory Structure, Key Workflows, Module Registry, Overview, Quick Start (+2 more)
 
 ### Community 107 - "Community 107"
 Cohesion: 0.17
@@ -1074,11 +1073,11 @@ Nodes (10): Build System Brain Workflow, code:block1 (knowledge_brain/_SYSTEM/),
 
 ### Community 108 - "Community 108"
 Cohesion: 0.03
-Nodes (25): STATUS_CHIP, axiosInstance, failedQueue, forceLogout(), incrementFailedCount(), setAuthLogout(), setMaintenanceHandler(), token (+17 more)
+Nodes (24): STATUS_CHIP, axiosInstance, failedQueue, forceLogout(), incrementFailedCount(), setAuthLogout(), setMaintenanceHandler(), token (+16 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.18
-Nodes (10): Form layout (no FloatingCard), Frontend UI Tokens (Logimax ERP), Implementation anti-patterns, Module accents (one screen = one module), Quick classes, Related, Responsive checklist, Theme-aware checklist (+2 more)
+Nodes (10): Form layout (no FloatingCard), Frontend UI Tokens (Workhub ERP), Implementation anti-patterns, Module accents (one screen = one module), Quick classes, Related, Responsive checklist, Theme-aware checklist (+2 more)
 
 ### Community 110 - "Community 110"
 Cohesion: 0.18
@@ -1094,7 +1093,7 @@ Nodes (11): devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, esli
 
 ### Community 114 - "Community 114"
 Cohesion: 0.18
-Nodes (10): Form layout (no FloatingCard), Frontend UI Tokens (Logimax ERP), Implementation anti-patterns, Mandatory rules, Module accents (one screen = one module), Quick classes, Related, Responsive checklist (+2 more)
+Nodes (10): Form layout (no FloatingCard), Frontend UI Tokens (Workhub ERP), Implementation anti-patterns, Mandatory rules, Module accents (one screen = one module), Quick classes, Related, Responsive checklist (+2 more)
 
 ### Community 115 - "Community 115"
 Cohesion: 0.17
@@ -1102,7 +1101,7 @@ Nodes (10): Architecture Overview, AWS API Gateway-Style Rate Limiting & Queuein
 
 ### Community 116 - "Community 116"
 Cohesion: 0.22
-Nodes (7): Architecture Document: Logimax HR Tracker System, code:block1 (┌─────────────────┐    ┌─────────────────┐    ┌─────────────), **Current Security Measures:**, High-Level Architecture, Security Considerations, **Security Gaps to Address:**, System Overview
+Nodes (7): Architecture Document: Workhub HR Tracker System, code:block1 (┌─────────────────┐    ┌─────────────────┐    ┌─────────────), **Current Security Measures:**, High-Level Architecture, Security Considerations, **Security Gaps to Address:**, System Overview
 
 ### Community 117 - "Community 117"
 Cohesion: 0.18
@@ -1294,7 +1293,7 @@ Nodes (52): AlertDialog, build, _buildEmptyState, _buildFeedPostCard, _buildFilt
 
 ### Community 167 - "Community 167"
 Cohesion: 0.22
-Nodes (7): Agent Behavioral Rules, Central Configuration — Logimax ERP Tracker System, Directory Structure, Environment Paths, Module Registry, Project Identity, Tech Stack
+Nodes (7): Agent Behavioral Rules, Central Configuration — Workhub ERP Tracker System, Directory Structure, Environment Paths, Module Registry, Project Identity, Tech Stack
 
 ### Community 168 - "Community 168"
 Cohesion: 0.22
@@ -1822,7 +1821,7 @@ Nodes (6): RunnerTests, RunnerTests, RunnerTests, RunnerTests, RunnerTests, XCTe
 
 ### Community 308 - "Community 308"
 Cohesion: 0.03
-Nodes (58): ActivityDetailPage(), DailyTracker(), AttendanceApprovalPage(), fmt12(), fmtHM(), getDaysInMonth(), MONTH_NAMES, MonthlySummary() (+50 more)
+Nodes (62): ActivityDetailPage(), DailyTracker(), AttendanceApprovalPage(), fmt12(), fmtHM(), getDaysInMonth(), MONTH_NAMES, MonthlySummary() (+54 more)
 
 ### Community 309 - "Community 309"
 Cohesion: 0.05
@@ -2001,8 +2000,8 @@ Cohesion: 0.03
 Nodes (63): 28.10 Architectural Notes, 28.1 Why does this collection exist?, 28.2 What business problem does it solve?, 28.3 What relationships does it build?, 28.4 Which architectural category does it belong to?, 28.5 What is the ultimate purpose of this model?, 28.6 Why was this separated into its own collection?, 28.7 What would happen if this collection disappeared? (+55 more)
 
 ### Community 440 - "Community 440"
-Cohesion: 0.17
-Nodes (4): FALLBACK_TOKEN, PRIORITY_CELL, PRIORITY_TOKENS, STATUS_TOKENS
+Cohesion: 0.05
+Nodes (22): buildCategoryColumns(), ClientKanbanPage(), PRIORITY_COLS, STATUS_COLS, FALLBACK_TOKEN, PRIORITY_CELL, PRIORITY_TOKENS, STATUS_TOKENS (+14 more)
 
 ### Community 445 - "Community 445"
 Cohesion: 0.09
@@ -2408,10 +2407,6 @@ Nodes (3): __dirname, __filename, seed()
 Cohesion: 0.22
 Nodes (9): dependencies, framer-motion, lucide-react, next, react, react-dom, react-hot-toast, @vercel/analytics (+1 more)
 
-### Community 615 - "Community 615"
-Cohesion: 0.33
-Nodes (4): DAY_LABELS, fmtDate(), SHIFT_COLORS, ShiftRoster()
-
 ### Community 616 - "Community 616"
 Cohesion: 0.28
 Nodes (5): EXPENSE_TYPES, blankDay(), blankExpense(), EXPENSE_TYPES, ExpenseTracker()
@@ -2642,7 +2637,7 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Tracker Mongoose Collections Reference` connect `Community 54` to `Community 512`, `Community 513`, `Community 514`, `Community 515`, `Community 516`, `Community 517`, `Community 518`, `Community 519`, `Community 520`, `Community 521`, `Community 522`, `Community 523`, `Community 524`, `Community 525`, `Community 526`, `Community 527`, `Community 528`, `Community 529`, `Community 530`, `Community 531`, `Community 532`, `Community 534`, `Community 535`, `Community 408`, `Community 537`, `Community 539`, `Community 429`, `Community 309`, `Community 313`, `Community 103`, `Community 501`, `Community 504`, `Community 506`, `Community 509`?**
   _High betweenness centrality (0.030) - this node is a cross-community bridge._
-- **Why does `sendNotification()` connect `Community 47` to `Community 0`, `Community 1`, `Community 194`, `Community 34`, `Community 38`, `Community 12`, `Community 89`?**
+- **Why does `sendNotification()` connect `Community 47` to `Community 0`, `Community 194`, `Community 34`, `Community 38`, `Community 12`, `Community 89`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `LeaveAndRegularization()` connect `Community 89` to `Community 33`, `Community 34`, `Community 70`, `Community 308`, `Community 247`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
@@ -2650,7 +2645,7 @@ _Questions this graph is uniquely positioned to answer:_
   _4969 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.011327698234719108 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.14245014245014245 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._

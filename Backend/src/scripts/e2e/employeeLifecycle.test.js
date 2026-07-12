@@ -67,7 +67,7 @@ export async function runEmployeeLifecycle() {
   console.log(`👤 Actor employee: ${adminEmp.basicInfo.firstName} (${adminEmp._id}) with role: ${superAdminRole.name}`);
 
   const uniqueSuffix = Date.now();
-  const empEmail = `e2e_employee_${uniqueSuffix}@logimax.com`;
+  const empEmail = `e2e_employee_${uniqueSuffix}@Workhub.com`;
   const empId = `EMP-E2E-${uniqueSuffix.toString().slice(-6)}`;
   const leaveTypeName = `Casual E2E ${uniqueSuffix}`;
   const leavePolicyName = `Policy E2E ${uniqueSuffix}`;

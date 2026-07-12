@@ -1,1 +1,30 @@
-{"nodes": [{"id": "e_loigmax_tracker_tracker_mobile_android_app_src_main_kotlin_com_logimax_tracker_tracker_mobile_mainactivity_kt", "label": "MainActivity.kt", "file_type": "code", "source_file": "E:\\Loigmax\\Tracker\\tracker_mobile\\android\\app\\src\\main\\kotlin\\com\\logimax\\tracker\\tracker_mobile\\MainActivity.kt", "source_location": "L1"}, {"id": "tracker_mobile_mainactivity_mainactivity", "label": "MainActivity", "file_type": "code", "source_file": "E:\\Loigmax\\Tracker\\tracker_mobile\\android\\app\\src\\main\\kotlin\\com\\logimax\\tracker\\tracker_mobile\\MainActivity.kt", "source_location": "L5"}], "edges": [{"source": "e_loigmax_tracker_tracker_mobile_android_app_src_main_kotlin_com_logimax_tracker_tracker_mobile_mainactivity_kt", "target": "tracker_mobile_mainactivity_mainactivity", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\tracker_mobile\\android\\app\\src\\main\\kotlin\\com\\logimax\\tracker\\tracker_mobile\\MainActivity.kt", "source_location": "L5", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "e_loigmax_tracker_tracker_mobile_android_app_src_main_kotlin_com_Workhub_tracker_tracker_mobile_mainactivity_kt",
+            "label": "MainActivity.kt",
+            "file_type": "code",
+            "source_file": "E:\\Loigmax\\Tracker\\tracker_mobile\\android\\app\\src\\main\\kotlin\\com\\Workhub\\tracker\\tracker_mobile\\MainActivity.kt",
+            "source_location": "L1"
+        },
+        {
+            "id": "tracker_mobile_mainactivity_mainactivity",
+            "label": "MainActivity",
+            "file_type": "code",
+            "source_file": "E:\\Loigmax\\Tracker\\tracker_mobile\\android\\app\\src\\main\\kotlin\\com\\Workhub\\tracker\\tracker_mobile\\MainActivity.kt",
+            "source_location": "L5"
+        }
+    ],
+    "edges": [
+        {
+            "source": "e_loigmax_tracker_tracker_mobile_android_app_src_main_kotlin_com_Workhub_tracker_tracker_mobile_mainactivity_kt",
+            "target": "tracker_mobile_mainactivity_mainactivity",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\tracker_mobile\\android\\app\\src\\main\\kotlin\\com\\Workhub\\tracker\\tracker_mobile\\MainActivity.kt",
+            "source_location": "L5",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

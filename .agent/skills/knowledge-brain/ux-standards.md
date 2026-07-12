@@ -17,7 +17,7 @@
 | Forgot Password | "Forgot?" link below password field | Uses module accent color, links to `/forgot-password` |
 | Submit Button | Brand gradient with ArrowRight icon | `tracker-btn-brand` (web) / blue filled + ArrowRight (mobile) |
 | Error State | Red banner above form | Shows validation and API error messages |
-| Branding | "WorkHub" name, "© {year} Portal" footer | No "Logimax" or old branding anywhere in UI |
+| Branding | "WorkHub" name, "© {year} Portal" footer | No "Workhub" or old branding anywhere in UI |
 
 ## 2. Splash Screen (web only: `SplashScreen.jsx`)
 
@@ -101,7 +101,7 @@ Each renders a 2-column stat card grid + 2-column action cards.
 
 | Asset | Standard |
 |-------|----------|
-| App Name | "WorkHub" (never "Logimax" or "LMX" in UI) |
+| App Name | "WorkHub" (never "Workhub" or "LMX" in UI) |
 | Footer | "© {currentYear} Portal" |
 | Icon | Initial letter "W" in brand container |
 | Gradient | Dark navy `#0F172A` → blue `#1E3A8A` for heroes |

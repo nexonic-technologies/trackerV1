@@ -44,7 +44,7 @@ async function verify() {
   const Employee = mongoose.model('employees');
   const Role = mongoose.model('roles');
 
-  const vendorName = 'TEST_VENDOR_LOGIMAX_ERP';
+  const vendorName = 'TEST_VENDOR_Workhub_ERP';
   const poNumber = 'TEST_PO_9999';
 
   // --- CLEANUP ---
@@ -98,8 +98,8 @@ async function verify() {
     modelName: 'assetvendors',
     body: {
       name: vendorName,
-      contactPerson: 'Logimax Lead Inspector',
-      email: 'logimax@test.com',
+      contactPerson: 'Workhub Lead Inspector',
+      email: 'Workhub@test.com',
       phone: '9998887776',
       gstIN: '33TESTG1234F1Z1',
       address: 'ERP Hub, Coimbatore',

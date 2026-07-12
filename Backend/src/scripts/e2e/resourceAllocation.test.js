@@ -47,7 +47,7 @@ export async function runResourceAllocation() {
   const clientName = `Client Alloc E2E ${uniqueSuffix}`;
   const projectName = `Project Alloc E2E ${uniqueSuffix}`;
   const taskTypeName = `TaskType Alloc E2E ${uniqueSuffix}`;
-  const empEmail = `e2e_alloc_employee_${uniqueSuffix}@logimax.com`;
+  const empEmail = `e2e_alloc_employee_${uniqueSuffix}@Workhub.com`;
   const empId = `EMP-AL-${uniqueSuffix.toString().slice(-6)}`;
   const deptName = `Dept Alloc E2E ${uniqueSuffix}`;
 

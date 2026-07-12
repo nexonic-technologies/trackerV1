@@ -112,7 +112,7 @@ await Comment.deleteOne({ _id: ObjectId("${deleteId}") });`;
               title: "Fix session refresh leak",
               status: readFilter === "assigned_me" ? "Open" : "Open",
               assignedTo: "user_123",
-              createdBy: populateAuthor ? { name: "Arunbharathi", email: "arunbharathi@logimaxindia.com" } : "user_123"
+              createdBy: populateAuthor ? { name: "Arunbharathi", email: "arunbharathi@Workhubindia.com" } : "user_123"
             }
           ]
         };
@@ -191,8 +191,8 @@ await Comment.deleteOne({ _id: ObjectId("${deleteId}") });`;
                     key={tab.id}
                     onClick={() => setOpType(tab.id)}
                     className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${isSelected
-                        ? "bg-slate-800 text-white shadow-md"
-                        : "text-slate-500 hover:text-slate-350"
+                      ? "bg-slate-800 text-white shadow-md"
+                      : "text-slate-500 hover:text-slate-350"
                       }`}
                   >
                     <Icon size={12} className={tab.color} />

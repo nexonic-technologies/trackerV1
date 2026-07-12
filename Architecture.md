@@ -1,8 +1,8 @@
-# Architecture Document: Logimax HR Tracker System
+# Architecture Document: Workhub HR Tracker System
 
 ## System Overview
 
-The Logimax HR Tracker is a multi-platform employee management system built with a unified backend serving three frontend applications:
+The Workhub HR Tracker is a multi-platform employee management system built with a unified backend serving three frontend applications:
 - **Web Application** (React + Vite)
 - **Mobile Application** (React Native + Expo)
 - **Document Platform** (Next.js - planned)

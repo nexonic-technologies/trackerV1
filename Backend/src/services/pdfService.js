@@ -62,7 +62,7 @@ const pdfService = {
         currentY += 10;
         doc.font('Helvetica-Bold').text('Subtotal:', 350, currentY);
         doc.text((oaData.subtotal || 0).toLocaleString(), 480, currentY, { align: 'right' });
-        
+
         currentY += 15;
         doc.text('GST Total:', 350, currentY);
         doc.text((oaData.taxTotal || 0).toLocaleString(), 480, currentY, { align: 'right' });
@@ -94,8 +94,8 @@ const pdfService = {
         doc.pipe(stream);
 
         // --- Header / Logo Area ---
-        doc.fillColor('#1E293B').fontSize(22).font('Helvetica-Bold').text('TRACKER LOGIMAX ERP', { align: 'left' });
-        doc.fontSize(10).font('Helvetica').fillColor('#64748B').text('Logimax Systems Pvt. Ltd. | Human Resources Department', { align: 'left' });
+        doc.fillColor('#1E293B').fontSize(22).font('Helvetica-Bold').text('TRACKER Workhub ERP', { align: 'left' });
+        doc.fontSize(10).font('Helvetica').fillColor('#64748B').text('Workhub Systems Pvt. Ltd. | Human Resources Department', { align: 'left' });
         doc.moveDown();
         doc.moveTo(50, doc.y).lineTo(560, doc.y).strokeColor('#E2E8F0').lineWidth(1).stroke();
         doc.moveDown(2);
@@ -122,7 +122,7 @@ const pdfService = {
         doc.font('Helvetica-Bold').fillColor('#0F172A').text(`Dear ${candidateData.firstName},`);
         doc.moveDown(0.5);
         doc.font('Helvetica').fillColor('#334155').text(
-          `We are pleased to offer you employment with Logimax Systems Pvt. Ltd. in the position of ${jobData.title || 'Software Developer'}. We were highly impressed by your credentials and look forward to welcoming you to our team.`,
+          `We are pleased to offer you employment with Workhub Systems Pvt. Ltd. in the position of ${jobData.title || 'Software Developer'}. We were highly impressed by your credentials and look forward to welcoming you to our team.`,
           { align: 'justify', lineGap: 2 }
         );
         doc.moveDown();
@@ -136,37 +136,37 @@ const pdfService = {
         doc.text(`• Offered CTC: INR ${(candidateData.offeredSalary || 0).toLocaleString()} per annum`);
         doc.text(`• Joining Date: ${candidateData.joiningDate ? new Date(candidateData.joiningDate).toLocaleDateString() : 'To Be Confirmed'}`);
         doc.text(`• Offer Validity: Until ${candidateData.offerExpiryDate ? new Date(candidateData.offerExpiryDate).toLocaleDateString() : 'N/A'}`);
-        
+
         doc.moveDown(1.5);
 
         // --- Who to Contact for What Section ---
         doc.font('Helvetica-Bold').fillColor('#1E3A8A').text('🔑 Key Contact Info (Who to Contact for What):');
         doc.moveDown(0.5);
-        
+
         doc.font('Helvetica-Bold').fillColor('#0F172A').text('1. Onboarding & Documentation Formalities:');
         doc.font('Helvetica').fillColor('#334155').text(`   • Contact: Human Resources (HR) Department`);
-        doc.text(`   • Email: ${hrConfig.hrEmail || 'hr@logimax.com'}`);
+        doc.text(`   • Email: ${hrConfig.hrEmail || 'hr@Workhub.com'}`);
         doc.text('   • Purpose: Submitting personal ID proofs, signing NDA, and verification of background letters.');
         doc.moveDown(0.5);
 
         doc.font('Helvetica-Bold').fillColor('#0F172A').text('2. IT Assets & Setup (Laptop, Software Accounts):');
         doc.font('Helvetica').fillColor('#334155').text(`   • Contact: IT Service Desk Team`);
-        doc.text(`   • Email: ${hrConfig.itEmail || 'it@logimax.com'}`);
+        doc.text(`   • Email: ${hrConfig.itEmail || 'it@Workhub.com'}`);
         doc.text('   • Purpose: Requesting company laptop assignment, email portal, and dev environment setup.');
         doc.moveDown(0.5);
 
         doc.font('Helvetica-Bold').fillColor('#0F172A').text('3. Reporting, Team Induction & Tasks:');
         doc.font('Helvetica').fillColor('#334155').text(`   • Contact: ${hrConfig.managerName || 'Your Reporting Manager'}`);
-        doc.text(`   • Email: ${hrConfig.managerEmail || 'manager@logimax.com'}`);
+        doc.text(`   • Email: ${hrConfig.managerEmail || 'manager@Workhub.com'}`);
         doc.text('   • Purpose: Initial team induction training, tasks alignment, and shift assignment planning.');
-        
+
         doc.moveDown(1.5);
 
         // --- Signature ---
         doc.font('Helvetica').fillColor('#334155').text('Please review the offer details. We request you to accept the offer by signing and returning a copy to us.');
         doc.moveDown(1.5);
-        
-        doc.font('Helvetica-Bold').text('For Logimax Systems Pvt. Ltd.,');
+
+        doc.font('Helvetica-Bold').text('For Workhub Systems Pvt. Ltd.,');
         doc.moveDown(2.5);
         doc.font('Helvetica-Bold').text('Authorized HR Signatory');
 

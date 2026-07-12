@@ -1,1 +1,271 @@
-{"nodes": [{"id": "e_loigmax_tracker_agent_claude_md", "label": "Claude.md", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L1"}, {"id": "agent_claude_step_zero_before_any_task_non_negotiable", "label": "\u26d4 STEP ZERO \u2014 BEFORE ANY TASK (NON-NEGOTIABLE)", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L1"}, {"id": "agent_claude_1_load_the_knowledge_brain_skill", "label": "1. Load the Knowledge Brain skill", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L7"}, {"id": "agent_claude_2_for_ui_styling_tasks", "label": "2. For UI / styling tasks", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L11"}, {"id": "agent_claude_3_then_proceed_with_code_investigation", "label": "3. THEN proceed with code investigation", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L15"}, {"id": "agent_claude_project_rules_logimax_erp_tracker_system", "label": "Project Rules \u2014 Logimax ERP Tracker System", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L23"}, {"id": "agent_claude_1_framework_coding_standards", "label": "1. Framework & Coding Standards", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L29"}, {"id": "agent_claude_frontend_react_vite_javascript", "label": "Frontend (React + Vite + JavaScript)", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L31"}, {"id": "agent_claude_backend_express_5_mongoose_8_mongodb", "label": "Backend (Express 5 + Mongoose 8 + MongoDB)", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L53"}, {"id": "agent_claude_2_api_data_flow", "label": "2. API & Data Flow", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L74"}, {"id": "agent_claude_codeblock_1", "label": "code:block1 (Browser \u2192 React (pages/components))", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L77"}, {"id": "agent_claude_3_frontend_conventions", "label": "3. Frontend Conventions", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L96"}, {"id": "agent_claude_4_backend_conventions", "label": "4. Backend Conventions", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L108"}, {"id": "agent_claude_5_safety_guardrails", "label": "5. Safety & Guardrails", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L120"}, {"id": "agent_claude_6_documentation_process", "label": "6. Documentation & Process", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L132"}, {"id": "agent_claude_7_environment", "label": "7. Environment", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L146"}, {"id": "agent_claude_8_modules", "label": "8. Modules", "file_type": "document", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L163"}], "edges": [{"source": "e_loigmax_tracker_agent_claude_md", "target": "agent_claude_step_zero_before_any_task_non_negotiable", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L1", "weight": 1.0}, {"source": "agent_claude_step_zero_before_any_task_non_negotiable", "target": "agent_claude_1_load_the_knowledge_brain_skill", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L7", "weight": 1.0}, {"source": "agent_claude_step_zero_before_any_task_non_negotiable", "target": "agent_claude_2_for_ui_styling_tasks", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L11", "weight": 1.0}, {"source": "agent_claude_step_zero_before_any_task_non_negotiable", "target": "agent_claude_3_then_proceed_with_code_investigation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L15", "weight": 1.0}, {"source": "e_loigmax_tracker_agent_claude_md", "target": "agent_claude_project_rules_logimax_erp_tracker_system", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L23", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_1_framework_coding_standards", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L29", "weight": 1.0}, {"source": "agent_claude_1_framework_coding_standards", "target": "agent_claude_frontend_react_vite_javascript", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L31", "weight": 1.0}, {"source": "agent_claude_1_framework_coding_standards", "target": "agent_claude_backend_express_5_mongoose_8_mongodb", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L53", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_2_api_data_flow", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L74", "weight": 1.0}, {"source": "agent_claude_2_api_data_flow", "target": "agent_claude_codeblock_1", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L77", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_3_frontend_conventions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L96", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_4_backend_conventions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L108", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_5_safety_guardrails", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L120", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_6_documentation_process", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L132", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_7_environment", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L146", "weight": 1.0}, {"source": "agent_claude_project_rules_logimax_erp_tracker_system", "target": "agent_claude_8_modules", "relation": "contains", "confidence": "EXTRACTED", "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md", "source_location": "L163", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+    "nodes": [
+        {
+            "id": "e_loigmax_tracker_agent_claude_md",
+            "label": "Claude.md",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L1"
+        },
+        {
+            "id": "agent_claude_step_zero_before_any_task_non_negotiable",
+            "label": "\u26d4 STEP ZERO \u2014 BEFORE ANY TASK (NON-NEGOTIABLE)",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L1"
+        },
+        {
+            "id": "agent_claude_1_load_the_knowledge_brain_skill",
+            "label": "1. Load the Knowledge Brain skill",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L7"
+        },
+        {
+            "id": "agent_claude_2_for_ui_styling_tasks",
+            "label": "2. For UI / styling tasks",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L11"
+        },
+        {
+            "id": "agent_claude_3_then_proceed_with_code_investigation",
+            "label": "3. THEN proceed with code investigation",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L15"
+        },
+        {
+            "id": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "label": "Project Rules \u2014 Workhub ERP Tracker System",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L23"
+        },
+        {
+            "id": "agent_claude_1_framework_coding_standards",
+            "label": "1. Framework & Coding Standards",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L29"
+        },
+        {
+            "id": "agent_claude_frontend_react_vite_javascript",
+            "label": "Frontend (React + Vite + JavaScript)",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L31"
+        },
+        {
+            "id": "agent_claude_backend_express_5_mongoose_8_mongodb",
+            "label": "Backend (Express 5 + Mongoose 8 + MongoDB)",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L53"
+        },
+        {
+            "id": "agent_claude_2_api_data_flow",
+            "label": "2. API & Data Flow",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L74"
+        },
+        {
+            "id": "agent_claude_codeblock_1",
+            "label": "code:block1 (Browser \u2192 React (pages/components))",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L77"
+        },
+        {
+            "id": "agent_claude_3_frontend_conventions",
+            "label": "3. Frontend Conventions",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L96"
+        },
+        {
+            "id": "agent_claude_4_backend_conventions",
+            "label": "4. Backend Conventions",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L108"
+        },
+        {
+            "id": "agent_claude_5_safety_guardrails",
+            "label": "5. Safety & Guardrails",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L120"
+        },
+        {
+            "id": "agent_claude_6_documentation_process",
+            "label": "6. Documentation & Process",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L132"
+        },
+        {
+            "id": "agent_claude_7_environment",
+            "label": "7. Environment",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L146"
+        },
+        {
+            "id": "agent_claude_8_modules",
+            "label": "8. Modules",
+            "file_type": "document",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L163"
+        }
+    ],
+    "edges": [
+        {
+            "source": "e_loigmax_tracker_agent_claude_md",
+            "target": "agent_claude_step_zero_before_any_task_non_negotiable",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_step_zero_before_any_task_non_negotiable",
+            "target": "agent_claude_1_load_the_knowledge_brain_skill",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_step_zero_before_any_task_non_negotiable",
+            "target": "agent_claude_2_for_ui_styling_tasks",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_step_zero_before_any_task_non_negotiable",
+            "target": "agent_claude_3_then_proceed_with_code_investigation",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "e_loigmax_tracker_agent_claude_md",
+            "target": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_1_framework_coding_standards",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L29",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_1_framework_coding_standards",
+            "target": "agent_claude_frontend_react_vite_javascript",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L31",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_1_framework_coding_standards",
+            "target": "agent_claude_backend_express_5_mongoose_8_mongodb",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L53",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_2_api_data_flow",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L74",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_2_api_data_flow",
+            "target": "agent_claude_codeblock_1",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L77",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_3_frontend_conventions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L96",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_4_backend_conventions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L108",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_5_safety_guardrails",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L120",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_6_documentation_process",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L132",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_7_environment",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L146",
+            "weight": 1.0
+        },
+        {
+            "source": "agent_claude_project_rules_Workhub_erp_tracker_system",
+            "target": "agent_claude_8_modules",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "E:\\Loigmax\\Tracker\\.agent\\Claude.md",
+            "source_location": "L163",
+            "weight": 1.0
+        }
+    ],
+    "input_tokens": 0,
+    "output_tokens": 0
+}

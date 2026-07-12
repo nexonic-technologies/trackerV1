@@ -94,8 +94,8 @@ export default function candidates() {
           };
 
           const hrConfig = {
-            hrEmail: 'hr@logimax.com',
-            itEmail: 'it@logimax.com',
+            hrEmail: 'hr@Workhub.com',
+            itEmail: 'it@Workhub.com',
             managerName,
             managerEmail
           };
@@ -109,7 +109,7 @@ export default function candidates() {
           const pdfPath = path.join(uploadsDir, pdfFilename);
 
           await pdfService.generateOfferLetter(candidate, jobData, hrConfig, pdfPath);
-          
+
           // Update Candidate with offerLetterUrl
           const relativeUrl = `/uploads/offer_letters/${pdfFilename}`;
           const { default: CandidateModel } = await import('../models/Candidate.js');
@@ -126,12 +126,12 @@ export default function candidates() {
               tls: { rejectUnauthorized: false }
             });
 
-            const emailSubject = `Official Offer of Employment - Logimax Systems Pvt. Ltd.`;
+            const emailSubject = `Official Offer of Employment - Workhub Systems Pvt. Ltd.`;
             const emailHtml = `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 25px; border-radius: 8px; color: #1e293b;">
                 <h2 style="color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">Congratulations ${candidate.firstName}!</h2>
                 <p>Dear ${candidate.firstName},</p>
-                <p>We are delighted to offer you the position of <strong>${jobData.title}</strong> at Logimax Systems Pvt. Ltd. Your skills and experience will be a valuable addition to our team.</p>
+                <p>We are delighted to offer you the position of <strong>${jobData.title}</strong> at Workhub Systems Pvt. Ltd. Your skills and experience will be a valuable addition to our team.</p>
                 
                 <p>Please find attached your official <strong>Offer of Employment</strong> letter containing detailed information about your position, compensation, and onboarding process.</p>
                 
@@ -147,7 +147,7 @@ export default function candidates() {
                 <p>Please review the details in the attached PDF. To accept the offer, sign the document and return it to us before the expiry date: <strong>${candidate.offerExpiryDate ? new Date(candidate.offerExpiryDate).toLocaleDateString() : 'N/A'}</strong>.</p>
                 
                 <p style="margin-top: 30px;">Best Regards,</p>
-                <p><strong>Human Resources Department</strong><br>Logimax Systems Pvt. Ltd.</p>
+                <p><strong>Human Resources Department</strong><br>Workhub Systems Pvt. Ltd.</p>
               </div>
             `;
 
@@ -243,8 +243,8 @@ export default function candidates() {
           // 2. Fallback: seed the 12 approved default document slots if no workflow config exists
           if (checklist.length === 0) {
             const defaultDocTypes = [
-              'Resume', 'Photo', 'PAN', 'Aadhaar', 'Passport', 'Degree', 
-              'Experience Letter', 'Relieving Letter', 'Offer Letter', 
+              'Resume', 'Photo', 'PAN', 'Aadhaar', 'Passport', 'Degree',
+              'Experience Letter', 'Relieving Letter', 'Offer Letter',
               'Joining Letter', 'Bank Proof', 'Medical Certificate'
             ];
             checklist = defaultDocTypes.map(docType => ({

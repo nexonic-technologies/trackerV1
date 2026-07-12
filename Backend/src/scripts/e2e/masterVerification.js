@@ -47,7 +47,7 @@ export async function runAllVerification() {
 
   try {
     console.log('\n==================================================');
-    console.log('🚀 LOGIMAX ERP: STARTING SYSTEM BUSINESS VERIFICATION');
+    console.log('🚀 Workhub ERP: STARTING SYSTEM BUSINESS VERIFICATION');
     console.log('==================================================\n');
 
     // Establish connection and configure test policies
@@ -211,7 +211,7 @@ export async function runAllVerification() {
     let finalHealthScore = Math.max(0, baseScore - indexHealthPenalty);
 
     console.log('\n==================================================');
-    console.log('📊 LOGIMAX ERP: SYSTEM VERIFICATION REPORT');
+    console.log('📊 Workhub ERP: SYSTEM VERIFICATION REPORT');
     console.log('==================================================');
 
     const printStatus = (title, status, error) => {

@@ -20,7 +20,7 @@ Only after Steps 1-2 are complete may you run grep, read source files, or write 
 
 ---
 
-# Project Rules — Logimax ERP Tracker System
+# Project Rules — Workhub ERP Tracker System
 
 > These rules apply to every conversation in this workspace. They are non-negotiable.
 

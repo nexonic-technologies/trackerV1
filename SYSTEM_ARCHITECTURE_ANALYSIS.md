@@ -1,7 +1,7 @@
 # 🏗️ TRACKER SYSTEM ARCHITECTURE ANALYSIS
 
 ## 📋 PROJECT OVERVIEW
-**Logimax Organization Full-Fledged HR Admin Panel**
+**Workhub Organization Full-Fledged HR Admin Panel**
 - **Version**: 2.2.0 (All platforms synchronized)
 - **Architecture**: Multi-platform (Web React, Mobile React Native, Backend Node.js)
 - **Database**: MongoDB with Mongoose ODM
