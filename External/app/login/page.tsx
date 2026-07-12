@@ -18,7 +18,8 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/agent/login', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${API_URL}/api/agent/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

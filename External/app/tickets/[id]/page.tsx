@@ -64,7 +64,8 @@ export default function TicketDetailsPage({ params }: PageProps) {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('agentToken');
-      await fetch('http://localhost:3000/api/agent/logout', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      await fetch(`${API_URL}/api/agent/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

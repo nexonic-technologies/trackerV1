@@ -26,7 +26,8 @@ export default function DashboardPage() {
       const token = localStorage.getItem('agentToken');
       const agentId = localStorage.getItem('agentId');
 
-      const response = await fetch(`http://localhost:3000/api/populate/read/tickets?filter={"createdBy":"${agentId}"}`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${API_URL}/api/populate/read/tickets?filter={"createdBy":"${agentId}"}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'x-source': 'external'
@@ -47,7 +48,8 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('agentToken');
-      await fetch('http://localhost:3000/api/agent/logout', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      await fetch(`${API_URL}/api/agent/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
