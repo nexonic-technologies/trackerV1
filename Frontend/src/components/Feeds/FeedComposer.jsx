@@ -5,10 +5,11 @@ import { FiPaperclip, FiLoader, FiSend, FiHash, FiChevronDown, FiSearch } from '
 import { MdOutlineCampaign } from 'react-icons/md';
 import ProfileImage from '../Common/ProfileImage';
 
-const POST_TYPES = [
+const ALL_POST_TYPES = [
   { id: 'Update', label: 'Post' },
   { id: 'Announcement', label: 'Announcement' },
   { id: 'Question', label: 'Question' },
+  { id: 'Poll', label: 'Poll' }
 ];
 
 const TARGET_DOT_COLORS = [
@@ -159,6 +160,8 @@ export default function FeedComposer({
   showMentions,
   mentionList = [],
   onSelectMention,
+  pollOptions = [],
+  setPollOptions,
 }) {
   const isEmpty = !postContent.trim() || postContent === '<p><br></p>';
   const isChannelMode = targetType === 'Channel';
@@ -166,8 +169,21 @@ export default function FeedComposer({
   const targetPlaceholder = isChannelMode ? 'Select channel…' : 'Select group…';
   const targetSearchPlaceholder = isChannelMode ? 'Search channel…' : 'Search group…';
 
+  const selectedChannel = channels.find((c) => c._id === targetId);
+  const isExternalChannel = selectedChannel?.isExternal === true;
+
+  const allowedPostTypes = isExternalChannel
+    ? ALL_POST_TYPES.filter(t => ['Update', 'Announcement'].includes(t.id))
+    : ALL_POST_TYPES;
+
+  useEffect(() => {
+    if (isExternalChannel && ['Question', 'Poll'].includes(postType)) {
+      setPostType('Update');
+    }
+  }, [isExternalChannel, postType, setPostType]);
+
   const postLabel = useMemo(
-    () => POST_TYPES.find((t) => t.id === postType)?.label || 'Post',
+    () => ALL_POST_TYPES.find((t) => t.id === postType)?.label || 'Post',
     [postType]
   );
 
@@ -242,7 +258,7 @@ export default function FeedComposer({
         </div>
 
         <div className="lmx-feed-composer__type-tabs shrink-0" role="tablist" aria-label="Post type">
-          {POST_TYPES.map(({ id, label }) => (
+          {allowedPostTypes.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -271,6 +287,49 @@ export default function FeedComposer({
             className="lmx-input w-16 py-1 text-xs text-center font-semibold"
           />
           <span className="text-xs text-amber-700 dark:text-amber-400">days</span>
+        </div>
+      )}
+
+      {/* Poll Options — only when Poll selected */}
+      {postType === 'Poll' && (
+        <div className="mx-4 mt-3 space-y-2 border border-hairline-soft p-3 rounded-tracker-md bg-surface-1/40 animate-fade-in">
+          <span className="text-xs font-semibold text-ink-muted block">Poll Options</span>
+          {pollOptions.map((opt, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={opt}
+                onChange={(e) => {
+                  const newOpts = [...pollOptions];
+                  newOpts[idx] = e.target.value;
+                  setPollOptions(newOpts);
+                }}
+                placeholder={`Option ${idx + 1}`}
+                className="lmx-input flex-1 py-1 px-3 text-xs"
+              />
+              {pollOptions.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== idx))}
+                  className="p-1 text-ink-subtle hover:text-red-500 transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              )}
+            </div>
+          ))}
+          {pollOptions.length < 10 && (
+            <button
+              type="button"
+              onClick={() => setPollOptions([...pollOptions, ''])}
+              className="text-xs text-[var(--module-accent)] font-semibold hover:underline"
+            >
+              + Add Option
+            </button>
+          )}
         </div>
       )}
 

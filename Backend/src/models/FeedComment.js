@@ -7,7 +7,8 @@ const ReactionSchema = new Schema({
 
 const FeedCommentSchema = new Schema({
   postId: { type: Schema.Types.ObjectId, ref: 'feedposts', required: true, index: true },
-  author: { type: Schema.Types.ObjectId, ref: 'employees', required: true },
+  author: { type: Schema.Types.ObjectId, refPath: 'authorModel', required: true },
+  authorModel: { type: String, enum: ['employees', 'agents'], default: 'employees' },
   content: { type: String, required: true }, // Rich text enabled from frontend
   attachments: [{ type: String }],
   mentions: [{ type: Schema.Types.ObjectId, ref: 'employees' }],

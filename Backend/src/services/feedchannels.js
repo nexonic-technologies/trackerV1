@@ -34,7 +34,21 @@ export default function feedchannelsService() {
       }
     },
 
-    async beforeRead({ filter, userId }) {
+    async beforeRead({ filter, userId, role, user }) {
+      if (role === 'agent') {
+        const clientObjectId = user?.client ? new mongoose.Types.ObjectId(user.client.toString()) : null;
+        const visibilityFilter = {
+          isExternal: true,
+          allowedClients: clientObjectId
+        };
+
+        if (!filter.$and) {
+          filter.$and = [];
+        }
+        filter.$and.push(visibilityFilter);
+        return { filter };
+      }
+
       const userObjectId = new mongoose.Types.ObjectId(userId.toString());
       
       const visibilityFilter = {
@@ -48,6 +62,7 @@ export default function feedchannelsService() {
         filter.$and = [];
       }
       filter.$and.push(visibilityFilter);
+      return { filter };
     }
   };
 }

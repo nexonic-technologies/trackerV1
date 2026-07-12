@@ -12,13 +12,21 @@ const ViewedBySchema = new Schema({
 }, { _id: false });
 
 const FeedPostSchema = new Schema({
-  author: { type: Schema.Types.ObjectId, ref: 'employees', required: true, index: true },
-  postType: { type: String, enum: ['Update', 'Announcement', 'Question', 'General'], default: 'General', index: true },
+  author: { type: Schema.Types.ObjectId, refPath: 'authorModel', required: true, index: true },
+  authorModel: { type: String, enum: ['employees', 'agents'], default: 'employees' },
+  postType: { type: String, enum: ['Update', 'Announcement', 'Question', 'General', 'Poll'], default: 'General', index: true },
   subject: { type: String }, // Subject/Title
   content: { type: String, required: true }, // Rich text enabled from frontend
   attachments: [{ type: String }],
   group: { type: Schema.Types.ObjectId, ref: 'feedgroups', index: true },
   channel: { type: Schema.Types.ObjectId, ref: 'feedchannels', index: true },
+  channels: [{ type: Schema.Types.ObjectId, ref: 'feedchannels', index: true }],
+  isBroadcast: { type: Boolean, default: false, index: true },
+  pollOptions: [{
+    optionText: { type: String, required: true },
+    votes: [{ type: Schema.Types.ObjectId, refPath: 'voterModel' }]
+  }],
+  voterModel: { type: String, enum: ['employees', 'agents'], default: 'employees' },
   mentions: [{ type: Schema.Types.ObjectId, ref: 'employees' }],
   reactions: [ReactionSchema],
   commentsCount: { type: Number, default: 0 },

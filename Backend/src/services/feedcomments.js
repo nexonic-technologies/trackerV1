@@ -1,5 +1,11 @@
 export default function feedcommentsService() {
   return {
+    async beforeCreate(ctx) {
+      const { body, userId, role } = ctx;
+      body.author = userId;
+      body.authorModel = role === 'agent' ? 'agents' : 'employees';
+    },
+
     // Ensure the author is set to the current user
     async afterCreate(ctx) {
       const { modelName, docId, userId } = ctx;
@@ -9,7 +15,7 @@ export default function feedcommentsService() {
         const { generateNotification } = await import('../middlewares/notificationMessagePrasher.js');
 
         const commentDoc = await models.feedcomments.findById(docId)
-          .populate('author', 'basicInfo.firstName basicInfo.lastName');
+          .populate('author', 'basicInfo.firstName basicInfo.lastName name');
 
         if (!commentDoc || !commentDoc.postId) return;
 
@@ -22,7 +28,9 @@ export default function feedcommentsService() {
 
         if (!post) return;
 
-        const commenterName = `${commentDoc.author?.basicInfo?.firstName || ''} ${commentDoc.author?.basicInfo?.lastName || ''}`.trim() || 'Someone';
+        const commenterName = commentDoc.authorModel === 'agents'
+          ? (commentDoc.author?.name || 'Someone')
+          : (`${commentDoc.author?.basicInfo?.firstName || ''} ${commentDoc.author?.basicInfo?.lastName || ''}`.trim() || 'Someone');
 
         const receivers = [];
 
