@@ -125,6 +125,33 @@ export default async function buildUpdateQuery(ctx) {
     await afterUpdate(ctx);
   }
 
+  // Safe background domain event emission
+  try {
+    const { default: domainEventService } = await import("../services/domainEventService.js");
+    
+    // Extract a minimal diff snapshot of fields that changed
+    const beforeSnapshot = {};
+    if (beforeDoc && cleanDoc) {
+      for (const key in body) {
+        if (Object.prototype.hasOwnProperty.call(body, key)) {
+          if (JSON.stringify(beforeDoc[key]) !== JSON.stringify(cleanDoc[key])) {
+            beforeSnapshot[key] = beforeDoc[key];
+          }
+        }
+      }
+    }
+
+    domainEventService.emit("update", {
+      eventId: `update_${modelName}_${updatedDoc._id}_${Date.now()}`,
+      modelName,
+      modelId: updatedDoc._id,
+      actorId: userId,
+      beforeSnapshot
+    });
+  } catch (err) {
+    console.error(`[DomainEvent] Failed to emit update event for ${modelName}:`, err.message);
+  }
+
   await saveAuditLog({
     action: "update",
     modelName,

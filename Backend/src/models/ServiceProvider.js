@@ -26,7 +26,6 @@ const ServiceProviderSchema = new mongoose.Schema({
   Status: { type: String, enum: ['Active', 'Inactive'], default: 'Active', index: true }
 }, { timestamps: true });
 
-ServiceProviderSchema.index({ name: 1 });
 ServiceProviderSchema.index({ 'services': 1 });
 
 export default mongoose.model('serviceproviders', ServiceProviderSchema);

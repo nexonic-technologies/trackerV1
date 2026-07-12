@@ -40,8 +40,6 @@ const PaymentJournalSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-PaymentJournalSchema.index({ receiptNumber: 1 });
-PaymentJournalSchema.index({ orderId: 1 });
 PaymentJournalSchema.index({ paymentDate: -1 });
 PaymentJournalSchema.index({ clientId: 1, status: 1 });
 

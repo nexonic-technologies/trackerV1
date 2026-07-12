@@ -53,7 +53,6 @@ const OrderAcknowledgementSchema = new mongoose.Schema({
   expectedEndDate: { type: Date }
 }, { timestamps: true });
 
-OrderAcknowledgementSchema.index({ orderNumber: 1 });
 OrderAcknowledgementSchema.index({ clientId: 1, status: 1 });
 
 export default mongoose.model('orderacknowledgements', OrderAcknowledgementSchema);
