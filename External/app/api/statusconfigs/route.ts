@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3000';
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3000';
 
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization') || '';
     const body = await request.json();
-    
-    const response = await fetch(`${BACKEND_URL}/api/populate/read/statusconfigs`, {
+
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/read/statusconfigs`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

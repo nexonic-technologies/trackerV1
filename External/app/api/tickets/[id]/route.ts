@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
 export async function GET(
   request: NextRequest,
@@ -9,7 +9,7 @@ export async function GET(
   try {
     const authHeader = request.headers.get('authorization') || '';
     const { id } = await params;
-    const response = await fetch(`${BACKEND_URL}/api/populate/read/tickets/${id}`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/read/tickets/${id}`, {
       method: 'POST', // Backend populate read accepts POST
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export async function PUT(
     const authHeader = request.headers.get('authorization') || '';
     const { id } = await params;
 
-    const response = await fetch(`${BACKEND_URL}/api/populate/update/tickets/${id}`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/update/tickets/${id}`, {
       method: 'PUT',
       headers: {
         'x-source': 'external',
@@ -80,7 +80,7 @@ export async function DELETE(
   try {
     const authHeader = request.headers.get('authorization') || '';
     const { id } = await params;
-    const response = await fetch(`${BACKEND_URL}/api/populate/delete/tickets/${id}`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/delete/tickets/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

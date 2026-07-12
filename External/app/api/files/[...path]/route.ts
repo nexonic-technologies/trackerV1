@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3000';
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3000';
 
 export async function GET(
   request: NextRequest,
@@ -10,8 +10,8 @@ export async function GET(
     const authHeader = request.headers.get('authorization') || '';
     const { path } = await params;
     const pathString = path.join('/');
-    
-    const response = await fetch(`${BACKEND_URL}/api/files/${pathString}`, {
+
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/files/${pathString}`, {
       method: 'GET',
       headers: {
         'x-source': 'external',
