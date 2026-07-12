@@ -38,6 +38,7 @@ export default function Feeds() {
   const [postMentions, setPostMentions] = useState([]);
   const [showMentions, setShowMentions] = useState(false);
   const [mentionList, setMentionList] = useState([]);
+  const [pollOptions, setPollOptions] = useState(['', '']);
 
   // Collapse states
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -158,8 +159,26 @@ export default function Feeds() {
         payload.expiryDate = expiry.toISOString();
       }
 
-      if (targetType === 'Group' && targetId) payload.group = targetId;
-      if (targetType === 'Channel' && targetId) payload.channel = targetId;
+      if (postType === 'Poll') {
+        const filteredOpts = pollOptions.filter(opt => opt.trim() !== '');
+        if (filteredOpts.length < 2) {
+          toast.error("Please add at least 2 poll options");
+          return;
+        }
+        payload.pollOptions = filteredOpts.map(opt => ({ optionText: opt, votes: [] }));
+      }
+
+      if (targetType === 'Group' && targetId) {
+        payload.group = targetId;
+        payload.isBroadcast = true;
+        const groupChannels = channels.filter(c => c.groups && c.groups.some(gId => gId.toString() === targetId.toString()));
+        payload.channels = groupChannels.map(c => c._id);
+      }
+      
+      if (targetType === 'Channel' && targetId) {
+        payload.channel = targetId;
+        payload.channels = [targetId];
+      }
 
       await create('feedposts', payload, 'Post created successfully!');
       localStorage.removeItem('feed-post-draft');
@@ -170,6 +189,7 @@ export default function Feeds() {
       setTargetId('');
       setPostMentions([]);
       setExpiryDays(7);
+      setPollOptions(['', '']);
       fetchPosts();
       setIsComposerExpanded(false);
     } catch (err) {
@@ -615,6 +635,8 @@ export default function Feeds() {
                 showMentions={showMentions}
                 mentionList={mentionList}
                 onSelectMention={handleSelectMention}
+                pollOptions={pollOptions}
+                setPollOptions={setPollOptions}
               />
 
               {/* POSTS LIST */}

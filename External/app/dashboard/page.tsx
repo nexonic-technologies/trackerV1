@@ -124,6 +124,23 @@ export default function DashboardPage() {
             <span className="text-ink-subtle text-[13px] ml-2">Agent Portal</span>
           </div>
         </div>
+
+        {/* Center menu links */}
+        <div className="flex items-center gap-6">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="text-[14px] font-bold text-accent border-b-2 border-accent pb-1 transition-colors"
+          >
+            Tickets
+          </button>
+          <button
+            onClick={() => router.push('/feeds')}
+            className="text-[14px] font-semibold text-ink-muted hover:text-accent transition-colors"
+          >
+            Feeds
+          </button>
+        </div>
+
         <div className="flex items-center gap-3">
           {activeView === 'list' && (
             <button

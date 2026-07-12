@@ -29,14 +29,14 @@ export const DEFAULT_POPULATE_FIELDS = {
     'client': 'name'
   },
   feedposts: {
-    'author': 'basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage',
+    'author': 'basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage,name',
     'group': 'name',
     'channel': 'name',
     'viewedBy.employee': 'basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage',
     'reactions.employee': 'basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage'
   },
   feedcomments: {
-    'author': 'basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage',
+    'author': 'basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage,name',
     'postId': 'subject'
   },
   feedgroups: {

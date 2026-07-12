@@ -69,10 +69,11 @@ export const agentAuthMiddleware = async (req, res, next) => {
             name: agent.name
           };
           req.user = {
+            id: agent._id,
             _id: agent._id,
             email: agent.email,
             name: agent.name,
-            role: 'agent' || 'admin',
+            role: 'agent',
             client: agent.client._id
           };
           

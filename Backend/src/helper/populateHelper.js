@@ -413,7 +413,7 @@ export async function populateHelper(req, res, next) {
       filter: queryFilter,
       populateFields: finalPopulate, // Pass the merged object
       body: requestBody,
-      user: { id: user.id, role: user.role, userType: user.userType }
+      user: { id: user.id, role: user.role, userType: user.userType, client: user.client }
     }));
 
     const statusCode = action === "create" ? 201 : 200;

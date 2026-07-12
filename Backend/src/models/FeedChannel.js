@@ -10,6 +10,8 @@ const FeedChannelSchema = new Schema({
   description: { type: String, trim: true },
   groups: [{ type: Schema.Types.ObjectId, ref: 'feedgroups' }],
   members: { type: [ChannelMemberSchema], default: [] },
+  isExternal: { type: Boolean, default: false },
+  allowedClients: [{ type: Schema.Types.ObjectId, ref: 'clients' }],
   createdBy: { type: Schema.Types.ObjectId, ref: 'employees', required: true }
 }, { timestamps: true });
 

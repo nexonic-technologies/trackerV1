@@ -4,8 +4,9 @@ export default function feedpostsService() {
      * beforeCreate: Set the author and default values before saving a new post.
      */
     async beforeCreate(ctx) {
-      const { body, userId } = ctx;
+      const { body, userId, role } = ctx;
       body.author = userId;
+      body.authorModel = role === 'agent' ? 'agents' : 'employees';
       body.commentsCount = 0;
       body.viewsCount = 0;
       body.viewedBy = [];
@@ -137,7 +138,7 @@ export default function feedpostsService() {
      *  - Posts they were mentioned in
      *  - General posts (no group or channel)
      */
-    async beforeRead({ role, userId, filter }) {
+    async beforeRead({ role, userId, filter, user }) {
       const { default: models } = await import('../models/Collection.js');
       const { default: mongoose } = await import('mongoose');
 
@@ -149,32 +150,48 @@ export default function feedpostsService() {
         return; // Invalid userId, skip filter injection
       }
 
-      // Find groups the user is a member of
-      const userGroups = await models.feedgroups.find({ 'members.employee': userObjectId }).select('_id').lean();
-      const userGroupIds = userGroups.map(g => g._id);
+      let userGroupIds = [];
+      let userChannelIds = [];
 
-      // Find channels the user is a member of (directly or via a group they're in)
-      const userChannels = await models.feedchannels.find({
-        $or: [
-          { 'members.employee': userObjectId },
-          { groups: { $in: userGroupIds } }
-        ]
-      }).select('_id').lean();
-      const userChannelIds = userChannels.map(c => c._id);
+      if (role === 'agent') {
+        // Agents are not in feedgroups, they only have access to external channels allowed for their client
+        const clientObjectId = user?.client ? new mongoose.Types.ObjectId(user.client.toString()) : null;
+        
+        const userChannels = await models.feedchannels.find({
+          isExternal: true,
+          allowedClients: clientObjectId
+        }).select('_id').lean();
+        userChannelIds = userChannels.map(c => c._id);
+      } else {
+        // Find groups the employee is a member of
+        const userGroups = await models.feedgroups.find({ 'members.employee': userObjectId }).select('_id').lean();
+        userGroupIds = userGroups.map(g => g._id);
+
+        // Find channels the employee is a member of (directly or via a group they're in)
+        const userChannels = await models.feedchannels.find({
+          $or: [
+            { 'members.employee': userObjectId },
+            { groups: { $in: userGroupIds } }
+          ]
+        }).select('_id').lean();
+        userChannelIds = userChannels.map(c => c._id);
+      }
 
       const visibilityFilter = {
         $or: [
           { group: { $in: userGroupIds } },
           { channel: { $in: userChannelIds } },
+          { channels: { $in: userChannelIds } },
           { author: userObjectId },
           { mentions: userObjectId },
-          // General posts: no group AND no channel (null, undefined, or missing)
-          {
+          // General posts (only for employees, agents only see external channels)
+          ...(role !== 'agent' ? [{
             $and: [
               { $or: [{ group: { $exists: false } }, { group: null }] },
-              { $or: [{ channel: { $exists: false } }, { channel: null }] }
+              { $or: [{ channel: { $exists: false } }, { channel: null }] },
+              { $or: [{ channels: { $exists: false } }, { channels: null }, { channels: { $size: 0 } }] }
             ]
-          }
+          }] : [])
         ]
       };
 

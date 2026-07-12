@@ -102,6 +102,34 @@ export default function PostCard({ post, onRefresh }) {
     }
   };
 
+  const handleVote = async (optionIndex) => {
+    if (!user?.id) return;
+    const updatedOptions = (localPost.pollOptions || []).map((opt, idx) => {
+      let votes = [...(opt.votes || [])];
+      votes = votes.filter(v => {
+        const vId = v && typeof v === 'object' ? (v._id || v.toString()) : (v ? v.toString() : '');
+        return vId !== user.id.toString();
+      });
+      if (idx === optionIndex) {
+        votes.push(user.id);
+      }
+      return { ...opt, votes };
+    });
+
+    setLocalPost(prev => ({ ...prev, pollOptions: updatedOptions }));
+
+    try {
+      await update('feedposts', localPost._id, {
+        pollOptions: updatedOptions,
+        voterModel: user.role === 'agent' ? 'agents' : 'employees'
+      });
+      toast.success("Vote registered!");
+    } catch (err) {
+      console.error("Failed to submit vote", err);
+      toast.error("Failed to vote");
+    }
+  };
+
   const myReaction = localPost.reactions?.find(r => r.employee?._id === user?.id || r.employee === user?.id);
   const hasReacted = !!myReaction;
 
@@ -425,6 +453,67 @@ export default function PostCard({ post, onRefresh }) {
           className="text-ink text-xs mb-3 leading-normal ql-editor !p-0"
           dangerouslySetInnerHTML={{ __html: localPost.content }}
         />
+
+        {/* POLL SECTION */}
+        {localPost.postType === 'Poll' && localPost.pollOptions && localPost.pollOptions.length > 0 && (() => {
+          const totalVotes = localPost.pollOptions.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0) || 0;
+          return (
+            <div className="mb-4 space-y-2 border border-hairline-soft p-3 rounded-tracker-lg bg-surface-1/30">
+              {localPost.pollOptions.map((option, idx) => {
+                const votesCount = option.votes?.length || 0;
+                const pct = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
+                const isUserChoice = option.votes?.some(v => {
+                  const vId = v && typeof v === 'object' ? (v._id || v.toString()) : (v ? v.toString() : '');
+                  return vId === user?.id?.toString();
+                });
+
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleVote(idx)}
+                    className={`w-full text-left relative overflow-hidden p-2.5 rounded-tracker-md border transition-all flex items-center justify-between group ${
+                      isUserChoice
+                        ? 'border-[var(--module-accent)] bg-[var(--module-accent-light)]/20'
+                        : 'border-hairline hover:bg-surface-1 hover:border-ink-subtle'
+                    }`}
+                  >
+                    {/* Progress Bar background */}
+                    <div
+                      className="absolute top-0 left-0 bottom-0 bg-[var(--module-accent)]/10 transition-all duration-300 pointer-events-none"
+                      style={{ width: `${pct}%` }}
+                    />
+
+                    {/* Left content: check circle and text */}
+                    <div className="relative z-10 flex items-center gap-2 min-w-0 pointer-events-none">
+                      <span className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center shrink-0 text-[10px] font-bold ${
+                        isUserChoice
+                          ? 'border-[var(--module-accent)] bg-[var(--module-accent)] text-white'
+                          : 'border-ink-subtle bg-white text-transparent'
+                      }`}>
+                        {isUserChoice ? "✓" : ""}
+                      </span>
+                      <span className={`text-xs font-semibold truncate ${
+                        isUserChoice ? 'text-ink' : 'text-ink-muted group-hover:text-ink'
+                      }`}>
+                        {option.optionText}
+                      </span>
+                    </div>
+
+                    {/* Right content: percentage and votes count */}
+                    <div className="relative z-10 shrink-0 text-right pl-2 pointer-events-none">
+                      <span className="text-xs font-bold text-ink">{pct}%</span>
+                      <span className="text-[10px] text-ink-subtle block">{votesCount} vote{votesCount !== 1 ? 's' : ''}</span>
+                    </div>
+                  </button>
+                );
+              })}
+              <p className="text-[10px] text-ink-tertiary text-right font-medium px-1">
+                Total: {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+              </p>
+            </div>
+          );
+        })()}
 
         {/* ATTACHMENTS */}
         {localPost.attachments && localPost.attachments.length > 0 && (
