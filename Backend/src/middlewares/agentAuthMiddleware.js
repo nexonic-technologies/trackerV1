@@ -20,8 +20,26 @@ export const agentAuthMiddleware = async (req, res, next) => {
     if (source === 'external' && token) {
       // External agent authentication - handle both AgentToken and Agent JWT
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+        const decoded = jwt.decode(token);
+        if (!decoded || !decoded.id) {
+          return res.status(401).json({ success: false, message: 'Invalid token' });
+        }
+
+        // Find session using the token to retrieve the dynamic secret
+        const SessionModel = (await import('../models/Session.js')).default;
+        const userSession = await SessionModel.findOne({
+          userId: decoded.id,
+          'generatedToken.token': token,
+          status: 'Active'
+        });
+
+        const tokenSecret = userSession ? userSession.generatedToken.secret : process.env.JWT_SECRET;
+        const verifiedDecoded = jwt.verify(token, tokenSecret);
+
+        if (userSession) {
+          userSession.lastUsedAt = new Date();
+          await userSession.save();
+        }
         // First try AgentToken model
         let agent = await AgentToken.findOne({
           currentSessionToken: token,
