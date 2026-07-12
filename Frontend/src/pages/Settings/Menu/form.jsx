@@ -319,6 +319,8 @@ const MenuFormPage = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const [record, setRecord] = useState(null);
+  const [formValues, setFormValues] = useState({});
+  const [initialDataForTab, setInitialDataForTab] = useState({});
   const [fetching, setFetching] = useState(Boolean(id));
   const [activeTab, setActiveTab] = useState("item");
 
@@ -339,6 +341,8 @@ const MenuFormPage = () => {
         const item = res.data?.data;
         if (item?._id?.$oid) item._id = item._id.$oid;
         setRecord(item);
+        setFormValues(item || {});
+        setInitialDataForTab(item || {});
       } catch (err) {
         toast.error("Failed to load menu item");
       } finally {
@@ -347,16 +351,26 @@ const MenuFormPage = () => {
     })();
   }, [id]);
 
+  const handleFormChange = useCallback((updated) => {
+    setFormValues((prev) => ({ ...prev, ...updated }));
+  }, []);
+
+  const handleTabChange = (tabId) => {
+    setInitialDataForTab(formValues);
+    setActiveTab(tabId);
+  };
+
   const handleSubmit = async (formData) => {
-    const hasParent = !!(formData.parentId?._id || formData.parentId);
+    const mergedData = { ...formValues, ...formData };
+    const hasParent = !!(mergedData.parentId?._id || mergedData.parentId);
 
     const payload = {
-      ...formData,
-      isActive: formData.isActive === undefined ? true : formData.isActive === "true" || formData.isActive === true,
+      ...mergedData,
+      isActive: mergedData.isActive === undefined ? true : mergedData.isActive === "true" || mergedData.isActive === true,
       isParent: !hasParent,        // If no parent, it IS a parent
       hasChildren: !hasParent,     // Parents can have children
-      parentId: formData.parentId?._id || formData.parentId || null,
-      resourceId: formData.resourceId?._id || formData.resourceId || null,
+      parentId: mergedData.parentId?._id || mergedData.parentId || null,
+      resourceId: mergedData.resourceId?._id || mergedData.resourceId || null,
       visibility: "protected",    // Always protected — CBAC controls visibility
     };
 
@@ -407,7 +421,7 @@ const MenuFormPage = () => {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
                 activeTab === tab.id
                   ? "text-accent border-accent"
@@ -428,7 +442,8 @@ const MenuFormPage = () => {
               fields={SidebarForm.filter(f => MENU_FORM_TABS[0].fieldNames.includes(f.name))}
               submitButton={{ text: id ? "Update menu item" : "Create menu item", color: "blue" }}
               onSubmit={handleSubmit}
-              data={record || {}}
+              onChange={handleFormChange}
+              data={initialDataForTab}
             />
           )}
 
@@ -442,12 +457,13 @@ const MenuFormPage = () => {
                 fields={SidebarForm.filter(f => MENU_FORM_TABS[1].fieldNames.includes(f.name))}
                 submitButton={{ text: id ? "Update menu item" : "Create menu item", color: "blue" }}
                 onSubmit={handleSubmit}
-                data={record || {}}
+                onChange={handleFormChange}
+                data={initialDataForTab}
               />
 
               {/* Capabilities Manager */}
               <CapabilityManager
-                resourceId={record?.resourceId}
+                resourceId={formValues?.resourceId}
                 menuItemId={id}
               />
             </div>
