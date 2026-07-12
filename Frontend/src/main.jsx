@@ -7,8 +7,7 @@ import { PermissionProvider } from './context/permissionProvider'
 import App from './App'
 import { ThemeProvider } from './context/themeProvider'
 import { NotificationProvider } from './context/notificationProvider'
-
-
+import { Analytics } from '@vercel/analytics/react'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -18,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <PermissionProvider>
             <NotificationProvider>
               <App />
+              <Analytics />
             </NotificationProvider>
           </PermissionProvider>
         </AuthProvider>
