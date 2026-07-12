@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3000';
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3000';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const agentId = searchParams.get('agentId');
-    
+
     if (!agentId) {
       return NextResponse.json(
         { error: 'Agent ID is required' },
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/populate/read/agents/${agentId}?clientProducts=true`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/read/agents/${agentId}?clientProducts=true`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

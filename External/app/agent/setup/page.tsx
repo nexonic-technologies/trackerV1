@@ -23,7 +23,7 @@ function AgentSetupForm() {
     }
 
     try {
-      const apiUrl = `${process.env.BACKEND_URL}/agent-invite/verify-token/${token}`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/agent-invite/verify-token/${token}`;
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -77,7 +77,7 @@ function AgentSetupForm() {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.BACKEND_URL}/agent-invite/set-password`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/agent-invite/set-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

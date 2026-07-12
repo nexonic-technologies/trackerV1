@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:3000';
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:3000';
 
 async function handleProxy(
   request: NextRequest,
@@ -31,12 +31,12 @@ async function handleProxy(
       'x-source': 'external',
       'Authorization': authHeader
     };
-    
+
     if (body && typeof body === 'string') {
       headers['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/populate/${actionPath}`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/${actionPath}`, {
       method,
       headers,
       body,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Proxy to the backend's generic populate endpoint
-    const response = await fetch(`${BACKEND_URL}/api/populate/read/tickets`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/read/tickets`, {
       method: 'POST', // Backend populate read endpoint accepts POST
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const authHeader = request.headers.get('authorization') || '';
 
-    const response = await fetch(`${BACKEND_URL}/api/populate/create/tickets`, {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/create/tickets`, {
       method: 'POST',
       headers: {
         'x-source': 'external',
