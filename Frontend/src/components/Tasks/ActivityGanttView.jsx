@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { format, differenceInMinutes, startOfDay, addHours, isToday } from "date-fns";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/authProvider";
-import { RefreshCw, Clock, Users, ListOrdered, ArrowUp, ArrowDown, UserMinus, Plus, ShieldAlert, Check } from "lucide-react";
+import { RefreshCw, Clock, Users, ListOrdered, ArrowUp, ArrowDown, UserMinus, Plus, ShieldAlert, Check, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function ActivityGanttView({ date = new Date(), filterUserId, filterTaskId }) {
