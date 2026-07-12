@@ -193,11 +193,12 @@ export default function GeneralSettingsPage() {
     e.preventDefault();
     setSaving(true);
     try {
+      const { _id, ...payload } = settings;
       if (settings._id) {
-        await axiosInstance.put(`/populate/update/generalsettings/${settings._id}`, settings);
+        await axiosInstance.put(`/populate/update/generalsettings/${settings._id}`, payload);
         toast.success('General settings updated successfully');
       } else {
-        const res = await axiosInstance.post('/populate/create/generalsettings', settings);
+        const res = await axiosInstance.post('/populate/create/generalsettings', payload);
         toast.success('General settings initialized');
         if (res.data?.data?._id) {
           setSettings(s => ({ ...s, _id: res.data.data._id }));
