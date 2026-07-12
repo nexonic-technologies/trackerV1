@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 dayjs.extend(relativeTime);
 
-export default function PostCard({ post, onRefresh }) {
+export default function PostCard({ post, onRefresh, onEditDraft }) {
   const { user } = useAuth();
   const { update, create, readPaginated, remove } = useGenericAPI();
   const [localPost, setLocalPost] = useState(post);
@@ -536,7 +536,7 @@ export default function PostCard({ post, onRefresh }) {
         )}
 
         {/* REACTION SUMMARY BAR */}
-        {reactionEmojis.length > 0 && (
+        {!localPost.isDraft && reactionEmojis.length > 0 && (
           <div className="flex items-center gap-2 mb-3">
             <div className="flex -space-x-1">
               {reactionEmojis.slice(0, 4).map(e => (
@@ -547,8 +547,29 @@ export default function PostCard({ post, onRefresh }) {
           </div>
         )}
 
-        {/* FOOTER ACTIONS */}
-        <div className="flex items-center justify-between border-t border-hairline-soft pt-3 text-sm text-ink-muted">
+        {localPost.isDraft ? (
+          <div className="flex items-center justify-between border-t border-hairline-soft pt-3 text-sm mt-3">
+            <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider">
+              ⚠️ Draft
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEditDraft && onEditDraft(localPost)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--module-accent)] hover:bg-[var(--module-accent)]/90 text-white font-semibold text-xs transition-all shadow-sm"
+              >
+                <FiEdit2 className="text-xs" /> Edit & Publish
+              </button>
+              <button
+                onClick={handleDeletePost}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs transition-all"
+              >
+                <FiTrash2 className="text-xs" /> Delete
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* FOOTER ACTIONS */
+          <div className="flex items-center justify-between border-t border-hairline-soft pt-3 text-sm text-ink-muted">
           <div className="flex items-center gap-1 md:gap-3">
             {/* Reaction Button */}
             <div className="flex items-center gap-1 relative">
@@ -647,10 +668,11 @@ export default function PostCard({ post, onRefresh }) {
             <span className="hidden sm:inline">views</span>
           </button>
         </div>
+        )}
       </div>
 
       {/* VIEWS SECTION */}
-      {showViews && (
+      {!localPost.isDraft && showViews && (
         <div className="px-4 md:px-5 pb-4 pt-1 border-t border-gray-100">
           <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 mt-3">Viewed By</div>
           {localPost.viewedBy?.length > 0 ? (
@@ -678,7 +700,7 @@ export default function PostCard({ post, onRefresh }) {
       )}
 
       {/* COMMENTS SECTION */}
-      {showComments && (
+      {!localPost.isDraft && showComments && (
         <div className="px-4 md:px-5 pb-4 pt-1 border-t border-gray-100">
           <div className="space-y-3 mt-3">
             {comments.length === 0 && (

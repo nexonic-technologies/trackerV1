@@ -1,16 +1,16 @@
 # Graph Report - trackerV1  (2026-07-13)
 
 ## Corpus Check
-- 916 files · ~757,664 words
+- 916 files · ~758,281 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 9344 nodes · 11616 edges · 740 communities (629 shown, 111 thin omitted)
+- 9344 nodes · 11616 edges · 739 communities (629 shown, 110 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 78 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b4947ca1`
+- Built from commit: `7661339b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -495,6 +495,7 @@
 - [[_COMMUNITY_Community 548|Community 548]]
 - [[_COMMUNITY_Community 549|Community 549]]
 - [[_COMMUNITY_Community 551|Community 551]]
+- [[_COMMUNITY_Community 552|Community 552]]
 - [[_COMMUNITY_Community 554|Community 554]]
 - [[_COMMUNITY_Community 555|Community 555]]
 - [[_COMMUNITY_Community 556|Community 556]]
@@ -614,7 +615,6 @@
 - [[_COMMUNITY_Community 698|Community 698]]
 - [[_COMMUNITY_Community 699|Community 699]]
 - [[_COMMUNITY_Community 729|Community 729]]
-- [[_COMMUNITY_Community 730|Community 730]]
 - [[_COMMUNITY_Community 733|Community 733]]
 - [[_COMMUNITY_Community 734|Community 734]]
 - [[_COMMUNITY_Community 736|Community 736]]
@@ -658,7 +658,7 @@
 - `buildUpdateQuery()` --calls--> `afterUpdate()`  [INFERRED]
   Backend/src/crud/buildUpdateQuery.js → backend/src/services/tasks.js
 
-## Communities (740 total, 111 thin omitted)
+## Communities (739 total, 110 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.01
@@ -701,8 +701,8 @@ Cohesion: 0.06
 Nodes (31): 10. Engineering Score Card, 11. `verify [model]` — Scoped, 12. `verify system` — Full, No Exceptions, 1. Architecture Compliance Audit, 1. Audit Severity, 1. Code Philosophy & Quality Audit, 2. Architecture Compliance (🔴), 2. Architecture Compliance Audit (🔴 Blocking) (+23 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.05
-Nodes (17): PriorityTasks(), COLOR_MAP, StatCard(), useAnimatedCounter(), LEAVE_COLORS, PRIORITY_COLORS, STATUS_STYLING, DEFAULT_ROLE_CONFIG (+9 more)
+Cohesion: 0.06
+Nodes (14): PriorityTasks(), LEAVE_COLORS, PRIORITY_COLORS, STATUS_STYLING, DEFAULT_ROLE_CONFIG, getRoleConfig(), ROLE_CONFIG, WIDGET_MAP (+6 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.13
@@ -793,8 +793,8 @@ Cohesion: 0.11
 Nodes (10): EXPENSE_TYPES, AuthContext, ROLE_MAPPING, PRIORITY_COLORS, STATUS_COLORS, TicketData, Client, ExpenseLine (+2 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.06
-Nodes (33): setAuthLogout(), setMaintenanceHandler(), Allocations(), Incidents(), DAY_LABELS, fmtDate(), SHIFT_COLORS, ShiftRoster() (+25 more)
+Cohesion: 0.07
+Nodes (30): setAuthLogout(), setMaintenanceHandler(), Allocations(), Incidents(), AttendanceApprovalPage(), fmt12(), fmtHM(), AddComment() (+22 more)
 
 ### Community 35 - "Community 35"
 Cohesion: 0.07
@@ -845,8 +845,8 @@ Cohesion: 0.10
 Nodes (13): Attendance(), calcDuration(), fmtMonthLabel(), fmtWeekLabel(), formatTime(), getWeekRange(), runTests(), generateNotification() (+5 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.12
-Nodes (13): DashboardHero(), getFormattedDate(), getGreeting(), PROFILE_FORM_TABS, PROFILE_SUBMIT_LABELS, profileFormFields(), profileSubmitButton, APP_SHELL (+5 more)
+Cohesion: 0.09
+Nodes (16): COLOR_MAP, StatCard(), useAnimatedCounter(), DashboardHero(), getFormattedDate(), getGreeting(), PROFILE_FORM_TABS, PROFILE_SUBMIT_LABELS (+8 more)
 
 ### Community 49 - "Community 49"
 Cohesion: 0.12
@@ -1082,7 +1082,7 @@ Nodes (10): Build System Brain Workflow, code:block1 (knowledge_brain/_SYSTEM/),
 
 ### Community 108 - "Community 108"
 Cohesion: 0.04
-Nodes (18): STATUS_CHIP, axiosInstance, failedQueue, forceLogout(), getDeviceUUID(), incrementFailedCount(), token, PendingApprovals() (+10 more)
+Nodes (20): STATUS_CHIP, axiosInstance, failedQueue, forceLogout(), getDeviceUUID(), incrementFailedCount(), token, PendingApprovals() (+12 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.18
@@ -1129,8 +1129,8 @@ Cohesion: 0.13
 Nodes (19): build, ../../core/widgets/custom_button.dart, ../../core/widgets/custom_text_field.dart, dispose, _handleSignup, package:flutter/material.dart, package:provider/provider.dart, ../../providers/auth_provider.dart (+11 more)
 
 ### Community 120 - "Community 120"
-Cohesion: 0.10
-Nodes (24): authMiddleware(), changePassword(), forgotPassword(), getMe(), login(), logout(), refresh(), resetPassword() (+16 more)
+Cohesion: 0.13
+Nodes (20): authMiddleware(), changePassword(), forgotPassword(), getMe(), login(), logout(), refresh(), resetPassword() (+12 more)
 
 ### Community 121 - "Community 121"
 Cohesion: 0.17
@@ -1382,7 +1382,7 @@ Nodes (28): Employee Model, Express.js API, JWT Authentication, Mobile Client (R
 
 ### Community 187 - "Community 187"
 Cohesion: 0.04
-Nodes (41): getCapabilityForRoute(), PAGE_CAPABILITY_MAPPING, getContext(), GrantSchema, PermissionAuditSchema, PermissionVersionSchema, UserOverrideSchema, SchedulerProvider (+33 more)
+Nodes (45): getCapabilityForRoute(), PAGE_CAPABILITY_MAPPING, getContext(), bucket, jobs, newAvailable, GrantSchema, LeaveTransactionSchema (+37 more)
 
 ### Community 188 - "Community 188"
 Cohesion: 0.08
@@ -1838,7 +1838,7 @@ Nodes (6): RunnerTests, RunnerTests, RunnerTests, RunnerTests, RunnerTests, XCTe
 
 ### Community 308 - "Community 308"
 Cohesion: 0.03
-Nodes (57): ActivityDetailPage(), DailyTracker(), AttendanceApprovalPage(), fmt12(), fmtHM(), getDaysInMonth(), MONTH_NAMES, MonthlySummary() (+49 more)
+Nodes (54): ActivityDetailPage(), DailyTracker(), getDaysInMonth(), MONTH_NAMES, MonthlySummary(), STATUS_MAP, AttendanceReports(), getDaysInMonth() (+46 more)
 
 ### Community 309 - "Community 309"
 Cohesion: 0.05
@@ -2232,6 +2232,10 @@ Nodes (26): build, dispose, _formatDuration, Icon, _initCountdown, initState, Ma
 Cohesion: 0.20
 Nodes (8): content, __dirname, __filename, filePath, imports, importsMap, serviceFiles, servicesDir
 
+### Community 552 - "Community 552"
+Cohesion: 0.33
+Nodes (4): DAY_LABELS, fmtDate(), SHIFT_COLORS, ShiftRoster()
+
 ### Community 554 - "Community 554"
 Cohesion: 0.36
 Nodes (6): build, Container, CustomButton, package:flutter/material.dart, SizedBox, package:flutter/material.dart
@@ -2361,8 +2365,8 @@ Cohesion: 0.12
 Nodes (16): Architecture Overview, code:block35 (📦 File Upload System), code:block36 (backend/src/documents/), code:block37 (File Path Storage:), code:javascript (// Profile update with image (Enhanced FormRenderer)), code:javascript (// File selection with expo-image-picker), code:block40 (🛡️ File Security:), code:block41 (⚡ Performance Features:) (+8 more)
 
 ### Community 597 - "Community 597"
-Cohesion: 0.18
-Nodes (4): sessionsSchema, __dirname, __filename, run()
+Cohesion: 0.10
+Nodes (10): ClientSchema, sessionsSchema, accessSecret, agent, router, tempPassword, token, __dirname (+2 more)
 
 ### Community 598 - "Community 598"
 Cohesion: 0.08
@@ -2545,8 +2549,8 @@ Cohesion: 0.60
 Nodes (3): assets_for_linking, status, timestamp
 
 ### Community 658 - "Community 658"
-Cohesion: 0.06
-Nodes (24): initialStats, localIP, startServer(), apiHitLogger(), errorHandler(), requestTracer(), ApiHitLogSchema, ErrorLogSchema (+16 more)
+Cohesion: 0.07
+Nodes (20): initialStats, localIP, startServer(), apiHitLogger(), errorHandler(), requestTracer(), ApiHitLogSchema, ErrorLogSchema (+12 more)
 
 ### Community 666 - "Community 666"
 Cohesion: 0.25
@@ -2555,6 +2559,10 @@ Nodes (6): CURRENCIES, MODEL_CHOICES, NOTIF_TYPES, OPERATOR_CHOICES, TIMEZONES, 
 ### Community 668 - "Community 668"
 Cohesion: 0.22
 Nodes (9): Backend Dependencies, code:json ({), code:block32 (✅ Multi-Layer Defense:), code:json ({), code:json ({), Frontend Dependencies, Mobile Dependencies, Security Architecture Strengths (+1 more)
+
+### Community 670 - "Community 670"
+Cohesion: 0.40
+Nodes (4): cities, countries, router, states
 
 ### Community 676 - "Community 676"
 Cohesion: 0.22
@@ -2611,10 +2619,6 @@ Nodes (7): 1. **BACKEND** (`/backend/`), 2. **FRONTEND WEB** (`/frontend/`), 3. 
 ### Community 729 - "Community 729"
 Cohesion: 0.29
 Nodes (7): 1. **Data Sanitization Engine**, code:javascript (// Features:), code:javascript (// Features:), code:javascript (// Features:), sanitizePopulated.js - Population Security, sanitizeRead.js - Read Operation Protection, sanitizeWrite.js & sanitizeUpdate.js - Write Protection
-
-### Community 730 - "Community 730"
-Cohesion: 0.33
-Nodes (4): bucket, jobs, newAvailable, LeaveTransactionSchema
 
 ### Community 733 - "Community 733"
 Cohesion: 0.33
@@ -2691,7 +2695,7 @@ Nodes (4): code:block43 (Backend:), Current Test Coverage, Recommended Test Impl
 ## Knowledge Gaps
 - **5056 isolated node(s):** `name`, `version`, `main`, `type`, `test` (+5051 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **111 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **110 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -2700,7 +2704,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **Why does `sendNotification()` connect `Community 47` to `Community 0`, `Community 38`, `Community 12`, `Community 89`, `Community 57`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Why does `useAuth()` connect `Community 34` to `Community 89`, `Community 67`, `Community 440`, `Community 616`, `Community 11`, `Community 48`, `Community 49`, `Community 61`, `Community 308`, `Community 20`, `Community 247`, `Community 568`, `Community 57`, `Community 541`?**
+- **Why does `useAuth()` connect `Community 34` to `Community 89`, `Community 67`, `Community 440`, `Community 552`, `Community 616`, `Community 11`, `Community 108`, `Community 48`, `Community 49`, `Community 61`, `Community 308`, `Community 20`, `Community 247`, `Community 568`, `Community 57`, `Community 541`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `main` to the rest of the system?**
   _5063 weakly-connected nodes found - possible documentation gaps or missing edges._
