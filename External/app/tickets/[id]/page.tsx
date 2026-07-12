@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import TicketView from '../../../components/tickets/TicketView';
 import TicketForm from '../../../components/tickets/TicketForm';
 
+import { useGenericAPI } from '../../useGenericAPI';
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -15,6 +17,7 @@ export default function TicketDetailsPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
+  const { request, read } = useGenericAPI();
 
   useEffect(() => {
     const token = localStorage.getItem('agentToken');
@@ -41,19 +44,10 @@ export default function TicketDetailsPage({ params }: PageProps) {
   const fetchTicket = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('agentToken');
-      const response = await fetch(`/api/tickets/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ticket');
+      const data = await read('tickets', { id });
+      if (data.success) {
+        setTicket(data.data);
       }
-
-      const data = await response.json();
-      setTicket(data);
     } catch (error) {
       console.error('Error fetching ticket:', error);
     } finally {
@@ -63,21 +57,14 @@ export default function TicketDetailsPage({ params }: PageProps) {
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('agentToken');
-      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-      await fetch(`${API_URL}/api/agent/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'x-source': 'external'
-        }
-      });
+      await request('agent/logout', 'POST');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('agentToken');
       localStorage.removeItem('agentId');
       localStorage.removeItem('clientId');
+      localStorage.removeItem('sessionId');
       router.push('/login');
     }
   };

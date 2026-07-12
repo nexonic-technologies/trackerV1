@@ -2,15 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { requestFirebaseToken } from '../firebase';
 import TicketForm from '../../components/tickets/TicketForm';
 import TicketView from '../../components/tickets/TicketView';
+import NotificationDrawer from '../../components/Common/NotificationDrawer';
+import { useGenericAPI } from '../useGenericAPI';
 
 export default function DashboardPage() {
   const [activeView, setActiveView] = useState<'list' | 'view' | 'create' | 'edit'>('list');
   const [tickets, setTickets] = useState<any[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [fetching, setFetching] = useState(true);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const router = useRouter();
+  const { request, read } = useGenericAPI();
 
   useEffect(() => {
     const token = localStorage.getItem('agentToken');
@@ -19,22 +25,43 @@ export default function DashboardPage() {
       return;
     }
     fetchTickets();
+    setupPushNotifications();
+    fetchUnreadCount();
   }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const agentId = localStorage.getItem('agentId');
+      const data = await read('notifications', { filter: { receiver: agentId } });
+      if (data.success) {
+        const list = data.data || [];
+        const count = list.filter((n: any) => !(n.isRead || n.read)).length;
+        setUnreadNotifCount(count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  const setupPushNotifications = async () => {
+    try {
+      const sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) return;
+
+      const fcmToken = await requestFirebaseToken();
+      if (!fcmToken) return;
+
+      await request('auth/store-push-token', 'POST', { sessionId, fcmToken });
+      console.log('FCM Token registered successfully');
+    } catch (err) {
+      console.error('Failed to setup push notifications:', err);
+    }
+  };
 
   const fetchTickets = async () => {
     try {
-      const token = localStorage.getItem('agentToken');
       const agentId = localStorage.getItem('agentId');
-
-      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_URL}/api/populate/read/tickets?filter={"createdBy":"${agentId}"}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'x-source': 'external'
-        }
-      });
-
-      const data = await response.json();
+      const data = await read('tickets', { filter: { createdBy: agentId } });
       if (data.success) {
         setTickets(data.data || []);
       }
@@ -47,21 +74,14 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('agentToken');
-      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-      await fetch(`${API_URL}/api/agent/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'x-source': 'external'
-        }
-      });
+      await request('agent/logout', 'POST');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('agentToken');
       localStorage.removeItem('agentId');
       localStorage.removeItem('clientId');
+      localStorage.removeItem('sessionId');
       router.push('/login');
     }
   };
@@ -113,6 +133,19 @@ export default function DashboardPage() {
               + New Ticket
             </button>
           )}
+          <button
+            onClick={() => setDrawerOpen(!drawerOpen)}
+            className="lmx-btn-ghost text-[13px] p-2 relative shrink-0"
+            aria-label="Notifications"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            {unreadNotifCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-1 ring-white animate-pulse" />
+            )}
+          </button>
           <button onClick={handleLogout} className="lmx-btn-ghost text-[13px] px-3 py-2">
             Logout
           </button>
@@ -246,6 +279,7 @@ export default function DashboardPage() {
           />
         )}
       </div>
+      <NotificationDrawer isOpen={drawerOpen} setIsOpen={(val) => { setDrawerOpen(val); if (!val) fetchUnreadCount(); }} />
     </div>
   );
 }

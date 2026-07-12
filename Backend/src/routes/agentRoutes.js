@@ -4,6 +4,9 @@ import Client from '../models/Client.js';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import crypto from 'node:crypto';
+import session from '../models/Session.js';
+import { getDeviceInfo } from '../utils/deviceInfo.js';
+import { generateSecret } from '../utils/tokenGenrator.js';
 
 const router = express.Router();
 
@@ -42,7 +45,8 @@ router.post('/create-agent/:clientId', async (req, res) => {
       name: client.contactPerson,
       email: client.email,
       password: tempPassword,
-      client: clientId
+      client: clientId,
+      phone: client.phone || 'N/A' // agent model requires phone
     });
 
     await agent.save();
@@ -69,7 +73,8 @@ router.post('/create-agent/:clientId', async (req, res) => {
 // Agent login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, platform = 'web' } = req.body;
+    const deviceUUID = req.headers['x-device-uuid'] || req.headers['deviceuuid'] || 'external-client-browser';
 
     // console.log('=== AGENT LOGIN ATTEMPT (agentRoutes.js) ===');
     // console.log('Email:', email);
@@ -125,12 +130,30 @@ router.post('/login', async (req, res) => {
     agent.lastLogin = new Date();
     await agent.save();
 
-    // Generate JWT
+    // Generate dynamic secret
+    const accessSecret = generateSecret();
+
+    // Generate JWT signed with accessSecret
     const token = jwt.sign(
       { id: agent._id, email: agent.email, role: agent.role, client: agent.client._id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      accessSecret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
+
+    // Create session document
+    const userSession = await session.create({
+      userId: agent._id,
+      userModel: 'agents',
+      platform,
+      deviceUUID,
+      generatedToken: {
+        token,
+        secret: accessSecret,
+        expiry: process.env.JWT_EXPIRES_IN || '24h'
+      },
+      deviceInfo: getDeviceInfo(req, platform),
+      status: 'Active'
+    });
 
     // console.log('Login successful for agent:', agent.email);
     // console.log('=== LOGIN COMPLETE ===');
@@ -141,6 +164,7 @@ router.post('/login', async (req, res) => {
       token,
       agentId: agent._id,
       clientId: agent.client._id,
+      sessionId: userSession._id,
       data: {
         agent: {
           id: agent._id,

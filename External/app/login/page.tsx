@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useGenericAPI } from '../useGenericAPI';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { request } = useGenericAPI();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,28 +20,21 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_URL}/api/agent/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-source': 'external'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
+      const data = await request('agent/login', 'POST', formData);
 
       if (data.success) {
         localStorage.setItem('agentToken', data.token);
         localStorage.setItem('agentId', data.agentId);
         localStorage.setItem('clientId', data.clientId);
+        if (data.sessionId) {
+          localStorage.setItem('sessionId', data.sessionId);
+        }
         router.push('/dashboard');
       } else {
         setError(data.message || 'Login failed');
       }
-    } catch (error) {
-      setError('Connection error. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'Connection error. Please try again.');
     } finally {
       setLoading(false);
     }
