@@ -26,7 +26,7 @@ export default function DashboardPage() {
       const token = localStorage.getItem('agentToken');
       const agentId = localStorage.getItem('agentId');
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
       const response = await fetch(`${API_URL}/api/populate/read/tickets?filter={"createdBy":"${agentId}"}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -48,7 +48,7 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('agentToken');
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
       await fetch(`${API_URL}/api/agent/logout`, {
         method: 'POST',
         headers: {
@@ -95,8 +95,8 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg lmx-gradient-hero flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 12 2 2 4-4"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 12 2 2 4-4" />
             </svg>
           </div>
           <div>
@@ -166,8 +166,8 @@ export default function DashboardPage() {
                 <div className="lmx-empty-state">
                   <div className="lmx-empty-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--lmx-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M15 5v2"/><path d="M15 11v2"/><path d="M15 17v2"/>
-                      <path d="M5 5h14a2 2 0 0 1 1.36.51l.01.01A2 2 0 0 1 21 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+                      <path d="M15 5v2" /><path d="M15 11v2" /><path d="M15 17v2" />
+                      <path d="M5 5h14a2 2 0 0 1 1.36.51l.01.01A2 2 0 0 1 21 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
                     </svg>
                   </div>
                   <h3 className="text-[18px] font-semibold text-ink mb-2">No tickets yet</h3>

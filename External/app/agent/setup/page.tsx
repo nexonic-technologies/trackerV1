@@ -23,7 +23,7 @@ function AgentSetupForm() {
     }
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/agent-invite/verify-token/${token}`;
+      const apiUrl = `${process.env.BACKEND_URL}/agent-invite/verify-token/${token}`;
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -77,7 +77,7 @@ function AgentSetupForm() {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/agent-invite/set-password`, {
+      const response = await fetch(`${process.env.BACKEND_URL}/agent-invite/set-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,9 +127,9 @@ function AgentSetupForm() {
       <div className="min-h-screen flex items-center justify-center bg-canvas px-4">
         <div className="lmx-section-card-plain max-w-md w-full text-center">
           <div className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center"
-               style={{ background: 'var(--lmx-error-light)' }}>
+            style={{ background: 'var(--lmx-error-light)' }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--lmx-error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
           <h1 className="text-[22px] font-semibold text-ink mb-2">Invalid Invitation</h1>
@@ -145,9 +145,9 @@ function AgentSetupForm() {
       <div className="min-h-screen flex items-center justify-center bg-canvas px-4">
         <div className="lmx-section-card-plain max-w-md w-full text-center">
           <div className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center"
-               style={{ background: 'var(--lmx-success-light)' }}>
+            style={{ background: 'var(--lmx-success-light)' }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--lmx-success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
           <h1 className="text-[22px] font-semibold text-ink mb-2">Password Set Successfully!</h1>
@@ -170,8 +170,8 @@ function AgentSetupForm() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-[10px] lmx-gradient-hero flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="m9 12 2 2 4-4"/>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
               </svg>
             </div>
           </div>
@@ -192,7 +192,7 @@ function AgentSetupForm() {
             }}
           >
             <svg className="w-5 h-5 mt-0.5 shrink-0" style={{ color: 'var(--lmx-error)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+              <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
             </svg>
             <span>{error}</span>
           </div>
