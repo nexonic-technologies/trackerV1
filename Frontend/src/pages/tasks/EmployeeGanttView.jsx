@@ -387,23 +387,14 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
               </div>
             </div>
 
-            {/* Rows */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              {data.entries.map((entry, idx) => (
-                <div
-                  key={entry.taskId}
-                  className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
-                  onClick={() => onTaskClick?.(entry)}
-                >
-                  {/* Row label */}
-                  <div className="w-44 flex-shrink-0 flex items-center gap-2 px-2 py-2 cursor-pointer">
-                    {/* Order badge */}
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-                      style={{
-                        background: entry.isActive ? "var(--module-project)" : "var(--tracker-surface-chip)",
-                        color: entry.isActive ? "#fff" : "var(--tracker-ink-muted)",
-                      }}
+            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+              {/* Rows */}
+              <div className="flex flex-col gap-1.5 mt-1">
+                {data.entries.map((entry, idx) => (
+                  <TaskRowDroppable key={entry.taskId} entry={entry}>
+                    <div
+                      className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
+                      onClick={() => onTaskClick?.(entry)}
                     >
                       {/* Row label */}
                       <TaskRowDraggable entry={entry}>
@@ -447,11 +438,11 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
                             : "—"}
                         </span>
                       </div>
-                  </div>
-                </TaskRowDroppable>
-              ))}
-            </div>
-          </DndContext>
+                    </div>
+                  </TaskRowDroppable>
+                ))}
+              </div>
+            </DndContext>
 
             {/* Computed at footer */}
         <p className="mt-4 text-[10px] text-ink-tertiary text-right pr-2">
