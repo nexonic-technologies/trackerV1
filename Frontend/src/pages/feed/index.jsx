@@ -19,6 +19,7 @@ export default function Feeds() {
   const [activeNav, setActiveNav] = useState('All Posts');
   const [posts, setPosts] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [editDraftId, setEditDraftId] = useState(null);
 
   // Post Composer State
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
@@ -33,7 +34,7 @@ export default function Feeds() {
   const [groups, setGroups] = useState([]);
   const [channels, setChannels] = useState([]);
   const [employees, setEmployees] = useState([]);
-  
+
   const [expiryDays, setExpiryDays] = useState(7);
   const [postMentions, setPostMentions] = useState([]);
   const [showMentions, setShowMentions] = useState(false);
@@ -89,9 +90,105 @@ export default function Feeds() {
     }
   };
 
+  const fetchStarredPosts = async () => {
+    try {
+      const response = await readPaginated('feedposts', 1, 10, {
+        filter: JSON.stringify({ bookmarkedBy: user?.id }),
+        populateFields: 'author,group,channel',
+        sort: '-createdAt'
+      });
+      if (response?.data) {
+        setPosts(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch starred posts', err);
+      toast.error("Failed to fetch starred posts");
+    }
+  };
+
+  const fetchMentionPosts = async () => {
+    try {
+      const response = await readPaginated('feedposts', 1, 10, {
+        filter: JSON.stringify({ mentions: user?.id }),
+        populateFields: 'author,group,channel',
+        sort: '-createdAt'
+      });
+      if (response?.data) {
+        setPosts(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch mention posts', err);
+      toast.error("Failed to fetch mention posts");
+    }
+  };
+
+  const fetchMyFeeds = async () => {
+    try {
+      const response = await readPaginated('feedposts', 1, 10, {
+        filter: JSON.stringify({ author: user?.id }),
+        populateFields: 'author,group,channel',
+        sort: '-createdAt'
+      });
+      if (response?.data) {
+        setPosts(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch my feeds', err);
+      toast.error("Failed to fetch my feeds");
+    }
+  };
+
+  const fetchFollowingPosts = async () => {
+    try {
+      const response = await readPaginated('feedposts', 1, 10, {
+        filter: JSON.stringify({ followers: user?.id }),
+        populateFields: 'author,group,channel',
+        sort: '-createdAt'
+      });
+      if (response?.data) {
+        setPosts(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch following posts', err);
+      toast.error("Failed to fetch following posts");
+    }
+  };
+
+  const fetchBroadcastPosts = async () => {
+    try {
+      const response = await readPaginated('feedposts', 1, 10, {
+        filter: JSON.stringify({ isBroadcast: true }),
+        populateFields: 'author,group,channel',
+        sort: '-createdAt'
+      });
+      if (response?.data) {
+        setPosts(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch pinned posts', err);
+      toast.error("Failed to fetch pinned posts");
+    }
+  };
+
+  const fetchDraft = async () => {
+    try {
+      const response = await readPaginated('feedposts', 1, 10, {
+        filter: JSON.stringify({ isDraft: true, author: user?.id }),
+        populateFields: 'author,group,channel',
+        sort: '-createdAt'
+      });
+      if (response?.data) {
+        setPosts(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch draft posts', err);
+      toast.error("Failed to fetch draft posts");
+    }
+  }
+
   const fetchSearchPost = async (id) => {
     try {
-      const response = await readPaginated('feedposts', 1, 50, {
+      const response = await readPaginated('feedposts', 1, 10, {
         filter: JSON.stringify({ $or: [{ group: id }, { channel: id }] }),
         populateFields: 'author,group,channel',
         sort: '-createdAt'
@@ -128,18 +225,80 @@ export default function Feeds() {
     }
   };
 
-  const handleSaveDraft = () => {
-    const draft = {
-      postSubject,
-      postContent,
-      postType,
-      targetType,
-      targetId,
-      expiryDays,
-      savedAt: new Date().toISOString(),
-    };
-    localStorage.setItem('feed-post-draft', JSON.stringify(draft));
-    toast.success('Draft saved');
+  const handleSaveDraft = async () => {
+    if (!postContent.trim() || postContent === '<p><br></p>') {
+      toast.error("Please add some content before saving draft");
+      return;
+    }
+    try {
+      const payload = {
+        content: postContent,
+        subject: postSubject,
+        postType: postType,
+        author: user?.id,
+        mentions: postMentions,
+        isDraft: true
+      };
+
+      if (postType === 'Announcement') {
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + Number(expiryDays));
+        payload.expiryDate = expiry.toISOString();
+      }
+
+      if (postType === 'Poll') {
+        const filteredOpts = pollOptions.filter(opt => opt.trim() !== '');
+        payload.pollOptions = filteredOpts.map(opt => ({ optionText: opt, votes: [] }));
+      }
+
+      if (targetType === 'Group' && targetId) {
+        payload.group = targetId;
+        payload.isBroadcast = true;
+        const groupChannels = channels.filter(c => c.groups && c.groups.some(gId => gId.toString() === targetId.toString()));
+        payload.channels = groupChannels.map(c => c._id);
+      }
+
+      if (targetType === 'Channel' && targetId) {
+        payload.channel = targetId;
+        payload.channels = [targetId];
+      }
+
+      if (editDraftId) {
+        await update('feedposts', editDraftId, payload);
+        toast.success('Draft updated successfully!');
+      } else {
+        const res = await create('feedposts', payload);
+        if (res?.data?._id) {
+          setEditDraftId(res.data._id);
+        }
+        toast.success('Draft saved successfully!');
+      }
+      fetchPosts();
+    } catch (err) {
+      console.error('Failed to save draft', err);
+      toast.error('Failed to save draft');
+    }
+  };
+
+  const handleEditDraft = (draftPost) => {
+    setEditDraftId(draftPost._id);
+    setPostSubject(draftPost.subject || '');
+    setPostContent(draftPost.content || '');
+    setPostType(draftPost.postType || 'Update');
+    if (draftPost.group) {
+      setTargetType('Group');
+      setTargetId(draftPost.group._id || draftPost.group);
+    } else if (draftPost.channel || (draftPost.channels && draftPost.channels.length > 0)) {
+      setTargetType('Channel');
+      setTargetId(draftPost.channel?._id || draftPost.channel || draftPost.channels?.[0]);
+    } else {
+      setTargetType('Channel');
+      setTargetId('');
+    }
+    setPostMentions(draftPost.mentions || []);
+    setIsComposerExpanded(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.success('Draft loaded into composer!');
   };
 
   const handleCreatePost = async () => {
@@ -152,7 +311,7 @@ export default function Feeds() {
         author: user?.id,
         mentions: postMentions
       };
-      
+
       if (postType === 'Announcement') {
         const expiry = new Date();
         expiry.setDate(expiry.getDate() + Number(expiryDays));
@@ -174,13 +333,21 @@ export default function Feeds() {
         const groupChannels = channels.filter(c => c.groups && c.groups.some(gId => gId.toString() === targetId.toString()));
         payload.channels = groupChannels.map(c => c._id);
       }
-      
+
       if (targetType === 'Channel' && targetId) {
         payload.channel = targetId;
         payload.channels = [targetId];
       }
 
-      await create('feedposts', payload, 'Post created successfully!');
+      if (editDraftId) {
+        payload.isDraft = false;
+        await update('feedposts', editDraftId, payload);
+        toast.success('Post published successfully!');
+        setEditDraftId(null);
+      } else {
+        payload.isDraft = false;
+        await create('feedposts', payload, 'Post created successfully!');
+      }
       localStorage.removeItem('feed-post-draft');
       setPostContent('');
       setPostSubject('');
@@ -199,11 +366,11 @@ export default function Feeds() {
 
   const handleContentChange = (val) => {
     setPostContent(val);
-    
+
     const tempElement = document.createElement('div');
     tempElement.innerHTML = val;
     const textContent = tempElement.textContent || tempElement.innerText || "";
-    
+
     const match = textContent.match(/@([a-zA-Z0-9]*)$/);
     if (match) {
       const search = match[1].toLowerCase();
@@ -226,7 +393,7 @@ export default function Feeds() {
       const replacedTextAfter = textAfter.replace(/@([a-zA-Z0-9]*)/, `<strong class="text-indigo-600">@${employee.basicInfo?.firstName}</strong>&nbsp;`);
       setPostContent(textBefore + replacedTextAfter);
     }
-    
+
     setShowMentions(false);
     if (!postMentions.includes(employee._id)) {
       setPostMentions([...postMentions, employee._id]);
@@ -303,14 +470,12 @@ export default function Feeds() {
   const handleNavClick = (label) => {
     setActiveNav(label);
     setMobileSidebarOpen(false);
-    if (label === 'All Posts') {
+    if (label === 'All Posts' || label === 'Starred' || label === 'Mentions' || label === 'My Feeds' || label === 'My Follows' || label === 'Drafts') {
       setActiveTab('All');
       fetchPosts();
-    } else if (label === 'Broadcasts' || label === 'Announcements') {
+    } else if (label === 'Broadcasts') {
       setActiveTab('Announcement');
-    } else if (label === 'My Feeds') {
-      // Filter to user's own posts
-      setActiveTab('All');
+      fetchPosts();
     }
   };
 
@@ -318,6 +483,45 @@ export default function Feeds() {
   const filteredPosts = posts
     .filter(p => !p.isDeleted)
     .filter(p => activeTab === 'All' || p.postType === activeTab)
+    .filter(p => {
+      // Drafts filtering
+      if (activeNav === 'Drafts') {
+        const authorIdStr = p.author && typeof p.author === 'object' ? (p.author._id || p.author.toString()) : (p.author ? p.author.toString() : '');
+        return p.isDraft === true && authorIdStr === user?.id;
+      }
+
+      // Exclude drafts for other navigation menus
+      if (p.isDraft === true) return false;
+
+      if (activeNav === 'All Posts') {
+        return true;
+      }
+      if (activeNav === 'Starred') {
+        fetchStarredPosts();
+        return true;
+      }
+      if (activeNav === 'Mentions') {
+        fetchMentionPosts();
+        return true;
+      }
+      if (activeNav === 'My Feeds') {
+        fetchMyFeeds();
+        return true;
+      }
+      if (activeNav === 'My Follows') {
+        fetchFollowingPosts();
+        return true;
+      }
+      if (activeNav === 'Broadcasts') {
+        fetchBroadcastPosts();
+        return true;
+      }
+      if (activeNav === 'Drafts') {
+        fetchDraft();
+        return true;
+      }
+      return true;
+    })
     .filter(p => {
       if (!searchText.trim()) return true;
       const q = searchText.toLowerCase();
@@ -430,7 +634,7 @@ export default function Feeds() {
                     {g.name.charAt(0).toUpperCase()}
                   </span>
                   <span className="truncate text-ink-muted group-hover:text-ink transition-colors text-[13px] flex-1">{g.name}</span>
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); handleOpenGroupModal(g); }}
                     className="opacity-0 group-hover:opacity-100 tracker-btn-ghost !p-1"
                     title="Edit Group"
@@ -485,7 +689,7 @@ export default function Feeds() {
                     {c.name.charAt(0).toUpperCase()}
                   </span>
                   <span className="truncate text-ink-muted group-hover:text-ink transition-colors text-[13px] flex-1">{c.name}</span>
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); handleOpenChannelModal(c); }}
                     className="opacity-0 group-hover:opacity-100 tracker-btn-ghost !p-1"
                     title="Edit Channel"
@@ -647,7 +851,7 @@ export default function Feeds() {
                     <span className="text-sm text-ink-muted">Loading posts...</span>
                   </div>
                 ) : filteredPosts.length > 0 ? (
-                  filteredPosts.map(post => <PostCard key={post._id} post={post} onRefresh={fetchPosts} />)
+                  filteredPosts.map(post => <PostCard key={post._id} post={post} onRefresh={fetchPosts} onEditDraft={handleEditDraft} />)
                 ) : (
                   <div className="text-center py-16 tracker-card-plain border-dashed">
                     <MdOutlineDynamicFeed className="text-5xl text-ink-subtle mx-auto mb-3 opacity-40" />
@@ -803,11 +1007,10 @@ function NavItem({ icon, label, active, badge, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center justify-between px-3 py-1.5 mx-1 my-0.5 rounded-lg cursor-pointer transition-all duration-200 ${
-        active
-          ? 'bg-[var(--module-accent)] text-white shadow-sm'
-          : 'hover:bg-surface-1 text-ink-muted hover:text-ink'
-      }`}
+      className={`flex items-center justify-between px-3 py-1.5 mx-1 my-0.5 rounded-lg cursor-pointer transition-all duration-200 ${active
+        ? 'bg-[var(--module-accent)] text-white shadow-sm'
+        : 'hover:bg-surface-1 text-ink-muted hover:text-ink'
+        }`}
     >
       <div className="flex items-center gap-2.5">
         <span className={`text-[15px] ${active ? 'text-white/90' : 'text-ink-subtle'}`}>{icon}</span>
@@ -824,7 +1027,7 @@ function NavItem({ icon, label, active, badge, onClick }) {
 
 function MemberSelect({ employees, selectedMembers, onChange }) {
   const [search, setSearch] = useState('');
-  
+
   const handleSelectAll = () => {
     if (selectedMembers.length === employees.length) {
       onChange([]);
@@ -851,8 +1054,8 @@ function MemberSelect({ employees, selectedMembers, onChange }) {
     <div className="border border-hairline rounded-tracker-md overflow-hidden flex flex-col mt-4 bg-surface">
       <div className="bg-surface-1 px-3 py-2 flex items-center justify-between border-b border-hairline">
         <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-ink">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             checked={employees.length > 0 && selectedMembers.length === employees.length}
             onChange={handleSelectAll}
             className="rounded text-[var(--module-accent)] focus:ring-[var(--module-accent)] cursor-pointer"
