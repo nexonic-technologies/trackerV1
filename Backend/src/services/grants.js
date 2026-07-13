@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 export default function () {
   return {
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { docId } = ctx;
       try {
         await invalidateAllCache();
@@ -17,7 +17,7 @@ export default function () {
         console.error("[GrantsHook] Failed to invalidate cache after create:", err.message);
       }
     },
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { data } = ctx;
       try {
         await invalidateAllCache();
@@ -27,7 +27,7 @@ export default function () {
         console.error("[GrantsHook] Failed to invalidate cache after update:", err.message);
       }
     },
-    afterDelete: async async (ctx) => {
+    afterDelete: async (ctx) => {
       const { deletedDoc } = ctx;
       try {
         await invalidateAllCache();
@@ -39,3 +39,4 @@ export default function () {
     }
   };
 }
+

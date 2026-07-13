@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 export default function ticketAttachmentsService() {
   return {
     // ---------------- Before Create ----------------
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { role, userId, body } = ctx;
       // If the populateHelper set body.attachments from req.files.attachments:
       if (body.attachments && body.attachments.length > 0) {
@@ -28,7 +28,7 @@ export default function ticketAttachmentsService() {
     },
 
     // ---------------- After Create ----------------
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { role, userId, docId } = ctx;
       try {
         const attachment = await models.ticket_attachments.findById(docId).lean();
@@ -51,3 +51,4 @@ export default function ticketAttachmentsService() {
     }
   };
 }
+

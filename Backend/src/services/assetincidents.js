@@ -22,7 +22,7 @@ export default function () {
      * 3. Auto-populate employee/allocation/department if not provided.
      * 4. Enforce createdBy.
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { role, userId, body } = ctx;
       const data = body;
 
@@ -79,7 +79,7 @@ export default function () {
      * 1. Initialize approval workflow.
      * 2. Update asset status to 'Under Repair' or 'Lost'.
      */
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { docId } = ctx;
       const doc = await models.assetincidents.findById(docId);
       if (!doc) return;
@@ -102,7 +102,7 @@ export default function () {
      * 1. Enforce status transition rules.
      * 2. Cache old status for afterUpdate hooks.
      */
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId } = ctx;
       const data = body;
       if (!docId) return data;
@@ -132,7 +132,7 @@ export default function () {
      * 1. Advance approval workflow if status changes.
      * 2. If approved at final step, set recoveryApproved = true.
      */
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { docId, data, beforeDoc, userId } = ctx;
       if (!docId) return;
 
@@ -161,3 +161,4 @@ export default function () {
     }
   };
 }
+

@@ -9,7 +9,7 @@ export default function () {
     /**
      * beforeCreate
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body } = ctx;
       const data = body;
       
@@ -22,3 +22,4 @@ export default function () {
     }
   };
 }
+

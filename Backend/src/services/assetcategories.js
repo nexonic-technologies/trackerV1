@@ -13,7 +13,7 @@ export default function () {
      * 1. Normalize code to UPPERCASE.
      * 2. Guard against duplicate code (case-insensitive).
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body } = ctx;
       const data = body;
       // 1. Normalize
@@ -41,7 +41,7 @@ export default function () {
      * 1. Normalize code if being updated.
      * 2. Guard duplicate code collision on update.
      */
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId } = ctx;
       const data = body;
       if (data.code) {
@@ -62,3 +62,4 @@ export default function () {
 
   };
 }
+

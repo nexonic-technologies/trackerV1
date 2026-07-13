@@ -41,7 +41,7 @@ export default function () {
      * 5. Enforce default metaStatus = active.
      * 6. Enforce default condition = Good (unless explicitly provided).
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body } = ctx;
       const data = body;
 
@@ -96,7 +96,7 @@ export default function () {
      * 2. Enforce status transition rules.
      * 3. If condition is being updated, record conditionLastAssessedAt.
      */
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId, userId } = ctx;
       const data = body;
 
@@ -141,7 +141,7 @@ export default function () {
       return data;
     },
 
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { docId, data, beforeDoc, userId } = ctx;
       const statusChanged = data.status && data.status !== beforeDoc.status;
       if (!statusChanged) return;
@@ -162,3 +162,4 @@ export default function () {
     }
   };
 }
+

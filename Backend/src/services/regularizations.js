@@ -4,7 +4,7 @@ import { sendNotification } from '../utils/notificationService.js';
 export default function regularizations() {
   return {
     // ---------------- Before Create ----------------
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body, userId } = ctx;
       const { default: models } = await import('../models/Collection.js');
 
@@ -44,7 +44,7 @@ export default function regularizations() {
     },
 
     // ---------------- After Create ----------------
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { docId, userId } = ctx;
       const { default: models } = await import('../models/Collection.js');
 
@@ -57,7 +57,7 @@ export default function regularizations() {
     },
 
     // ---------------- Before Update ----------------
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId, userId } = ctx;
       const { default: models } = await import('../models/Collection.js');
       const old = await models.regularizations.findById(docId).lean();
@@ -66,7 +66,7 @@ export default function regularizations() {
     },
 
     // ---------------- After Update ----------------
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { docId, body, userId } = ctx;
       const { default: models } = await import('../models/Collection.js');
 

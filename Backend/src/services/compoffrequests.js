@@ -3,7 +3,7 @@ import Employee from "../models/Employee.js";
 
 export default function compoffrequests() {
   return {
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body } = ctx;
       const worked = new Date(body.workedDate);
       if (isNaN(worked.getTime())) {
@@ -31,7 +31,7 @@ export default function compoffrequests() {
       return body;
     },
 
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { modelName, docId, userId } = ctx;
       const { default: CompOffRequest } = await import('../models/CompOffRequest.js');
       const doc = await CompOffRequest.findById(docId);
@@ -41,7 +41,7 @@ export default function compoffrequests() {
       await approvalEngine.initializeWorkflow('compoffrequests', doc);
     },
 
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId } = ctx;
       if (!docId) return;
       const { default: CompOffRequest } = await import('../models/CompOffRequest.js');
@@ -49,7 +49,7 @@ export default function compoffrequests() {
       body._oldStatus = oldDoc.status;
     },
 
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { modelName, userId, docId, body } = ctx;
       if (!docId) return;
 
@@ -119,3 +119,4 @@ export default function compoffrequests() {
     }
   };
 }
+

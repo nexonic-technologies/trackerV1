@@ -9,7 +9,7 @@ export default function () {
     /**
      * beforeCreate
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body } = ctx;
       const data = body;
       if (!data.status) {
@@ -21,7 +21,7 @@ export default function () {
     /**
      * afterCreate
      */
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { docId } = ctx;
       // 1. Fetch payment
       const payment = await models.assetpayments.findById(docId).lean();
@@ -83,3 +83,4 @@ export default function () {
     }
   };
 }
+

@@ -28,7 +28,7 @@ export default function () {
      * 5. Force status = 'Pending Approval' and metaStatus = 'active'.
      * 6. Set createdBy = userId.
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { role, userId, body } = ctx;
       const data = body;
 
@@ -131,7 +131,7 @@ export default function () {
      * 1. Initialize the approval workflow.
      * 2. Update asset status to 'Reserved' (to prevent duplicate requests while approval is pending).
      */
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { docId } = ctx;
       const doc = await models.assetallocations.findById(docId);
       if (!doc) return;
@@ -149,7 +149,7 @@ export default function () {
      * 1. Enforce status transition rules.
      * 2. Handle return fields requirement.
      */
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { role, userId, body, docId } = ctx;
       const data = body;
 
@@ -221,7 +221,7 @@ export default function () {
      * 3. If status changes to 'Returned':
      *    - Based on returnedCondition, update asset status ('Available', 'Under Repair', 'Lost') and condition state.
      */
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { docId, data, beforeDoc, userId } = ctx;
       const statusChanged = data.status && data.status !== beforeDoc.status;
       if (!statusChanged) return;
@@ -338,3 +338,4 @@ export default function () {
 
   };
 }
+

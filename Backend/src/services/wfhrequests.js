@@ -1,7 +1,7 @@
 // services/wfhrequests.js
 export default function wfhrequests() {
   return {
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { body, userId } = ctx;
       const start = new Date(body.startDate);
       const end = new Date(body.endDate);
@@ -25,7 +25,7 @@ export default function wfhrequests() {
     },
     
     // AFTER CREATE ➝ Initialize dynamic approval workflow
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { modelName, docId, userId } = ctx;
       const { default: WFHRequest } = await import('../models/WFHRequest.js');
       const wfhDoc = await WFHRequest.findById(docId);
@@ -36,7 +36,7 @@ export default function wfhrequests() {
     },
 
     // BEFORE UPDATE ➝ Store old status
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId } = ctx;
       if (!docId) return;
       const { default: WFHRequest } = await import('../models/WFHRequest.js');
@@ -45,7 +45,7 @@ export default function wfhrequests() {
     },
 
     // AFTER UPDATE ➝ Advance workflow
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { modelName, userId, docId, body } = ctx;
       if (!docId) return;
 
@@ -68,3 +68,4 @@ export default function wfhrequests() {
     }
   };
 }
+

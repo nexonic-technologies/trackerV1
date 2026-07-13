@@ -20,7 +20,7 @@ export default function () {
     /**
      * beforeCreate
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { role, userId, body } = ctx;
       const data = body;
 
@@ -52,7 +52,7 @@ export default function () {
     /**
      * afterCreate
      */
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { role, userId, docId } = ctx;
       if (Array.isArray(docId)) {
         for (const id of docId) {
@@ -72,7 +72,7 @@ export default function () {
     /**
      * beforeUpdate
      */
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { role, userId, docId, body } = ctx;
       const data = body;
       if (!docId) return data;
@@ -97,7 +97,7 @@ export default function () {
     /**
      * afterUpdate
      */
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { docId, data, beforeDoc, userId } = ctx;
       const statusChanged = data.status && data.status !== beforeDoc.status;
       if (!statusChanged) return;
@@ -111,3 +111,4 @@ export default function () {
     }
   };
 }
+

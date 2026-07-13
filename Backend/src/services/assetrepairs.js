@@ -21,7 +21,7 @@ export default function () {
      * 2. Force status = 'Sent for Repair' and metaStatus = 'active'.
      * 3. Set createdBy = userId.
      */
-    beforeCreate: async async (ctx) => {
+    beforeCreate: async (ctx) => {
       const { role, userId, body } = ctx;
       const data = body;
 
@@ -50,7 +50,7 @@ export default function () {
      * ────────────
      * Ensure asset status is set to 'Under Repair'
      */
-    afterCreate: async async (ctx) => {
+    afterCreate: async (ctx) => {
       const { docId, userId } = ctx;
       const repair = await models.assetrepairs.findById(docId).lean();
       if (!repair) return;
@@ -81,7 +81,7 @@ export default function () {
      * ─────────────
      * Enforce status transitions
      */
-    beforeUpdate: async async (ctx) => {
+    beforeUpdate: async (ctx) => {
       const { body, docId } = ctx;
       const data = body;
       if (!docId) return data;
@@ -108,7 +108,7 @@ export default function () {
      * ────────────
      * Update asset register status & condition when repair is finalized
      */
-    afterUpdate: async async (ctx) => {
+    afterUpdate: async (ctx) => {
       const { docId, data, beforeDoc, userId } = ctx;
       const statusChanged = data.status && data.status !== beforeDoc.status;
       if (!statusChanged) return;
@@ -166,3 +166,4 @@ export default function () {
     }
   };
 }
+
