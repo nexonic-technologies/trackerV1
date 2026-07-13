@@ -17,23 +17,23 @@ import { Users, RefreshCw, Clock, Zap, AlertTriangle, CheckCircle2, ChevronDown 
 // ── Utilization badge ────────────────────────────────────────────────────────
 const UtilizationBadge = ({ percent }) => {
   if (percent == null) return null;
-  const isHealthy  = percent < 80;
-  const isBusy     = percent >= 80 && percent <= 120;
+  const isHealthy = percent < 80;
+  const isBusy = percent >= 80 && percent <= 120;
   const isOverload = percent > 120;
 
   return (
     <span
       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all"
       style={{
-        background:   isHealthy  ? "var(--tracker-success-light)"
-                    : isBusy    ? "var(--tracker-warning-light)"
-                    : "var(--tracker-danger-light)",
-        color:        isHealthy  ? "var(--tracker-success)"
-                    : isBusy    ? "var(--tracker-warning)"
-                    : "var(--tracker-danger)",
-        borderColor:  isHealthy  ? "color-mix(in srgb, var(--tracker-success) 30%, transparent)"
-                    : isBusy    ? "color-mix(in srgb, var(--tracker-warning) 30%, transparent)"
-                    : "color-mix(in srgb, var(--tracker-danger) 30%, transparent)",
+        background: isHealthy ? "var(--tracker-success-light)"
+          : isBusy ? "var(--tracker-warning-light)"
+            : "var(--tracker-danger-light)",
+        color: isHealthy ? "var(--tracker-success)"
+          : isBusy ? "var(--tracker-warning)"
+            : "var(--tracker-danger)",
+        borderColor: isHealthy ? "color-mix(in srgb, var(--tracker-success) 30%, transparent)"
+          : isBusy ? "color-mix(in srgb, var(--tracker-warning) 30%, transparent)"
+            : "color-mix(in srgb, var(--tracker-danger) 30%, transparent)",
       }}
     >
       {isHealthy ? <CheckCircle2 size={11} /> : isOverload ? <AlertTriangle size={11} /> : <Zap size={11} />}
@@ -45,20 +45,20 @@ const UtilizationBadge = ({ percent }) => {
 // ── Priority dot ─────────────────────────────────────────────────────────────
 const PRIORITY_COLORS = {
   "Weekly Priority": "var(--module-hr)",
-  "High":            "var(--tracker-danger)",
-  "Medium":          "var(--tracker-warning)",
-  "Low":             "var(--tracker-success)",
+  "High": "var(--tracker-danger)",
+  "Medium": "var(--tracker-warning)",
+  "Low": "var(--tracker-success)",
 };
 
 // ── Gantt bar ─────────────────────────────────────────────────────────────────
 const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
   if (!entry.projectedStart || !entry.projectedEnd) return null;
 
-  const start   = new Date(entry.projectedStart).getTime();
-  const end     = new Date(entry.projectedEnd).getTime();
-  const left    = Math.max(0, ((start - startEpoch) / totalSpanMs) * 100);
-  const width   = Math.max(1, ((end - start) / totalSpanMs) * 100);
-  const color   = entry.isActive
+  const start = new Date(entry.projectedStart).getTime();
+  const end = new Date(entry.projectedEnd).getTime();
+  const left = Math.max(0, ((start - startEpoch) / totalSpanMs) * 100);
+  const width = Math.max(1, ((end - start) / totalSpanMs) * 100);
+  const color = entry.isActive
     ? "var(--module-project)"
     : PRIORITY_COLORS[entry.priorityLevel] || "var(--tracker-ink-subtle)";
 
@@ -96,6 +96,57 @@ const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
   );
 };
 
+// ── Draggable/Droppable Row Wrappers ──────────────────────────────────────────
+const TaskRowDraggable = ({ entry, children }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: entry.taskId,
+    disabled: entry.isActive
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 'auto',
+    position: 'relative',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex-1 flex items-center min-w-0">
+      {!entry.isActive && (
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="p-1 cursor-grab hover:bg-surface-2 rounded text-ink-subtle shrink-0 mr-1 flex items-center justify-center"
+          title="Drag to reorder"
+        >
+          <GripVertical size={14} />
+        </button>
+      )}
+      {children}
+    </div>
+  );
+};
+
+const TaskRowDroppable = ({ entry, children }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: entry.taskId
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="transition-all duration-150 rounded-tracker-md"
+      style={{
+        borderTop: isOver ? '2.5px solid var(--module-project)' : '2.5px solid transparent',
+        borderBottom: isOver ? '2.5px solid var(--module-project)' : '2.5px solid transparent',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 // ── Day axis header ───────────────────────────────────────────────────────────
 const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
   const days = Array.from({ length: dayCount + 1 }, (_, i) => {
@@ -121,9 +172,9 @@ const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
 
 // ── Main component ───────────────────────────────────────────────────────────
 const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, onEmployeeChange, onTaskClick }) => {
-  const [data,    setData]    = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState(null);
+  const [error, setError] = useState(null);
 
   const fetchQueue = useCallback(async (empId) => {
     if (!empId) return;
@@ -145,18 +196,18 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
   const ganttBounds = (() => {
     if (!data?.entries?.length) return null;
     const starts = data.entries.map(e => new Date(e.projectedStart).getTime()).filter(Boolean);
-    const ends   = data.entries.map(e => new Date(e.projectedEnd).getTime()).filter(Boolean);
+    const ends = data.entries.map(e => new Date(e.projectedEnd).getTime()).filter(Boolean);
     if (!starts.length) return null;
     const minEpoch = Math.min(...starts);
     const maxEpoch = Math.max(...ends);
-    const spanMs   = maxEpoch - minEpoch || 86400000;
+    const spanMs = maxEpoch - minEpoch || 86400000;
     const dayCount = Math.ceil(spanMs / 86400000);
     return { startEpoch: minEpoch, totalSpanMs: spanMs, dayCount };
   })();
 
   // ── Employee select options ───────────────────────────────────────────────
   const empOptions = employees.map(e => ({
-    id:   e._id,
+    id: e._id,
     name: [e.basicInfo?.firstName, e.basicInfo?.lastName].filter(Boolean).join(" ") || "Employee",
   }));
 
@@ -215,7 +266,7 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
         {/* Loading */}
         {loading && (
           <div className="flex flex-col gap-3 p-4">
-            {[1,2,3,4].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} className="flex gap-4 animate-pulse">
                 <div className="w-40 h-8 bg-surface-1 rounded-tracker-md flex-shrink-0" />
                 <div className="flex-1 h-8 bg-surface-1 rounded-full" style={{ width: `${40 + i * 15}%` }} />
@@ -271,7 +322,7 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
                       className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
                       style={{
                         background: entry.isActive ? "var(--module-project)" : "var(--tracker-surface-chip)",
-                        color:      entry.isActive ? "#fff"                  : "var(--tracker-ink-muted)",
+                        color: entry.isActive ? "#fff" : "var(--tracker-ink-muted)",
                       }}
                     >
                       {entry.isActive ? "▶" : idx + 1}
