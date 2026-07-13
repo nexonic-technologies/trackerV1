@@ -127,7 +127,7 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
         bg-surface border-r border-hairline-soft
         transition-all duration-300 ease-in-out overflow-hidden
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        ${isExpandedView ? "w-[240px]" : "w-[52px]"}
+        ${isExpandedView ? "w-[240px]" : "w-[64px]"}
       `}
     >
       {/* Brand */}
@@ -150,22 +150,13 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
         </div>
         
         {isExpandedView && (
-          <>
-            <button
-              onClick={onClose}
-              className="tracker-btn-ghost p-1 lg:block hidden flex-shrink-0"
-              aria-label="Collapse sidebar"
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={onClose}
-              className="tracker-btn-ghost p-1 lg:hidden flex-shrink-0"
-              aria-label="Close sidebar"
-            >
-              <MD.MdClose className="text-lg" />
-            </button>
-          </>
+          <button
+            onClick={onClose}
+            className="tracker-btn-ghost p-1 lg:hidden flex-shrink-0"
+            aria-label="Close sidebar"
+          >
+            <MD.MdClose className="text-lg" />
+          </button>
         )}
       </div>
 
@@ -204,15 +195,6 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
           © {new Date().getFullYear()} Portal
         </span>
 
-        {!isOpen && !isExpandedView && (
-          <button
-            onClick={onOpen}
-            className="tracker-btn-ghost p-1.5 hidden lg:block"
-            aria-label="Expand sidebar"
-          >
-            <ChevronsRight className="h-4 w-4" />
-          </button>
-        )}
       </div>
     </aside>  );
 };

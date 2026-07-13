@@ -153,7 +153,7 @@
 
   /* Layout */
   --sidebar-width: 240px;
-  --sidebar-collapsed: 52px;
+  --sidebar-collapsed: 64px;
   --topbar-height: 60px;
   --content-offset: var(--sidebar-width);
 }

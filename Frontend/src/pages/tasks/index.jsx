@@ -216,7 +216,7 @@ const TasksPage = () => {
     <div className="flex flex-col h-full bg-canvas" data-module="project">
 
       {/* ── Page header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e2e8f0] pb-1 mb-2">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-hairline-soft pb-1 mb-2">
 
         {/* Left: Title & Subtitle */}
         <div className="flex items-center gap-3 min-w-0">
