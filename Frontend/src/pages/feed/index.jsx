@@ -490,52 +490,17 @@ export default function Feeds() {
     }
   };
 
-  // Filtered posts (pure client-side filtering of state)
+  // Filtered posts (relying on genericApi server-side filtering results)
   const filteredPosts = posts
     .filter(p => !p.isDeleted)
     .filter(p => activeTab === 'All' || p.postType === activeTab)
     .filter(p => {
       // Drafts filtering
       if (activeNav === 'Drafts') {
-        const authorIdStr = p.author && typeof p.author === 'object' ? (p.author._id || p.author.toString()) : (p.author ? p.author.toString() : '');
-        return p.isDraft === true && authorIdStr === user?.id;
+        return p.isDraft === true;
       }
-
-      // Exclude drafts for other navigation menus
-      if (p.isDraft === true) return false;
-
-      if (activeNav === 'All Posts') {
-        return true;
-      }
-      if (activeNav === 'Starred') {
-        const hasStarred = p.bookmarkedBy && p.bookmarkedBy.some(b => {
-          const bId = b && typeof b === 'object' ? (b._id || b.toString()) : (b ? b.toString() : '');
-          return bId === user?.id;
-        });
-        return hasStarred;
-      }
-      if (activeNav === 'Mentions') {
-        const hasMention = p.mentions && p.mentions.some(m => {
-          const mId = m && typeof m === 'object' ? (m._id || m.toString()) : (m ? m.toString() : '');
-          return mId === user?.id;
-        });
-        return hasMention;
-      }
-      if (activeNav === 'My Feeds') {
-        const authorIdStr = p.author && typeof p.author === 'object' ? (p.author._id || p.author.toString()) : (p.author ? p.author.toString() : '');
-        return authorIdStr === user?.id;
-      }
-      if (activeNav === 'My Follows') {
-        const hasFollow = p.followers && p.followers.some(f => {
-          const fId = f && typeof f === 'object' ? (f._id || f.toString()) : (f ? f.toString() : '');
-          return fId === user?.id;
-        });
-        return hasFollow;
-      }
-      if (activeNav === 'Broadcasts') {
-        return p.isBroadcast === true;
-      }
-      return true;
+      // Exclude drafts for all other standard views
+      return !p.isDraft;
     })
     .filter(p => {
       if (!searchText.trim()) return true;
