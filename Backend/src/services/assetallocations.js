@@ -205,6 +205,15 @@ export default function () {
             throw new Error(`returnedCondition is required and must be one of: ${VALID_CONDITIONS.join(', ')}.`);
           }
         }
+
+        // Auditing & Approval status tracking
+        if (data.status === 'Active') {
+          data.approvedBy = userId;
+          data.approvedAt = new Date();
+        } else if (data.status === 'Rejected') {
+          data.rejectedBy = userId;
+          data.rejectedAt = new Date();
+        }
       }
 
       return data;

@@ -114,8 +114,19 @@ const AssetAllocationSchema = new Schema({
     type: Date
   },
   
+  rejectedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'employees'
+  },
+  
   rejectedAt: {
     type: Date
+  },
+
+  remarks: {
+    type: String,
+    maxLength: 500,
+    trim: true
   },
 
   // ── Transfer Details ─────────────────────────────────────────────────────────

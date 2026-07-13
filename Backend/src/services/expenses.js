@@ -61,6 +61,44 @@ export default function expensesService() {
   }
 
   return {
+    async beforeRead(ctx) {
+      const { filter = {}, user } = ctx;
+      const role = user?.role;
+      const userId = user?.id;
+
+      const { canDo } = await import('../utils/cache.js');
+      const privileged = canDo(role, 'manage:expenses');
+
+      // Check if viewing pending approvals tab
+      if (filter.status === 'pending' && filter.viewMode === 'approvals') {
+        delete filter.viewMode; // delete transient UI field
+
+        if (privileged) {
+          // HR and SuperAdmin can see all pending expenses
+          return { filter };
+        }
+
+        // Managers can see pending expenses of employees reporting to them
+        const { default: models } = await import('../models/Collection.js');
+        const reportingEmployees = await models.employees.find({
+          'professionalInfo.reportingManager': userId
+        }).select('_id').lean();
+
+        const employeeIds = reportingEmployees.map(emp => emp._id);
+        filter.employeeId = { $in: employeeIds };
+
+        return { filter };
+      }
+
+      // Default: regular read request
+      if (!privileged && userId) {
+        // Enforce reading own expenses only
+        filter.employeeId = userId;
+      }
+
+      return { filter };
+    },
+
     async beforeCreate(ctx) {
       const { body, user } = ctx;
       // Always auto-stamp the employee from the authenticated user

@@ -14,6 +14,7 @@ export default function DynamicModelPage() {
     if (lower === "leave" || lower === "leaves") return "leaves";
     if (lower === "wfhrequest" || lower === "wfhrequests") return "wfhrequests";
     if (lower === "regularization" || lower === "regularizations") return "regularizations";
+    if (lower === "assetallocation" || lower === "assetallocations") return "assetallocations";
     return name;
   };
   const model = getNormalizedModelName(rawModel);
@@ -73,6 +74,23 @@ export default function DynamicModelPage() {
         } else {
           setError("Regularization request not found.");
         }
+      } else if (model === "assetallocations") {
+        const res = await readDetailed("assetallocations", {
+          id,
+          populateFields: {
+            employeeId: "basicInfo.firstName,basicInfo.lastName,professionalInfo.empId",
+            departmentId: "name",
+            assetId: "name,serialNumber,category,status",
+            managerId: "basicInfo.firstName,basicInfo.lastName",
+            transferFromEmployee: "basicInfo.firstName,basicInfo.lastName",
+            transferToEmployee: "basicInfo.firstName,basicInfo.lastName"
+          }
+        });
+        if (res?.data) {
+          setData(res.data);
+        } else {
+          setError("Asset allocation request not found.");
+        }
       } else {
         // Fallback placeholder for other models
         setData({ isPlaceholder: true });
@@ -91,10 +109,13 @@ export default function DynamicModelPage() {
   }, [id, model, fetchRecord]);
 
   const handleAction = async (approve) => {
-    if (!data || (model !== "wfhrequests" && model !== "leaves" && model !== "regularizations")) return;
+    if (!data || (model !== "wfhrequests" && model !== "leaves" && model !== "regularizations" && model !== "assetallocations")) return;
     setActionBusy(true);
     try {
-      const targetStatus = approve ? "Approved" : "Rejected";
+      let targetStatus = approve ? "Approved" : "Rejected";
+      if (model === "assetallocations" && approve) {
+        targetStatus = "Active";
+      }
       
       let successMsg = "";
       if (model === "leaves") {
@@ -103,10 +124,13 @@ export default function DynamicModelPage() {
         successMsg = approve ? "WFH request approved successfully!" : "WFH request rejected.";
       } else if (model === "regularizations") {
         successMsg = approve ? "Regularization request approved successfully!" : "Regularization request rejected.";
+      } else if (model === "assetallocations") {
+        successMsg = approve ? "Asset allocation request approved successfully!" : "Asset allocation request rejected.";
       }
       
       const updateData = {
         status: targetStatus,
+        remarks: comment,
         approverComment: comment,
         managerComments: comment
       };
@@ -176,13 +200,15 @@ export default function DynamicModelPage() {
     );
   }
 
-  const isPending = data.status === "Pending";
+  const isPending = data.status === "Pending" || data.status === "Pending Approval";
   const dateOptions = { year: "numeric", month: "long", day: "numeric" };
   const timeOptions = { hour: "2-digit", minute: "2-digit", hour12: true };
   
   const startDateStr = data.startDate ? new Date(data.startDate).toLocaleDateString("en-IN", dateOptions) : "";
   const endDateStr = data.endDate ? new Date(data.endDate).toLocaleDateString("en-IN", dateOptions) : "";
   const requestDateStr = data.requestDate ? new Date(data.requestDate).toLocaleDateString("en-IN", dateOptions) : "";
+  const allocationDateStr = data.allocationDate ? new Date(data.allocationDate).toLocaleDateString("en-IN", dateOptions) : "";
+  const expectedReturnStr = data.expectedReturn ? new Date(data.expectedReturn).toLocaleDateString("en-IN", dateOptions) : "—";
   
   const originalCheckInStr = data.originalCheckIn ? new Date(data.originalCheckIn).toLocaleTimeString("en-IN", timeOptions) : "—";
   const originalCheckOutStr = data.originalCheckOut ? new Date(data.originalCheckOut).toLocaleTimeString("en-IN", timeOptions) : "—";
@@ -214,20 +240,24 @@ export default function DynamicModelPage() {
                     ? "Leave Request Review" 
                     : model === "wfhrequests" 
                     ? "WFH Request Review" 
-                    : "Regularization Request Review"}
+                    : model === "regularizations"
+                    ? "Regularization Request Review"
+                    : "Asset Allocation Review"}
                 </span>
                 <h1 className="text-xl font-bold text-ink mt-1">
                   {model === "leaves" 
                     ? "Review Leave Request" 
                     : model === "wfhrequests" 
                     ? "Review WFH Request" 
-                    : "Review Regularization Request"}
+                    : model === "regularizations"
+                    ? "Review Regularization Request"
+                    : "Review Asset Allocation"}
                 </h1>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                data.status === "Pending"
+                data.status === "Pending" || data.status === "Pending Approval"
                   ? "bg-tracker-warning-light text-tracker-warning"
-                  : data.status === "Approved"
+                  : data.status === "Approved" || data.status === "Active"
                   ? "bg-tracker-success-light text-tracker-success"
                   : "bg-tracker-danger-light text-tracker-danger"
               }`}>
@@ -267,7 +297,7 @@ export default function DynamicModelPage() {
               </div>
 
               {/* Duration or Request Date Detail */}
-              {model !== "regularizations" ? (
+              {model !== "regularizations" && model !== "assetallocations" && (
                 <div className="flex items-start gap-3 col-span-1 md:col-span-2">
                   <div className="lmx-icon-tile mt-0.5">
                     <Calendar size={18} />
@@ -279,7 +309,8 @@ export default function DynamicModelPage() {
                     </p>
                   </div>
                 </div>
-              ) : (
+              )}
+              {model === "regularizations" && (
                 <div className="flex items-start gap-3 col-span-1 md:col-span-2">
                   <div className="lmx-icon-tile mt-0.5">
                     <Calendar size={18} />
@@ -306,6 +337,82 @@ export default function DynamicModelPage() {
                     </p>
                   </div>
                 </div>
+              )}
+
+              {/* Asset Allocation Details */}
+              {model === "assetallocations" && (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="lmx-icon-tile mt-0.5">
+                      <FileText size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-semibold text-ink-subtle uppercase tracking-wider">Allocation Type</h3>
+                      <p className="text-base font-bold text-ink mt-0.5">{data.allocationType || "Allocation"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 col-span-1 md:col-span-2">
+                    <div className="lmx-icon-tile mt-0.5">
+                      <Calendar size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-semibold text-ink-subtle uppercase tracking-wider">Allocation Period</h3>
+                      <p className="text-base font-bold text-ink mt-0.5">
+                        {allocationDateStr} {expectedReturnStr ? `— ${expectedReturnStr}` : " (No expected return)"}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Asset Details Sub-grid */}
+                  <div className="col-span-1 md:col-span-2 mt-4 bg-canvas-muted p-4 rounded-tracker-md border border-hairline space-y-3">
+                    <h4 className="text-xs font-bold text-ink-muted uppercase tracking-wider border-b border-hairline pb-1.5">Asset Details</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="block text-[11px] font-bold text-ink-subtle uppercase">Asset Name</span>
+                        <span className="font-semibold text-ink">{data.assetId?.name || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[11px] font-bold text-ink-subtle uppercase">Serial Number</span>
+                        <span className="font-semibold text-ink">{data.assetId?.serialNumber || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[11px] font-bold text-ink-subtle uppercase">Category</span>
+                        <span className="font-semibold text-ink">{data.assetId?.category || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[11px] font-bold text-ink-subtle uppercase">Asset Status</span>
+                        <span className="font-semibold text-ink capitalize">{data.assetId?.status || "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Transfer Details Sub-grid if Type is Transfer */}
+                  {data.allocationType === "Transfer" && (
+                    <div className="col-span-1 md:col-span-2 mt-4 bg-canvas-muted p-4 rounded-tracker-md border border-hairline space-y-3">
+                      <h4 className="text-xs font-bold text-ink-muted uppercase tracking-wider border-b border-hairline pb-1.5">Transfer Details</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="block text-[11px] font-bold text-ink-subtle uppercase">Transfer From</span>
+                          <span className="font-semibold text-ink">
+                            {data.transferFromEmployee ? `${data.transferFromEmployee.basicInfo?.firstName || ""} ${data.transferFromEmployee.basicInfo?.lastName || ""}`.trim() : "—"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[11px] font-bold text-ink-subtle uppercase">Transfer To</span>
+                          <span className="font-semibold text-ink">
+                            {data.transferToEmployee ? `${data.transferToEmployee.basicInfo?.firstName || ""} ${data.transferToEmployee.basicInfo?.lastName || ""}`.trim() : "—"}
+                          </span>
+                        </div>
+                        {data.transferReason && (
+                          <div className="col-span-2">
+                            <span className="block text-[11px] font-bold text-ink-subtle uppercase">Transfer Reason</span>
+                            <span className="text-sm text-ink">{data.transferReason}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Regularization Times Detail */}
@@ -344,24 +451,24 @@ export default function DynamicModelPage() {
             </div>
 
             {/* Employee Request Note */}
-            {data.reason && (
+            {(data.reason || data.notes) && (
               <div className="mt-6 pt-5 border-t border-hairline-soft bg-canvas-muted p-4 rounded-tracker-md">
                 <h3 className="text-xs font-semibold text-ink-subtle uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <FileText size={14} /> Reason for Request
+                  <FileText size={14} /> Reason for Request / Notes
                 </h3>
                 <p className="text-sm text-ink whitespace-pre-line leading-relaxed">
-                  {data.reason}
+                  {data.reason || data.notes}
                 </p>
               </div>
             )}
 
             {/* Approver Comments */}
-            {(data.approverComment || data.managerComments) && (
+            {(data.approverComment || data.managerComments || data.remarks) && (
               <div className="mt-4 bg-canvas-muted p-4 rounded-tracker-md border border-hairline">
                 <h3 className="text-xs font-semibold text-ink-subtle uppercase tracking-wider mb-1">
-                  Approver Comment
+                  Approver Comment / Remarks
                 </h3>
-                <p className="text-sm text-ink">{data.approverComment || data.managerComments}</p>
+                <p className="text-sm text-ink">{data.approverComment || data.managerComments || data.remarks}</p>
               </div>
             )}
           </div>
@@ -375,7 +482,7 @@ export default function DynamicModelPage() {
             {isPending ? (
               <div className="space-y-4">
                   <p className="text-sm text-ink-muted leading-relaxed">
-                    Review the {model === "leaves" ? "leave details" : model === "wfhrequests" ? "Work From Home duration" : "attendance corrections"} and reasons carefully before approving or rejecting this request.
+                    Review the {model === "leaves" ? "leave details" : model === "wfhrequests" ? "Work From Home duration" : model === "regularizations" ? "attendance corrections" : "asset allocation details"} and reasons carefully before approving or rejecting this request.
                   </p>
                 
                 <div>
@@ -397,7 +504,7 @@ export default function DynamicModelPage() {
                     disabled={actionBusy}
                     className="tracker-btn-accent w-full min-h-[44px] flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:brightness-105 transition-all font-semibold disabled:opacity-50"
                   >
-                    <Check size={18} /> Approve {model === "leaves" ? "Leave" : model === "wfhrequests" ? "WFH" : "Regularization"} Request
+                    <Check size={18} /> Approve {model === "leaves" ? "Leave" : model === "wfhrequests" ? "WFH" : model === "regularizations" ? "Regularization" : "Asset Allocation"} Request
                   </button>
                   <button
                     onClick={() => handleAction(false)}
@@ -411,11 +518,11 @@ export default function DynamicModelPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-6 text-center gap-3">
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                  data.status === "Approved"
+                  data.status === "Approved" || data.status === "Active"
                     ? "bg-tracker-success-light text-tracker-success"
                     : "bg-tracker-danger-light text-tracker-danger"
                 }`}>
-                  {data.status === "Approved" ? <Check size={24} /> : <X size={24} />}
+                  {data.status === "Approved" || data.status === "Active" ? <Check size={24} /> : <X size={24} />}
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-ink">Already Processed</h3>

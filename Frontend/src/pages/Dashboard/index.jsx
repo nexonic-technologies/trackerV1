@@ -146,7 +146,7 @@ export default function Dashboard() {
       );
     }
 
-    // C) ADMIN / EXECUTIVE / MD V2 LAYOUT (Pulse + stats + Action Center full-width)
+    // C) ADMIN / EXECUTIVE / MD V2 LAYOUT (Pulse + stats + Action Center + Org Grid)
     return (
       <div className="space-y-4 animate-fade-in" data-module={MODULES.project.id}>
         {can('v2_alert_banner') && <V2AlertBanner alerts={alerts} />}
@@ -157,9 +157,35 @@ export default function Dashboard() {
 
         <V2StatsRow stats={v2Stats} layoutVariant={layoutVariant} />
 
-        {can('v2_action_center') && (
-          <div className="w-full">
-            <V2ActionCenter items={actionCenter} layoutVariant={layoutVariant} refresh={refresh} />
+        {/* Action Center + optional Org Attendance Grid */}
+        {(can('v2_action_center') || can('v2_team_attendance_grid')) && (
+          <div className={`grid grid-cols-1 ${can('v2_action_center') && can('v2_team_attendance_grid') ? 'lg:grid-cols-3' : ''} gap-4`}>
+            {can('v2_action_center') && (
+              <div className={can('v2_team_attendance_grid') ? 'lg:col-span-2' : 'lg:col-span-3'}>
+                <V2ActionCenter items={actionCenter} layoutVariant={layoutVariant} refresh={refresh} />
+              </div>
+            )}
+            {can('v2_team_attendance_grid') && (
+              <div>
+                <V2TeamAttendanceGrid teamGrid={teamGrid} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Secondary row: Employee Tasks + Leave Balance (if enabled for admin) */}
+        {(can('v2_employee_tasks') || can('v2_employee_leave_balance')) && (
+          <div className={`grid grid-cols-1 ${can('v2_employee_tasks') && can('v2_employee_leave_balance') ? 'lg:grid-cols-3' : ''} gap-4`}>
+            {can('v2_employee_tasks') && (
+              <div className={can('v2_employee_leave_balance') ? 'lg:col-span-2' : 'lg:col-span-3'}>
+                <V2EmployeeTasks tasks={employee?.tasks} />
+              </div>
+            )}
+            {can('v2_employee_leave_balance') && (
+              <div>
+                <V2EmployeeLeaveBalance leaveBalance={employee?.leaveBalance} />
+              </div>
+            )}
           </div>
         )}
       </div>

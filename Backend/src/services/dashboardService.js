@@ -742,32 +742,43 @@ function computeAlerts(stats, pulse, actionCenter) {
   return alerts;
 }
 
-// ─── Team Attendance Grid (Manager) ───────────────────────────────────────────
+// ─── Team / Org Attendance Grid ───────────────────────────────────────────────
+// Scope is decided by level:
+//   level 4-6 (Manager): only direct reports (professionalInfo.reportingManager = userId)
+//   level 7+  (Admin/Executive/MD): org-wide, sorted by urgency
+// WHETHER this data is rendered is controlled entirely by the DashboardWidget config
+// in the database (can('v2_team_attendance_grid') in the frontend). No level gate here.
 
-async function computeTeamGrid(roleId, userId) {
+async function computeTeamGrid(roleId, userId, level) {
   if (!canRead(roleId, 'attendances') || !canRead(roleId, 'employees')) return null;
 
   try {
-    const teamMembers = await models.employees.find({
-      'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
-      status: 'Active',
-      isActive: true
-    })
+    const isAdminScope = level >= 7;
+
+    const employeeQuery = isAdminScope
+      ? { status: 'Active', isActive: true }
+      : {
+          'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
+          status: 'Active',
+          isActive: true
+        };
+
+    const members = await models.employees.find(employeeQuery)
       .select('basicInfo.firstName basicInfo.lastName basicInfo.profileImage')
       .lean();
 
-    if (teamMembers.length === 0) return [];
+    if (members.length === 0) return [];
 
     const today = todayStart();
     const attendance = await models.attendances.find({
-      employee: { $in: teamMembers.map(m => m._id) },
+      employee: { $in: members.map(m => m._id) },
       date: { $gte: today, $lte: todayEnd() }
     }).select('employee status checkIn').lean();
 
     const attMap = {};
     attendance.forEach(a => { attMap[a.employee.toString()] = a; });
 
-    return teamMembers.map(m => {
+    return members.map(m => {
       const att = attMap[m._id.toString()];
       return {
         employeeId: m._id,
@@ -777,9 +788,9 @@ async function computeTeamGrid(roleId, userId) {
         checkIn: att?.checkIn || null
       };
     })
-      // Sort: unchecked first → late → leave → present
+      // Sort: unchecked/late/absent first — highest urgency at top
       .sort((a, b) => {
-        const priority = { Unchecked: 0, 'Late Entry': 1, Leave: 2, LOP: 3, Absent: 4, 'Work From Home': 5, Present: 6, 'Check-Out': 7 };
+        const priority = { Unchecked: 0, 'Late Entry': 1, LOP: 2, Absent: 3, Leave: 4, 'Work From Home': 5, Present: 6, 'Check-Out': 7 };
         return (priority[a.status] ?? 10) - (priority[b.status] ?? 10);
       })
       .slice(0, 10);
@@ -828,9 +839,10 @@ export async function getDashboardStats(userId, roleId) {
     promises.push(computeActionCenter(roleId, userId, level).then(d => { result.actionCenter = d; }));
   }
 
-  // Team grid (Manager only, level 4-6)
-  if (level >= 4 && level <= 6) {
-    promises.push(computeTeamGrid(roleId, userId).then(d => { result.teamGrid = d; }));
+  // Team / Org grid — scope is determined inside computeTeamGrid by level.
+  // Whether it *renders* is decided by the DashboardWidget config per role (frontend can()).
+  if (level >= 4) {
+    promises.push(computeTeamGrid(roleId, userId, level).then(d => { result.teamGrid = d; }));
   }
 
   await Promise.all(promises);

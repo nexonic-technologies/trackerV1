@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/authProvider";
+import { useUserRole } from "../../hooks/useUserRole";
 import axiosInstance from "../../api/axiosInstance";
 import toast from "react-hot-toast";
-import { Plus, X, BadgeDollarSign, Calendar, Building2, Trash2 } from "lucide-react";
+import { Plus, X, BadgeDollarSign, Calendar, Building2, Trash2, Check, AlertCircle } from "lucide-react";
 import { RoleBasedExpenses } from "../../components/role";
 import TableGenerator from "../../components/Common/TableGenerator";
 
@@ -51,23 +52,65 @@ const blankDay     = () => ({
 /* ════════════════════════════════════════ */
 const ExpenseTracker = () => {
   const { user }    = useAuth();
+  const { policies, userId } = useUserRole();
   const [expenses, setExpenses]       = useState([]);
+  const [pendingExpenses, setPendingExpenses] = useState([]);
   const [clients, setClients]         = useState([]);
   const [showForm, setShowForm]       = useState(false);
   const [loading, setLoading]         = useState(false);
   const [dailyEntries, setDailyEntries] = useState([blankDay()]);
+  const [activeTab, setActiveTab]     = useState("my"); // "my" or "pending"
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [comment, setComment]         = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => { fetchExpenses(); fetchClients(); }, []);
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      refreshData();
+    }
+  }, [userId, policies]);
+
+  const refreshData = () => {
+    fetchExpenses();
+    if (policies.expenses?.update) {
+      fetchPendingExpenses();
+    }
+  };
 
   const fetchExpenses = async () => {
     try {
       const res = await axiosInstance.post("/populate/read/expenses", {
-        filter: { employeeId: user?._id },
+        populateFields: {
+          employeeId: "basicInfo.firstName,basicInfo.lastName",
+          clientId: "name"
+        },
         sort: { createdAt: -1 },
         limit: 100,
       });
       setExpenses(res.data.data || []);
     } catch { toast.error("Failed to fetch expenses"); }
+  };
+
+  const fetchPendingExpenses = async () => {
+    try {
+      const res = await axiosInstance.post("/populate/read/expenses", {
+        filter: {
+          status: "pending",
+          viewMode: "approvals"
+        },
+        populateFields: {
+          employeeId: "basicInfo.firstName,basicInfo.lastName",
+          clientId: "name"
+        },
+        sort: { createdAt: -1 },
+        limit: 100,
+      });
+      setPendingExpenses(res.data.data || []);
+    } catch { toast.error("Failed to fetch pending approvals"); }
   };
 
   const fetchClients = async () => {
@@ -112,16 +155,40 @@ const ExpenseTracker = () => {
       toast.success("Expenses submitted!");
       setShowForm(false);
       setDailyEntries([blankDay()]);
-      fetchExpenses();
+      refreshData();
     } catch (e) {
       toast.error(e.response?.data?.message || "Failed to submit");
     } finally { setLoading(false); }
+  };
+
+  const handleApprovalAction = async (status) => {
+    if (!selectedExpense) return;
+    try {
+      setActionLoading(true);
+      await axiosInstance.put(`/populate/update/expenses/${selectedExpense._id}`, {
+        status,
+        rejectionReason: status === "rejected" ? comment : undefined
+      });
+      toast.success(`Expense claim ${status === "approved" ? "approved" : "rejected"}!`);
+      setSelectedExpense(null);
+      setComment("");
+      refreshData();
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to update expense status");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   /* ── TableGenerator custom renders ── */
   const customRender = {
     status:   (r) => <StatusChip value={r.status} />,
     clientId: (r) => <span className="text-[13px] text-ink font-medium">{r.clientId?.name || "—"}</span>,
+    employeeId: (r) => (
+      <span className="text-[13px] text-ink font-medium">
+        {r.employeeId ? `${r.employeeId.basicInfo?.firstName || ''} ${r.employeeId.basicInfo?.lastName || ''}`.trim() : "—"}
+      </span>
+    ),
     dayTotal: (r) => (
       <span className="text-[13px] font-semibold text-[var(--module-payroll)]">
         ₹{(r.dayTotal || 0).toLocaleString("en-IN")}
@@ -132,6 +199,21 @@ const ExpenseTracker = () => {
         {r.totalExpenses} item{r.totalExpenses !== 1 ? "s" : ""}
       </span>
     ),
+    date: (r) => (
+      <span className="text-[13px] text-ink-muted">
+        {r.date ? new Date(r.date).toLocaleDateString() : "—"}
+      </span>
+    ),
+    submittedAt: (r) => (
+      <span className="text-[13px] text-ink-muted">
+        {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : "—"}
+      </span>
+    ),
+    createdAt: (r) => (
+      <span className="text-[13px] text-ink-muted">
+        {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "—"}
+      </span>
+    ),
   };
 
   /* ════════════════════════════════════════ */
@@ -139,7 +221,7 @@ const ExpenseTracker = () => {
     <div className="space-y-6" data-module="payroll">
 
       {/* ── Role-based stat strip ── */}
-      <RoleBasedExpenses onRefresh={fetchExpenses} />
+      <RoleBasedExpenses onRefresh={refreshData} />
 
       {/* ── Page header ── */}
       <div className="flex items-start justify-between">
@@ -156,13 +238,44 @@ const ExpenseTracker = () => {
         </button>
       </div>
 
+      {/* ── Tabs selector (only visible if user can update/approve expenses) ── */}
+      {policies.expenses?.update && (
+        <div className="flex gap-2 border-b border-hairline pb-px mb-2">
+          <button
+            onClick={() => setActiveTab("my")}
+            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "my"
+                ? "border-[var(--module-payroll)] text-[var(--module-payroll)]"
+                : "border-transparent text-ink-muted hover:text-ink"
+            }`}
+          >
+            My Expenses
+          </button>
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "pending"
+                ? "border-[var(--module-payroll)] text-[var(--module-payroll)]"
+                : "border-transparent text-ink-muted hover:text-ink"
+            }`}
+          >
+            Pending Approvals
+          </button>
+        </div>
+      )}
+
       {/* ── Expense table ── */}
       <TableGenerator
-        title="My Expenses"
-        data={expenses}
+        title={activeTab === "my" ? "My Expenses" : "Pending Approvals"}
+        data={activeTab === "my" ? expenses : pendingExpenses}
         customRender={customRender}
-        customColumns={["date", "clientId", "totalExpenses", "dayTotal", "status", "createdAt"]}
+        customColumns={
+          activeTab === "my"
+            ? ["date", "clientId", "totalExpenses", "dayTotal", "status", "createdAt"]
+            : ["employeeId", "date", "clientId", "totalExpenses", "dayTotal", "status", "submittedAt"]
+        }
         enableActions={false}
+        onRowClick={(row) => setSelectedExpense(row)}
       />
 
       {/* ── Add expense modal ── */}
@@ -295,6 +408,129 @@ const ExpenseTracker = () => {
                 ) : <BadgeDollarSign size={15} />}
                 {loading ? "Submitting…" : `Submit ${dailyEntries.length} Day${dailyEntries.length !== 1 ? "s" : ""}`}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Detailed Expense View Modal ── */}
+      {selectedExpense && (
+        <div className="fixed inset-0 tracker-overlay z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-surface rounded-tracker-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            style={{ boxShadow: "var(--tracker-shadow-overlay)" }}>
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 text-white bg-gradient-to-br from-[#1E293B] to-[#475569]">
+              <div>
+                <h2 className="text-[17px] font-semibold">Expense Claim Details</h2>
+                {selectedExpense.employeeId && (
+                  <p className="text-[13px] text-white/75 mt-0.5">
+                    Submitted by: {selectedExpense.employeeId.basicInfo?.firstName} {selectedExpense.employeeId.basicInfo?.lastName}
+                  </p>
+                )}
+              </div>
+              <button onClick={() => { setSelectedExpense(null); setComment(""); }}
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="overflow-y-auto p-6 space-y-5 scrollbar-hide">
+              <div className="grid grid-cols-2 gap-4 text-sm bg-surface-1 p-4 rounded-tracker-lg border border-hairline-soft">
+                <div>
+                  <span className="block text-[11px] font-bold text-ink-subtle uppercase">Client</span>
+                  <span className="font-semibold text-ink">{selectedExpense.clientId?.name || "—"}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-bold text-ink-subtle uppercase">Claim Date</span>
+                  <span className="font-semibold text-ink">{selectedExpense.date ? new Date(selectedExpense.date).toLocaleDateString() : "—"}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-bold text-ink-subtle uppercase">Status</span>
+                  <span className="mt-1 block"><StatusChip value={selectedExpense.status} /></span>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-bold text-ink-subtle uppercase">Total Amount</span>
+                  <span className="font-bold text-[var(--module-payroll)] text-[15px]">
+                    ₹{(selectedExpense.dayTotal || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Items Grid */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-ink-muted uppercase tracking-wider">Line Items</h3>
+                <div className="border border-hairline rounded-tracker-lg overflow-hidden">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-surface-2 border-b border-hairline text-ink-muted font-semibold">
+                        <th className="p-3">Type</th>
+                        <th className="p-3">Description</th>
+                        <th className="p-3 text-right">Amount (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-hairline-soft">
+                      {selectedExpense.expenses?.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-surface-1">
+                          <td className="p-3 font-semibold capitalize"><TypeChip value={item.expenseType} /></td>
+                          <td className="p-3 text-ink">{item.description || "No description"}</td>
+                          <td className="p-3 text-right font-bold text-ink">₹{item.amount?.toLocaleString("en-IN")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Rejection/Audit Notes */}
+              {selectedExpense.rejectionReason && (
+                <div className="p-4 rounded-tracker-md bg-[var(--tracker-danger-light)] border border-color-mix text-xs text-[var(--tracker-danger)] flex gap-2.5">
+                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block mb-0.5">Rejection Reason:</span>
+                    <span>{selectedExpense.rejectionReason}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Comments Field (visible for pending approvals tab if user can update) */}
+              {selectedExpense.status === "pending" && activeTab === "pending" && policies.expenses?.update && (
+                <div className="space-y-1.5 pt-2">
+                  <FieldLabel>Approver Remarks / Rejection Comment</FieldLabel>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Enter remarks or rejection reasons here..."
+                    className="lmx-input w-full min-h-[70px] py-2 px-3 text-[13px] resize-none"
+                    maxLength={300}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-hairline-soft flex items-center justify-end gap-3 bg-surface">
+              <button onClick={() => { setSelectedExpense(null); setComment(""); }} className="tracker-btn-secondary">Close</button>
+              
+              {selectedExpense.status === "pending" && activeTab === "pending" && policies.expenses?.update && (
+                <div className="flex gap-2">
+                  <button
+                    disabled={actionLoading}
+                    onClick={() => handleApprovalAction("rejected")}
+                    className="px-4 py-2 text-sm font-semibold rounded-tracker-md text-[var(--tracker-danger)] bg-[var(--tracker-danger-light)] hover:bg-[var(--tracker-danger)] hover:text-white transition-all disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    disabled={actionLoading}
+                    onClick={() => handleApprovalAction("approved")}
+                    className="px-4 py-2 text-sm font-semibold rounded-tracker-md text-white bg-[var(--tracker-success)] hover:bg-[var(--tracker-success-dark)] transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Check size={14} /> Approve
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
