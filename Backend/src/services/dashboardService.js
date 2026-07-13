@@ -158,7 +158,7 @@ async function computePulse(roleId, userId, level) {
     const uncheckedCount = total - checkedEmployees.size;
     statusCounts.Unchecked += uncheckedCount;
 
-    const effectivePresent = statusCounts.Present + statusCounts['Work From Home'];
+    const effectivePresent = statusCounts.Present + statusCounts['Work From Home'] + statusCounts['Late Entry'];
     const attendanceRate = total > 0 ? Math.round((effectivePresent / total) * 100) : 0;
 
     return {

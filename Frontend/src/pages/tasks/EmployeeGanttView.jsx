@@ -179,6 +179,7 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [queueDoc, setQueueDoc] = useState(null);
 
   const fetchQueue = useCallback(async (empId) => {
     if (!empId) return;
@@ -186,13 +187,14 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
     setError(null);
     try {
       const res = await axiosInstance.get(`/employees/${empId}/gantt-queue`);
-      setData(res.data?.data || null);
-
-      const qRes = await axiosInstance.post("/populate/read/employeetaskqueues", {
-        filter: { employeeId: empId }
-      });
-      if (qRes.data?.data?.length > 0) {
-        setQueueDoc(qRes.data.data[0]);
+      const payload = res.data?.data || null;
+      setData(payload);
+      if (payload?.queueDocId) {
+        setQueueDoc({
+          _id: payload.queueDocId,
+          employeeId: empId,
+          queue: payload.rawQueue || []
+        });
       } else {
         setQueueDoc(null);
       }
@@ -394,7 +396,7 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
                   <TaskRowDroppable key={entry.taskId} entry={entry}>
                     <div
                       className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
-                      onClick={() => onTaskClick?.(entry)}
+                      onClick={() => onTaskClick?.({ ...entry, _id: entry._id || entry.taskId })}
                     >
                       {/* Row label */}
                       <TaskRowDraggable entry={entry}>

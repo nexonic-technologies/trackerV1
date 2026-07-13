@@ -46,7 +46,7 @@ export function useDashboardData({ enabledWidgets, userId }) {
           leaveBalance,
           myTasks,
           totalEmployees: data.pulse?.total || 0,
-          presentToday: data.pulse?.present || 0,
+          presentToday: (data.pulse?.present || 0) + (data.pulse?.wfh || 0) + (data.pulse?.late || 0),
         });
 
         // Map pending leaves from action center for V1 widget compatibility

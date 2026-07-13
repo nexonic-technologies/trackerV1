@@ -71,6 +71,7 @@ router.get('/employees/:id/gantt-queue', authMiddleware, async (req, res) => {
       const projectedEnd       = projectedEndResult.deliveryDate;
 
       entries.push({
+        _id:            item.taskId,
         order:          item.order,
         taskId:         item.taskId,
         title:          task.title || item.taskName || 'Untitled',
@@ -97,6 +98,8 @@ router.get('/employees/:id/gantt-queue', authMiddleware, async (req, res) => {
       data: {
         employeeId,
         computedAt:       new Date(),
+        queueDocId:       queueDoc?._id || null,
+        rawQueue:         queueDoc?.queue || [],
         utilizationPercent,
         totalQueueHours,
         projectionDays,

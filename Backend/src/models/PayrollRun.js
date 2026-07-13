@@ -26,7 +26,13 @@ const payrollRunSchema = new mongoose.Schema({
   payrollAuditEvents: { type: [auditEventSchema], default: [] }
 }, { timestamps: true });
 
-payrollRunSchema.index({ month: 1, year: 1 });
+payrollRunSchema.index(
+  { month: 1, year: 1 },
+  { 
+    unique: true, 
+    partialFilterExpression: { status: { $in: ['Approved', 'Paid'] } } 
+  }
+);
 payrollRunSchema.index({ status: 1, createdAt: -1 });
 payrollRunSchema.index({ initiatedBy: 1 });
 

@@ -43,7 +43,7 @@ export default function V2WorkforcePulse({ pulse, scope = 'org' }) {
       <div className="flex items-center gap-2 flex-shrink-0 font-medium text-ink">
         <span>{scopeLabel}:</span>
         <span className="font-semibold text-ink">
-          {present + wfh}/{total} present
+          {present + wfh + late}/{total} present
         </span>
         <span className="text-ink-subtle">({attendanceRate}%)</span>
       </div>

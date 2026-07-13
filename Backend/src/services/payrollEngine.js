@@ -32,7 +32,27 @@ export async function resolveStructure(employeeId, payrollDate) {
     $or: [{ effectiveTo: null }, { effectiveTo: { $gte: payrollDate } }]
   }).sort({ effectiveFrom: -1 }).lean();
 
-  if (!structure) throw new Error(`No salary structure found for employee ${employeeId} on ${payrollDate.toISOString().slice(0, 10)}`);
+  if (!structure) {
+    const { default: Employee } = await import('../models/Employee.js');
+    const emp = await Employee.findById(employeeId).select('salaryDetails').lean();
+    
+    if (emp?.salaryDetails?.basic) {
+      // Return transient, in-memory fallback salary structure without writing to database
+      return {
+        employeeId,
+        basicSalary: emp.salaryDetails.basic,
+        grossSalary: emp.salaryDetails.ctc || emp.salaryDetails.basic,
+        earnings: [
+          { name: 'Basic', type: 'fixed', amount: emp.salaryDetails.basic }
+        ],
+        deductions: [],
+        overtimeRate: 0,
+        source: 'employee_fallback',
+        isTransient: true
+      };
+    }
+    throw new Error(`No salary structure found for employee ${employeeId} on ${payrollDate.toISOString().slice(0, 10)}`);
+  }
   return structure;
 }
 

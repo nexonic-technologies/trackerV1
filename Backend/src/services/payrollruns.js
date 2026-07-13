@@ -5,6 +5,22 @@ const STATE_MACHINE = { Processing: [], Computed: ['Approved'], Approved: ['Paid
 
 export default function payrollruns() {
   return {
+    async beforeCreate(ctx) {
+      const { body, role } = ctx;
+      if (!canDo(role, 'manage:payroll')) throw new Error('Only HR Admins can create payroll runs.');
+
+      const { default: PayrollRun } = await import('../models/PayrollRun.js');
+      const existing = await PayrollRun.findOne({
+        month: body.month,
+        year: body.year,
+        status: { $in: ['Approved', 'Paid'] }
+      }).lean();
+
+      if (existing) {
+        throw new Error(`A payroll run for ${body.month}/${body.year} has already been completed (status: ${existing.status}). Subsequent runs are blocked.`);
+      }
+    },
+
     async afterCreate(ctx) {
       const { role, userId, docId } = ctx;
       const { default: PayrollRun } = await import('../models/PayrollRun.js');
@@ -32,8 +48,17 @@ export default function payrollruns() {
           effectiveFrom: { $lte: payrollDate },
           $or: [{ effectiveTo: null }, { effectiveTo: { $gte: payrollDate } }]
         }).lean();
-        if (struct) validIds.push(eid);
-        else skipped.push(eid.toString());
+        if (struct) {
+          validIds.push(eid);
+        } else {
+          // Fallback check: check if the employee profile has basic salary details populated
+          const emp = await Employee.findById(eid).select('salaryDetails').lean();
+          if (emp?.salaryDetails?.basic) {
+            validIds.push(eid);
+          } else {
+            skipped.push(eid.toString());
+          }
+        }
       }
 
       const skipNote = skipped.length > 0
