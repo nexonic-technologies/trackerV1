@@ -12,7 +12,11 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../../api/axiosInstance";
-import { Users, RefreshCw, Clock, Zap, AlertTriangle, CheckCircle2, ChevronDown } from "lucide-react";
+import { Users, RefreshCw, Clock, Zap, AlertTriangle, CheckCircle2, ChevronDown, GripVertical } from "lucide-react";
+import { DndContext, useDraggable, useDroppable, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import toast from "react-hot-toast";
+import { ErrorBoundary } from "../../components/ErrorBoundary";
 
 // ── Utilization badge ────────────────────────────────────────────────────────
 const UtilizationBadge = ({ percent }) => {
@@ -96,6 +100,57 @@ const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
   );
 };
 
+// ── Draggable/Droppable Row Wrappers ──────────────────────────────────────────
+const TaskRowDraggable = ({ entry, children }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: entry.taskId,
+    disabled: entry.isActive
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 'auto',
+    position: 'relative' as any,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex-1 flex items-center min-w-0">
+      {!entry.isActive && (
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="p-1 cursor-grab hover:bg-surface-2 rounded text-ink-subtle shrink-0 mr-1 flex items-center justify-center"
+          title="Drag to reorder"
+        >
+          <GripVertical size={14} />
+        </button>
+      )}
+      {children}
+    </div>
+  );
+};
+
+const TaskRowDroppable = ({ entry, children }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: entry.taskId
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="transition-all duration-150 rounded-tracker-md"
+      style={{
+        borderTop: isOver ? '2.5px solid var(--module-project)' : '2.5px solid transparent',
+        borderBottom: isOver ? '2.5px solid var(--module-project)' : '2.5px solid transparent',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 // ── Day axis header ───────────────────────────────────────────────────────────
 const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
   const days = Array.from({ length: dayCount + 1 }, (_, i) => {
@@ -121,9 +176,18 @@ const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
 
 // ── Main component ───────────────────────────────────────────────────────────
 const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, onEmployeeChange, onTaskClick }) => {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState(null);
+  const [data,     setData]     = useState(null);
+  const [queueDoc, setQueueDoc] = useState(null);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
   const fetchQueue = useCallback(async (empId) => {
     if (!empId) return;
@@ -132,6 +196,15 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
     try {
       const res = await axiosInstance.get(`/employees/${empId}/gantt-queue`);
       setData(res.data?.data || null);
+
+      const qRes = await axiosInstance.post("/populate/read/employeetaskqueues", {
+        filter: { employeeId: empId }
+      });
+      if (qRes.data?.data?.length > 0) {
+        setQueueDoc(qRes.data.data[0]);
+      } else {
+        setQueueDoc(null);
+      }
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load queue");
     } finally {
@@ -140,6 +213,73 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
   }, []);
 
   useEffect(() => { fetchQueue(selectedEmployeeId); }, [selectedEmployeeId, fetchQueue]);
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !queueDoc || !data) return;
+
+    const activeIndex = queueDoc.queue.findIndex(e => e.taskId.toString() === active.id.toString());
+    const overIndex = queueDoc.queue.findIndex(e => e.taskId.toString() === over.id.toString());
+
+    if (activeIndex === -1 || overIndex === -1) return;
+
+    // Check if moving active task (which is locked at index 0)
+    const activeItem = queueDoc.queue[activeIndex];
+    const overItem = queueDoc.queue[overIndex];
+    
+    // Check if task is active in data entries
+    const isTaskActive = (taskId) => {
+      const entry = data.entries.find(e => e.taskId.toString() === taskId.toString());
+      return entry?.isActive === true;
+    };
+
+    if (isTaskActive(activeItem.taskId) || isTaskActive(overItem.taskId)) {
+      toast.error("Active tasks cannot be reordered");
+      return;
+    }
+
+    // Reorder queueDoc list
+    const reorderedQueue = [...queueDoc.queue];
+    const [removed] = reorderedQueue.splice(activeIndex, 1);
+    reorderedQueue.splice(overIndex, 0, removed);
+
+    // Update orders sequentially
+    const updatedQueue = reorderedQueue.map((item, index) => ({
+      ...item,
+      order: index
+    }));
+
+    // Update locally
+    setQueueDoc(prev => ({
+      ...prev,
+      queue: updatedQueue
+    }));
+
+    // Optimistically update visual Gantt entries list
+    const updatedEntries = [...data.entries];
+    const idOrderMap = new Map(updatedQueue.map((item, idx) => [item.taskId.toString(), idx]));
+    updatedEntries.sort((a, b) => {
+      const aIdx = idOrderMap.get(a.taskId.toString()) ?? 999;
+      const bIdx = idOrderMap.get(b.taskId.toString()) ?? 999;
+      return aIdx - bIdx;
+    });
+    updatedEntries.forEach((entry, idx) => {
+      entry.order = idx;
+    });
+    setData(prev => prev ? { ...prev, entries: updatedEntries } : null);
+
+    try {
+      await axiosInstance.put(`/populate/update/employeetaskqueues/${queueDoc._id}`, {
+        queue: updatedQueue
+      });
+      toast.success("Queue order updated successfully!");
+      fetchQueue(selectedEmployeeId); // refresh ETAs & projections
+    } catch (err) {
+      console.error("Failed to update queue order:", err);
+      toast.error("Failed to update queue order");
+      fetchQueue(selectedEmployeeId); // revert on error
+    }
+  };
 
   // ── Compute Gantt span ────────────────────────────────────────────────────
   const ganttBounds = (() => {
@@ -256,57 +396,62 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
               </div>
             </div>
 
-            {/* Rows */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              {data.entries.map((entry, idx) => (
-                <div
-                  key={entry.taskId}
-                  className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
-                  onClick={() => onTaskClick?.(entry)}
-                >
-                  {/* Row label */}
-                  <div className="w-44 flex-shrink-0 flex items-center gap-2 px-2 py-2 cursor-pointer">
-                    {/* Order badge */}
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-                      style={{
-                        background: entry.isActive ? "var(--module-project)" : "var(--tracker-surface-chip)",
-                        color:      entry.isActive ? "#fff"                  : "var(--tracker-ink-muted)",
-                      }}
+            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+              {/* Rows */}
+              <div className="flex flex-col gap-1.5 mt-1">
+                {data.entries.map((entry, idx) => (
+                  <TaskRowDroppable key={entry.taskId} entry={entry}>
+                    <div
+                      className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
+                      onClick={() => onTaskClick?.(entry)}
                     >
-                      {entry.isActive ? "▶" : idx + 1}
-                    </span>
+                      {/* Row label */}
+                      <TaskRowDraggable entry={entry}>
+                        <div className="w-44 flex-shrink-0 flex items-center gap-2 px-2 py-2 cursor-pointer">
+                          {/* Order badge */}
+                          <span
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                            style={{
+                              background: entry.isActive ? "var(--module-project)" : "var(--tracker-surface-chip)",
+                              color:      entry.isActive ? "#fff"                  : "var(--tracker-ink-muted)",
+                            }}
+                          >
+                            {entry.isActive ? "▶" : idx + 1}
+                          </span>
 
-                    {/* Priority dot */}
-                    <span
-                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ background: PRIORITY_COLORS[entry.priorityLevel] || "var(--tracker-border)" }}
-                    />
+                          {/* Priority dot */}
+                          <span
+                            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                            style={{ background: PRIORITY_COLORS[entry.priorityLevel] || "var(--tracker-border)" }}
+                          />
 
-                    {/* Title */}
-                    <span className="text-[11.5px] font-semibold text-ink truncate leading-tight">
-                      {entry.title}
-                    </span>
-                  </div>
+                          {/* Title */}
+                          <span className="text-[11.5px] font-semibold text-ink truncate leading-tight">
+                            {entry.title}
+                          </span>
+                        </div>
+                      </TaskRowDraggable>
 
-                  {/* Bar track */}
-                  <div className="flex-1 relative h-9">
-                    {/* Track line */}
-                    <div className="absolute top-1/2 left-0 right-0 h-px bg-hairline-soft -translate-y-1/2" />
-                    <GanttBar entry={entry} {...ganttBounds} />
-                  </div>
+                      {/* Bar track */}
+                      <div className="flex-1 relative h-9">
+                        {/* Track line */}
+                        <div className="absolute top-1/2 left-0 right-0 h-px bg-hairline-soft -translate-y-1/2" />
+                        <GanttBar entry={entry} {...ganttBounds} />
+                      </div>
 
-                  {/* ETA label */}
-                  <div className="w-20 flex-shrink-0 text-right pr-2">
-                    <span className="text-[10px] font-medium text-ink-muted">
-                      {entry.projectedEnd
-                        ? new Date(entry.projectedEnd).toLocaleDateString([], { month: "short", day: "numeric" })
-                        : "—"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                      {/* ETA label */}
+                      <div className="w-20 flex-shrink-0 text-right pr-2">
+                        <span className="text-[10px] font-medium text-ink-muted">
+                          {entry.projectedEnd
+                            ? new Date(entry.projectedEnd).toLocaleDateString([], { month: "short", day: "numeric" })
+                            : "—"}
+                        </span>
+                      </div>
+                    </div>
+                  </TaskRowDroppable>
+                ))}
+              </div>
+            </DndContext>
 
             {/* Computed at footer */}
             <p className="mt-4 text-[10px] text-ink-tertiary text-right pr-2">
@@ -320,4 +465,12 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
   );
 };
 
-export default EmployeeGanttView;
+const EmployeeGanttViewWithErrorBoundary = (props) => {
+  return (
+    <ErrorBoundary>
+      <EmployeeGanttView {...props} />
+    </ErrorBoundary>
+  );
+};
+
+export default EmployeeGanttViewWithErrorBoundary;

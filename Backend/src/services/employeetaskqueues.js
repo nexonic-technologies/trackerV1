@@ -120,6 +120,18 @@ export default function employeetaskqueues() {
           item.order = idx;
         });
       }
+    },
+
+    afterUpdate: async (ctx) => {
+      const { result } = ctx;
+      if (result && result.employeeId) {
+        try {
+          const { scheduleETARecalculation } = await import("../utils/scheduleETARecalculation.js");
+          await scheduleETARecalculation(result.employeeId);
+        } catch (err) {
+          console.error("[EmployeeTaskQueueService] afterUpdate error:", err.message);
+        }
+      }
     }
   };
 }
