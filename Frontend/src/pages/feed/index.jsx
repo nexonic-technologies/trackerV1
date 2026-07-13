@@ -67,13 +67,26 @@ export default function Feeds() {
   const { readPaginated, create, update, loading } = useGenericAPI();
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const fetchData = async () => {
-    fetchPosts();
-    fetchInitialData();
-  };
+  useEffect(() => {
+    if (activeNav === 'All Posts') {
+      fetchPosts();
+    } else if (activeNav === 'Starred') {
+      fetchStarredPosts();
+    } else if (activeNav === 'Mentions') {
+      fetchMentionPosts();
+    } else if (activeNav === 'My Feeds') {
+      fetchMyFeeds();
+    } else if (activeNav === 'My Follows') {
+      fetchFollowingPosts();
+    } else if (activeNav === 'Broadcasts') {
+      fetchBroadcastPosts();
+    } else if (activeNav === 'Drafts') {
+      fetchDraft();
+    }
+  }, [activeNav]);
 
   const fetchPosts = async () => {
     try {
@@ -472,14 +485,12 @@ export default function Feeds() {
     setMobileSidebarOpen(false);
     if (label === 'All Posts' || label === 'Starred' || label === 'Mentions' || label === 'My Feeds' || label === 'My Follows' || label === 'Drafts') {
       setActiveTab('All');
-      fetchPosts();
     } else if (label === 'Broadcasts') {
       setActiveTab('Announcement');
-      fetchPosts();
     }
   };
 
-  // Filtered posts
+  // Filtered posts (pure client-side filtering of state)
   const filteredPosts = posts
     .filter(p => !p.isDeleted)
     .filter(p => activeTab === 'All' || p.postType === activeTab)
@@ -497,28 +508,32 @@ export default function Feeds() {
         return true;
       }
       if (activeNav === 'Starred') {
-        fetchStarredPosts();
-        return true;
+        const hasStarred = p.bookmarkedBy && p.bookmarkedBy.some(b => {
+          const bId = b && typeof b === 'object' ? (b._id || b.toString()) : (b ? b.toString() : '');
+          return bId === user?.id;
+        });
+        return hasStarred;
       }
       if (activeNav === 'Mentions') {
-        fetchMentionPosts();
-        return true;
+        const hasMention = p.mentions && p.mentions.some(m => {
+          const mId = m && typeof m === 'object' ? (m._id || m.toString()) : (m ? m.toString() : '');
+          return mId === user?.id;
+        });
+        return hasMention;
       }
       if (activeNav === 'My Feeds') {
-        fetchMyFeeds();
-        return true;
+        const authorIdStr = p.author && typeof p.author === 'object' ? (p.author._id || p.author.toString()) : (p.author ? p.author.toString() : '');
+        return authorIdStr === user?.id;
       }
       if (activeNav === 'My Follows') {
-        fetchFollowingPosts();
-        return true;
+        const hasFollow = p.followers && p.followers.some(f => {
+          const fId = f && typeof f === 'object' ? (f._id || f.toString()) : (f ? f.toString() : '');
+          return fId === user?.id;
+        });
+        return hasFollow;
       }
       if (activeNav === 'Broadcasts') {
-        fetchBroadcastPosts();
-        return true;
-      }
-      if (activeNav === 'Drafts') {
-        fetchDraft();
-        return true;
+        return p.isBroadcast === true;
       }
       return true;
     })
@@ -627,7 +642,7 @@ export default function Feeds() {
               filteredGroups.map(g => (
                 <div
                   key={g._id}
-                  onClick={() => { fetchSearchPost(g._id); setMobileSidebarOpen(false); }}
+                  onClick={() => { setActiveNav(g.name); fetchSearchPost(g._id); setMobileSidebarOpen(false); }}
                   className="flex items-center gap-2.5 hover:bg-surface-1 p-2 rounded-lg cursor-pointer transition-colors group"
                 >
                   <span className="w-6 h-6 flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 rounded-md text-white text-[10px] font-bold shrink-0 shadow-sm">
@@ -682,7 +697,7 @@ export default function Feeds() {
               filteredChannels.map(c => (
                 <div
                   key={c._id}
-                  onClick={() => { fetchSearchPost(c._id); setMobileSidebarOpen(false); }}
+                  onClick={() => { setActiveNav(c.name); fetchSearchPost(c._id); setMobileSidebarOpen(false); }}
                   className="flex items-center gap-2.5 hover:bg-surface-1 p-2 rounded-lg cursor-pointer transition-colors group"
                 >
                   <span className="w-6 h-6 flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600 rounded-md text-white text-[10px] font-bold shrink-0 shadow-sm">
