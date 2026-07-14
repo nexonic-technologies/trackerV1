@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUserRole } from '../../hooks/useUserRole';
+import { usePermission } from '../../context/permissionProvider';
 import { useAuth } from '../../context/authProvider';
 import axiosInstance from '../../api/axiosInstance';
 
@@ -432,32 +432,30 @@ const EmployeeReports = ({ userId }) => {
 
 // Main Role-Based Reports Component
 const RoleBasedReports = () => {
-  const { userRole, loading, userId } = useUserRole();
+  const { hasCapability, loading, userProfile } = usePermission();
+  const userId = userProfile?.id;
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
 
   const renderReportsComponent = () => {
-    switch (userRole) {
-      case 'employee':
-        return <EmployeeReports userId={userId} />;
-      case 'manager':
-        return <ManagerReports />;
-      case 'hr':
-        return <HRReports />;
-      case 'super admin':
-        return <SuperAdminReports />;
-      default:
-        return <EmployeeReports userId={userId} />;
+    if (hasCapability("reports.system.read")) {
+      return <SuperAdminReports />;
     }
+    if (hasCapability("reports.all.read")) {
+      return <HRReports />;
+    }
+    if (hasCapability("reports.team.read")) {
+      return <ManagerReports />;
+    }
+    return <EmployeeReports userId={userId} />;
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Reports & Analytics</h2>
-        <p className="text-gray-600">Role: {userRole}</p>
       </div>
       {renderReportsComponent()}
     </div>

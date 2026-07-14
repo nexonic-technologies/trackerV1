@@ -135,23 +135,27 @@ export async function buildUserContext(userId, roleId) {
   }
 
   // 6. Get UI capabilities from Role.capabilities
-  let uiCapabilities = [];
+  let roleCapabilities = [];
   try {
     // Fetch role with capabilities populated
-    const Role = (await import('../models/role.js')).default;
+    const Role = (await import('../models/Role.js')).default;
     const role = await Role.findById(roleId)
       .populate('capabilities')
       .lean();
 
     if (role && role.capabilities && role.capabilities.length > 0) {
-      // Get capability keys
-      uiCapabilities = role.capabilities
-        .filter(cap => cap.status === 'active')
-        .map(cap => cap.key);
+      // Get capability objects
+      roleCapabilities = role.capabilities
+        .filter(cap => cap && cap.status === 'active')
+        .map(cap => ({
+          _id: cap._id?.toString(),
+          name: cap.name || cap.key,
+          action: cap.action || '',
+          description: cap.description || ''
+        }));
     }
   } catch (error) {
     console.error('Failed to resolve UI capabilities:', error.message);
-    // Fallback to empty array - UI will show all elements, backend still protected
   }
 
   // 7. Assemble response
@@ -172,7 +176,7 @@ export async function buildUserContext(userId, roleId) {
       }
     },
     permissions, // Backend permissions from AccessPolicies (single source of truth)
-    capabilities: uiCapabilities, // User capabilities for sidebar visibility and actions
+    capabilities: roleCapabilities, // User capabilities for visibility check
     navigation,
     _v: currentVersion,
     _cachedAt: new Date().toISOString()

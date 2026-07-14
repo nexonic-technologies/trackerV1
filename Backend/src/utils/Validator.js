@@ -85,6 +85,15 @@ export function fieldsValidator({ policy, action, modelName, fields }) {
 export function bodyValidator({ policy, action, modelName, body }) {
   if (!body || typeof body !== "object") return body;
 
+  // Strip system read-only fields during updates to prevent validation crashes
+  if (action === "update") {
+    delete body._id;
+    delete body.id;
+    delete body.createdAt;
+    delete body.updatedAt;
+    delete body.__v;
+  }
+
   // 🛡️ Global locked fields that are never modifiable via CRUD updates
   const globalLockedFields = [
     "_id",

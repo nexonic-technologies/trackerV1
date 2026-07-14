@@ -16,7 +16,7 @@ const Capabilities = () => {
     const [message, setMessage] = useState('');
 
     const [formData, setFormData] = useState({
-        key: '',
+        name: '',
         module: '',
         label: '',
         description: '',
@@ -48,19 +48,19 @@ const Capabilities = () => {
         if (cap) {
             setEditingCap(cap);
             setFormData({
-                key: cap.key,
-                module: cap.module,
-                label: cap.label,
+                name: cap.name || cap.key || '',
+                module: cap.module || '',
+                label: cap.label || '',
                 description: cap.description || '',
-                type: cap.type,
+                type: cap.type || 'ui',
                 action: cap.action || 'view',
                 resourceKey: cap.resourceKey || '',
-                status: cap.status
+                status: cap.status || 'active'
             });
         } else {
             setEditingCap(null);
             setFormData({
-                key: '',
+                name: '',
                 module: '',
                 label: '',
                 description: '',
@@ -78,7 +78,7 @@ const Capabilities = () => {
         setShowModal(false);
         setEditingCap(null);
         setFormData({
-            key: '',
+            name: '',
             module: '',
             label: '',
             description: '',
@@ -93,12 +93,18 @@ const Capabilities = () => {
         e.preventDefault();
         setMessage('Saving...');
 
+        // Map name to key representation under the hood (e.g. dashboard.read -> dashboard:read)
+        const submitData = {
+            ...formData,
+            key: formData.name ? formData.name.replace(/\./g, ':') : ''
+        };
+
         try {
             if (editingCap) {
-                await axiosInstance.put(`/populate/update/capabilities/${editingCap._id}`, formData);
+                await axiosInstance.put(`/populate/update/capabilities/${editingCap._id}`, submitData);
                 setMessage('Capability updated successfully!');
             } else {
-                await axiosInstance.post('/populate/create/capabilities', formData);
+                await axiosInstance.post('/populate/create/capabilities', submitData);
                 setMessage('Capability created successfully!');
             }
             await fetchCapabilities();
@@ -152,7 +158,7 @@ const Capabilities = () => {
                     <table className="w-full">
                         <thead className="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Key</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Label</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Module</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
@@ -165,7 +171,7 @@ const Capabilities = () => {
                             {capabilities.map((cap) => (
                                 <tr key={cap._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                        {cap.key}
+                                        {cap.name || cap.key}
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                         {cap.label}
@@ -236,15 +242,15 @@ const Capabilities = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Key *
+                                            Name *
                                         </label>
                                         <input
                                             type="text"
                                             required
-                                            value={formData.key}
-                                            onChange={(e) => setFormData({...formData, key: e.target.value})}
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
                                             className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            placeholder="e.g., Dashboard:view"
+                                            placeholder="e.g., dashboard.view"
                                         />
                                     </div>
                                     <div>
@@ -257,7 +263,7 @@ const Capabilities = () => {
                                             value={formData.module}
                                             onChange={(e) => setFormData({...formData, module: e.target.value})}
                                             className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            placeholder="e.g., Dashboard"
+                                            placeholder="e.g., dashboard"
                                         />
                                     </div>
                                 </div>
@@ -306,22 +312,25 @@ const Capabilities = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Action
+                                            Action *
                                         </label>
-                                        <select
+                                        <input
+                                            type="text"
+                                            list="action-suggestions"
+                                            required
                                             value={formData.action}
                                             onChange={(e) => setFormData({...formData, action: e.target.value})}
                                             className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        >
-                                            <option value="view">View</option>
-                                            <option value="create">Create</option>
-                                            <option value="read">Read</option>
-                                            <option value="update">Update</option>
-                                            <option value="delete">Delete</option>
-                                            <option value="approve">Approve</option>
-                                            <option value="reject">Reject</option>
-                                            <option value="custom">Custom</option>
-                                        </select>
+                                            placeholder="e.g., view"
+                                        />
+                                        <datalist id="action-suggestions">
+                                            <option value="menu" />
+                                            <option value="view" />
+                                            <option value="read" />
+                                            <option value="create" />
+                                            <option value="update" />
+                                            <option value="delete" />
+                                        </datalist>
                                     </div>
                                 </div>
 

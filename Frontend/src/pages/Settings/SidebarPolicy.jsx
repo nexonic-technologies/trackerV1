@@ -168,7 +168,7 @@ const SidebarPolicy = () => {
                                             onChange={() => toggleCapability(cap._id?.$oid || cap._id)}
                                             className="w-4 h-4 accent-blue-600"
                                         />
-                                        <span className="text-sm dark:text-gray-300">{cap.label || cap.key}</span>
+                                        <span className="text-sm dark:text-gray-300">{cap.label || cap.name || cap.key}</span>
                                     </label>
                                 ))}
                             </div>

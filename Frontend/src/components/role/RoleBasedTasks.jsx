@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUserRole } from '../../hooks/useUserRole';
+import { usePermission } from '../../context/permissionProvider';
 
 // Employee Tasks Component
 const EmployeeTasks = () => (
@@ -144,7 +144,8 @@ const HRTasks = () => (
 
 // Main Role-Based Tasks Component
 const RoleBasedTasks = () => {
-  const { userRole, loading, userId } = useUserRole();
+  const { hasCapability, loading, userProfile } = usePermission();
+  const userId = userProfile?.id;
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
@@ -154,29 +155,21 @@ const RoleBasedTasks = () => {
   const isFullAccessUser = userId === '68d8b98af397d1d97620ba97';
 
   const renderTasksComponent = () => {
-    if (isFullAccessUser) {
+    if (isFullAccessUser || hasCapability("tasks.all.read")) {
       return <HRTasks />;
     }
 
-    switch (userRole) {
-      case 'employee':
-        return <EmployeeTasks />;
-      case 'manager':
-        return <ManagerTasks />;
-      case 'hr':
-      case 'super admin':
-      case 'developer':
-        return <HRTasks />;
-      default:
-        return <EmployeeTasks />;
+    if (hasCapability("tasks.team.read")) {
+      return <ManagerTasks />;
     }
+
+    return <EmployeeTasks />;
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Tasks Management</h2>
-        <p className="text-gray-600">Role: {isFullAccessUser ? 'Full Admin Access' : userRole}</p>
       </div>
       {renderTasksComponent()}
     </div>

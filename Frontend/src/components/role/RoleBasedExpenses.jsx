@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useUserRole } from "../../hooks/useUserRole";
+import { usePermission } from "../../context/permissionProvider";
+import { useAuth } from "../../context/authProvider";
 import axiosInstance from "../../api/axiosInstance";
 import StatCard from "../Common/StatCard";
 import { Clock, CheckCircle2, XCircle, BadgeDollarSign } from "lucide-react";
@@ -28,19 +29,21 @@ const MANAGER_TILES = [
 
 /* ════════════════════════════════════════ */
 const RoleBasedExpenses = ({ onRefresh }) => {
-  const { userRole, loading: roleLoading, userId } = useUserRole();
+  const { user } = useAuth();
+  const { hasCapability, loading } = usePermission();
+  const userId = user?.id || user?._id;
   const [stats, setStats]       = useState({ pending: 0, approved: 0, rejected: 0, totalAmount: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
-    if (!userRole || !userId) return;
+    if (loading || !userId) return;
     fetchStats();
-  }, [userRole, userId]);
+  }, [loading, userId]);
 
   const fetchStats = async () => {
     try {
       setStatsLoading(true);
-      const filter = userRole === "employee" ? { employeeId: userId } : {};
+      const filter = !hasCapability("expenses.team.read") ? { employeeId: userId } : {};
       const res = await axiosInstance.post("/populate/read/expenses", { filter, type: 3 });
       const d = res?.data?.data || res?.data?.stats || {};
       setStats({
@@ -56,14 +59,14 @@ const RoleBasedExpenses = ({ onRefresh }) => {
     }
   };
 
-  if (roleLoading)
+  if (loading)
     return (
       <div className="flex items-center justify-center h-24">
         <div className="w-6 h-6 rounded-full border-2 border-[var(--module-payroll)] border-t-transparent animate-spin" />
       </div>
     );
 
-  const isManager = ["manager", "hr", "super admin"].includes(userRole);
+  const isManager = hasCapability("expenses.team.read");
   const tiles     = isManager ? MANAGER_TILES : EMPLOYEE_TILES;
   const heading   = isManager ? "Team Expenses" : "My Expenses";
 

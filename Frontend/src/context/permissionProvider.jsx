@@ -21,12 +21,16 @@ const PermissionContext = createContext({
   permissions: {},
   navigation: [],
   capabilities: [],
+  uiCapabilities: [],
   role: null,
   isSuperAdmin: false,
   loading: true,
   error: null,
   can: () => false,
   canAny: () => false,
+  canAll: () => false,
+  hasCapability: () => false,
+  canRenderMenu: () => false,
   refresh: () => {}
 });
 
@@ -67,11 +71,14 @@ export const PermissionProvider = ({ children }) => {
 
       if (ctx) {
         versionRef.current = ctx._v || 0;
+        const capObjects = ctx.capabilities || [];
+        const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : (cap.name || cap.key));
+
         setState({
           permissions: ctx.permissions || {},
           navigation: ctx.navigation || [],
-          capabilities: ctx.capabilities || [],
-          uiCapabilities: ctx.uiCapabilities || [],
+          capabilities: capObjects,
+          uiCapabilities: capNames,
           role: ctx.user?.role || null,
           userProfile: ctx.user || null,
           isSuperAdmin: ctx.user?.role?.isSuperAdmin || false,
@@ -153,11 +160,14 @@ export const PermissionProvider = ({ children }) => {
         if (ctx && (ctx._v || 0) > versionRef.current) {
           console.log(`[PermissionProvider] Version bumped to v${ctx._v}, refreshing context...`);
           versionRef.current = ctx._v || 0;
+          const capObjects = ctx.capabilities || [];
+          const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : (cap.name || cap.key));
+
           setState({
             permissions: ctx.permissions || {},
             navigation: ctx.navigation || [],
-            capabilities: ctx.capabilities || [],
-            uiCapabilities: ctx.uiCapabilities || [],
+            capabilities: capObjects,
+            uiCapabilities: capNames,
             role: ctx.user?.role || null,
             userProfile: ctx.user || null,
             isSuperAdmin: ctx.user?.role?.isSuperAdmin || false,
@@ -233,6 +243,19 @@ export const PermissionProvider = ({ children }) => {
     [state.uiCapabilities, state.isSuperAdmin]
   );
 
+  const canRenderMenu = useCallback(
+    (menu) => {
+      if (!menu) return false;
+      if (menu.visibility === 'public') return true;
+      if (!menu.capabilities || menu.capabilities.length === 0) return true;
+      return menu.capabilities.some(cap => {
+        const capKey = typeof cap === 'string' ? cap : (cap.name || cap.key || cap._id);
+        return hasCapability(capKey);
+      });
+    },
+    [hasCapability]
+  );
+
   return (
     <PermissionContext.Provider
       value={{
@@ -241,6 +264,7 @@ export const PermissionProvider = ({ children }) => {
         canAny,
         canAll,
         hasCapability,
+        canRenderMenu,
         refresh: refreshPermissions
       }}
     >

@@ -90,6 +90,27 @@ export default async function buildUpdateQuery(ctx) {
   let updatedDoc;
   const updateBody = flattenObject(body);
 
+  if (Object.keys(updateBody).length === 0) {
+    console.log(`[buildUpdateQuery] No fields modified for ${modelName}. Returning existing document.`);
+    const cleanDoc = beforeDoc;
+    if (typeof afterUpdate === "function") {
+      ctx.data = cleanDoc;
+      ctx.beforeDoc = beforeDoc;
+      ctx.docId = beforeDoc?._id;
+      await afterUpdate(ctx);
+    }
+    await saveAuditLog({
+      action: "update",
+      modelName,
+      userId,
+      role,
+      docId: beforeDoc?._id,
+      beforeDoc,
+      afterDoc: cleanDoc,
+    });
+    return cleanDoc;
+  }
+
   if (docId) {
     updatedDoc = await Model.findByIdAndUpdate(docId, { $set: updateBody }, {
       new: true,

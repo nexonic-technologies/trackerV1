@@ -10,7 +10,7 @@ import { usePermission } from '../context/permissionProvider';
  * @returns {Object} Capability checking functions
  */
 export function useCapability() {
-  const { uiCapabilities } = usePermission();
+  const { uiCapabilities, isSuperAdmin, canRenderMenu } = usePermission();
 
   /**
    * Check if user has a specific capability
@@ -18,6 +18,7 @@ export function useCapability() {
    * @returns {boolean} Whether user has the capability
    */
   const hasCapability = (capabilityKey) => {
+    if (isSuperAdmin) return true;
     if (!uiCapabilities || !Array.isArray(uiCapabilities)) {
       return false;
     }
@@ -30,6 +31,7 @@ export function useCapability() {
    * @returns {boolean} Whether user has any of the capabilities
    */
   const hasAnyCapability = (capabilityKeys) => {
+    if (isSuperAdmin) return true;
     if (!uiCapabilities || !Array.isArray(uiCapabilities)) {
       return false;
     }
@@ -42,6 +44,7 @@ export function useCapability() {
    * @returns {boolean} Whether user has all of the capabilities
    */
   const hasAllCapabilities = (capabilityKeys) => {
+    if (isSuperAdmin) return true;
     if (!uiCapabilities || !Array.isArray(uiCapabilities)) {
       return false;
     }
@@ -66,6 +69,7 @@ export function useCapability() {
     hasAnyCapability,
     hasAllCapabilities,
     getCapabilitiesByPattern,
+    canRenderMenu,
     uiCapabilities
   };
 }

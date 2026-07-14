@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUserRole } from '../../hooks/useUserRole';
+import { usePermission } from '../../context/permissionProvider';
 
 // Employee Attendance Component
 const EmployeeAttendance = () => (
@@ -192,31 +192,26 @@ const HRAttendance = () => (
 
 // Main Role-Based Attendance Component
 const RoleBasedAttendance = () => {
-  const { userRole, loading } = useUserRole();
+  const { hasCapability, loading } = usePermission();
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
 
   const renderAttendanceComponent = () => {
-    switch (userRole) {
-      case 'employee':
-        return <EmployeeAttendance />;
-      case 'manager':
-        return <ManagerAttendance />;
-      case 'hr':
-      case 'super admin':
-        return <HRAttendance />;
-      default:
-        return <EmployeeAttendance />;
+    if (hasCapability("attendance.all.read")) {
+      return <HRAttendance />;
     }
+    if (hasCapability("attendance.team.read")) {
+      return <ManagerAttendance />;
+    }
+    return <EmployeeAttendance />;
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Attendance Management</h2>
-        <p className="text-gray-600">Role: {userRole}</p>
       </div>
       {renderAttendanceComponent()}
     </div>

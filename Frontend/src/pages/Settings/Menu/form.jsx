@@ -14,7 +14,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newCap, setNewCap] = useState({
-    key: '',
+    name: '',
     module: '',
     label: '',
     description: '',
@@ -57,8 +57,8 @@ const CapabilityManager = ({ formValues, onChange }) => {
   // Create new capability
   const handleCreateCapability = async (e) => {
     e.preventDefault();
-    if (!newCap.key || !newCap.label || !newCap.module) {
-      toast.error("Key, Label, and Module are required");
+    if (!newCap.name || !newCap.label || !newCap.module) {
+      toast.error("Name, Label, and Module are required");
       return;
     }
 
@@ -66,6 +66,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
     try {
       const res = await axiosInstance.post("populate/create/capabilities", {
         ...newCap,
+        key: newCap.name ? newCap.name.replace(/\./g, ':') : '',
         status: 'active'
       });
       
@@ -80,11 +81,11 @@ const CapabilityManager = ({ formValues, onChange }) => {
         // Add to local list
         setAllCapabilities(prev => [...prev, createdCap]);
         
-        toast.success(`Created "${newCap.key}"`);
+        toast.success(`Created "${newCap.name}"`);
         
         // Reset form
         setNewCap({
-          key: '',
+          name: '',
           module: '',
           label: '',
           description: '',
@@ -152,12 +153,12 @@ const CapabilityManager = ({ formValues, onChange }) => {
           <form onSubmit={handleCreateCapability} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-ink-muted mb-1 block">Key *</label>
+                <label className="text-xs text-ink-muted mb-1 block">Name *</label>
                 <input
                   type="text"
-                  value={newCap.key}
-                  onChange={e => setNewCap({...newCap, key: e.target.value})}
-                  placeholder="e.g., Dashboard:view"
+                  value={newCap.name}
+                  onChange={e => setNewCap({...newCap, name: e.target.value})}
+                  placeholder="e.g., dashboard.view"
                   className="tracker-input text-sm"
                   required
                 />
@@ -211,21 +212,24 @@ const CapabilityManager = ({ formValues, onChange }) => {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-ink-muted mb-1 block">Action</label>
-                <select
+                <label className="text-xs text-ink-muted mb-1 block">Action *</label>
+                <input
+                  type="text"
+                  list="inline-action-suggestions"
                   value={newCap.action}
                   onChange={e => setNewCap({...newCap, action: e.target.value})}
+                  placeholder="e.g., view"
                   className="tracker-input text-sm"
-                >
-                  <option value="view">View</option>
-                  <option value="create">Create</option>
-                  <option value="read">Read</option>
-                  <option value="update">Update</option>
-                  <option value="delete">Delete</option>
-                  <option value="approve">Approve</option>
-                  <option value="reject">Reject</option>
-                  <option value="custom">Custom</option>
-                </select>
+                  required
+                />
+                <datalist id="inline-action-suggestions">
+                  <option value="menu" />
+                  <option value="view" />
+                  <option value="read" />
+                  <option value="create" />
+                  <option value="update" />
+                  <option value="delete" />
+                </datalist>
               </div>
               <div>
                 <label className="text-xs text-ink-muted mb-1 block">Resource Key</label>
@@ -397,7 +401,7 @@ const MenuFormPage = () => {
     const mergedData = { ...formValues, ...formData };
     const hasParent = !!(mergedData.parentId?._id || mergedData.parentId);
 
-    const payload = {
+    const rawPayload = {
       ...mergedData,
       isActive: mergedData.isActive === undefined ? true : mergedData.isActive === "true" || mergedData.isActive === true,
       isParent: !hasParent,        // If no parent, it IS a parent
@@ -406,6 +410,9 @@ const MenuFormPage = () => {
       capabilities: mergedData.capabilities || [],
       visibility: "protected",    // Always protected — CBAC controls visibility
     };
+
+    // Strip read-only properties to prevent validation errors on submit
+    const { _id, id: skipId, createdAt, updatedAt, __v, ...payload } = rawPayload;
 
     try {
       if (id) {

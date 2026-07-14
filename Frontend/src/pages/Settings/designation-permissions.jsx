@@ -135,7 +135,10 @@ export default function DesignationPermissions() {
                     const caps = capsRes.data?.data || [];
                     
                     const allowed = new Set();
-                    caps.forEach(c => allowed.add(c.key));
+                    caps.forEach(c => {
+                        if (c.key) allowed.add(c.key);
+                        if (c.name) allowed.add(c.name);
+                    });
                     setStagedCapabilities(allowed);
                 } else {
                     setStagedCapabilities(new Set());
@@ -172,9 +175,14 @@ export default function DesignationPermissions() {
             setStagedCapabilities(nextStaged);
 
             // Update Role.capabilities array directly
-            // Convert capability keys to Capability ObjectIds
+            // Convert capability keys/names to Capability ObjectIds
             const allCapabilityDocs = await axiosInstance.post('/populate/read/capabilities', {
-                filter: { key: { $in: Array.from(nextStaged) } },
+                filter: {
+                    $or: [
+                        { key: { $in: Array.from(nextStaged) } },
+                        { name: { $in: Array.from(nextStaged) } }
+                    ]
+                },
                 limit: 1000
             });
             const capabilityDocs = allCapabilityDocs.data?.data || [];
@@ -218,15 +226,42 @@ export default function DesignationPermissions() {
 
         // Use sidebar's capabilities directly instead of generating keys
         const sidebarCapabilities = item.capabilities || [];
-        const sidebarCapKeys = sidebarCapabilities.map(c => c.key);
+        const sidebarCapKeys = sidebarCapabilities.map(c => c.name || c.key);
 
-        // Identify custom actions (e.g. approve, reject) from the sidebar's capabilities
-        const customCaps = sidebarCapabilities.filter(c => {
-            const action = c.action;
-            return action && !['view', 'create', 'read', 'update', 'delete'].includes(action);
-        });
+        // Separate standard capabilities vs custom capabilities
+        const standardCapabilities = sidebarCapabilities.filter(c => 
+            c.action && ['view', 'create', 'read', 'update', 'delete'].includes(c.action)
+        );
+        const customCaps = sidebarCapabilities.filter(c => 
+            !c.action || !['view', 'create', 'read', 'update', 'delete'].includes(c.action)
+        );
 
         const permitsEdit = sidebarCapKeys.some(key => stagedCapabilities.has(key));
+
+        const getCapLabel = (cap) => {
+            const action = (cap.action || '').toLowerCase();
+            let icon = '';
+            if (action === 'view') icon = '👁️';
+            else if (action === 'create') icon = '➕';
+            else if (action === 'read') icon = '📖';
+            else if (action === 'update') icon = '📝';
+            else if (action === 'delete') icon = '🗑️';
+            
+            if (icon) {
+                return (
+                    <span className="flex items-center gap-1.5 justify-center">
+                        <span className="text-sm">{icon}</span>
+                        {/* Desktop: show short action name, Mobile: hide text */}
+                        <span className="hidden sm:inline text-xs font-bold capitalize">{action}</span>
+                    </span>
+                );
+            }
+            return (
+                <span className="flex items-center justify-center">
+                    <span className="text-xs font-bold capitalize">{cap.label || cap.name || cap.key}</span>
+                </span>
+            );
+        };
 
         return (
             <div key={item._id} className="w-full">
@@ -271,13 +306,14 @@ export default function DesignationPermissions() {
                             <div className="flex items-center gap-3">
                                 {/* Show sidebar capabilities as checkboxes */}
                                 <div className="flex items-center gap-2 flex-wrap">
-                                    {sidebarCapabilities.map(cap => {
-                                        const isChecked = stagedCapabilities.has(cap.key);
+                                    {standardCapabilities.map(cap => {
+                                        const capKey = cap.name || cap.key;
+                                        const isChecked = stagedCapabilities.has(cap.key) || (cap.name && stagedCapabilities.has(cap.name));
                                         return (
                                             <button
-                                                key={cap.key}
+                                                key={capKey}
                                                 type="button"
-                                                onClick={() => handleSaveCapability(item, null, cap.key)}
+                                                onClick={() => handleSaveCapability(item, null, capKey)}
                                                 className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 border transition-all ${
                                                     isChecked
                                                         ? 'bg-accent/10 border-accent/30 text-accent'
@@ -289,7 +325,7 @@ export default function DesignationPermissions() {
                                                 }`}>
                                                     {isChecked && <CheckIcon className="w-3 h-3" />}
                                                 </div>
-                                                <span>{cap.label || cap.key}</span>
+                                                {getCapLabel(cap)}
                                             </button>
                                         );
                                     })}
@@ -300,40 +336,6 @@ export default function DesignationPermissions() {
                         )}
                     </div>
                 </div>
-
-                {/* Inline custom capabilities if edit allowed */}
-                {permitsEdit && customCaps.length > 0 && (
-                    <div className={`py-2 border-b border-hairline-soft bg-canvas/30 ${isChild ? 'pl-16 pr-4' : 'pl-12 pr-4'}`}>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[10px] font-bold text-ink-muted uppercase tracking-wider mr-2">Additional:</span>
-                            {customCaps.map(cap => {
-                                const isChecked = stagedCapabilities.has(cap.key);
-                                const actionName = cap.action;
-                                return (
-                                    <button
-                                        key={cap.key}
-                                        type="button"
-                                        onClick={() => handleSaveCapability(item, null, cap.key)}
-                                        className={`px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 border transition-all ${
-                                            isChecked
-                                                ? 'bg-accent/10 border-accent/30 text-accent'
-                                                : 'bg-surface border-hairline text-ink-muted hover:border-hairline'
-                                        }`}
-                                        style={{ minWidth: '40px', minHeight: '32px' }}
-                                    >
-                                        <div className={`w-3 h-3 rounded flex items-center justify-center border transition-all ${
-                                            isChecked ? 'bg-accent border-transparent text-white' : 'border-hairline bg-canvas'
-                                        }`}>
-                                            {isChecked && <CheckIcon className="w-2 h-2" />}
-                                        </div>
-                                        <span className="capitalize">{actionName}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
                 {/* Render children if expanded */}
                 {hasChildren && isExpanded && (
                     <div className="w-full flex flex-col">
