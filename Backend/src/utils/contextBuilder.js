@@ -123,31 +123,31 @@ export async function buildUserContext(userId, roleId) {
       isActive: true,
       isDeleted: { $ne: true }
     })
+      .populate('capabilities')
       .sort({ order: 1 })
       .lean();
 
-    // Build menu tree using CBAC capabilities for visibility
-    navigation = await buildMenuTree(allSidebarItems, user);
+    // Build menu tree using sidebar capabilities comparison
+    navigation = await buildMenuTree(allSidebarItems, user, roleMeta);
 
     // Cache the constructed tree
     navigationCache.set(navCacheKey, navigation);
   }
 
-  // 6. Get UI capabilities from Role.capabilities (for frontend visibility)
+  // 6. Get UI capabilities from Role.capabilities
   let uiCapabilities = [];
   try {
     // Fetch role with capabilities populated
-    const Role = (await import('../models/Role.js')).default;
-    const role = await Role.findById(roleId).lean();
-    
+    const Role = (await import('../models/role.js')).default;
+    const role = await Role.findById(roleId)
+      .populate('capabilities')
+      .lean();
+
     if (role && role.capabilities && role.capabilities.length > 0) {
-      // Fetch capability documents to get keys
-      const capabilities = await Capability.find({
-        _id: { $in: role.capabilities },
-        status: 'active'
-      }).lean();
-      
-      uiCapabilities = capabilities.map(c => c.key);
+      // Get capability keys
+      uiCapabilities = role.capabilities
+        .filter(cap => cap.status === 'active')
+        .map(cap => cap.key);
     }
   } catch (error) {
     console.error('Failed to resolve UI capabilities:', error.message);
@@ -172,9 +172,8 @@ export async function buildUserContext(userId, roleId) {
       }
     },
     permissions, // Backend permissions from AccessPolicies (single source of truth)
-    uiCapabilities, // UI visibility capabilities from CBAC
+    capabilities: uiCapabilities, // User capabilities for sidebar visibility and actions
     navigation,
-    capabilities: roleMeta.capabilities || [], // Legacy capabilities (for backward compatibility)
     _v: currentVersion,
     _cachedAt: new Date().toISOString()
   };

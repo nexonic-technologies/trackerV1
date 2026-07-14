@@ -5,6 +5,7 @@ const SidebarPolicy = () => {
     const [sidebars, setSidebars] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [designations, setDesignations] = useState([]);
+    const [capabilities, setCapabilities] = useState([]);
 
     const [selectedItem, setSelectedItem] = useState(null);
     const [message, setMessage] = useState('');
@@ -13,14 +14,16 @@ const SidebarPolicy = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [sidRes, depRes, desRes] = await Promise.all([
+                const [sidRes, depRes, desRes, capRes] = await Promise.all([
                     axiosInstance.get('/populate/list/sidebars?limit=100&sort={"order":1}'),
                     axiosInstance.post('/populate/list/departments'),
-                    axiosInstance.post('/populate/list/designations')
+                    axiosInstance.post('/populate/list/designations'),
+                    axiosInstance.post('/populate/read/capabilities', { filter: { status: 'active' }, limit: 1000 })
                 ]);
                 setSidebars((sidRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
                 setDepartments((depRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
                 setDesignations((desRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
+                setCapabilities(capRes.data.data || []);
             } catch (err) {
                 console.error("Failed to load sidebar data", err);
             }
@@ -42,13 +45,23 @@ const SidebarPolicy = () => {
         });
     };
 
+    const toggleCapability = (capId) => {
+        setSelectedItem(prev => {
+            const list = prev.capabilities || [];
+            const exists = list.includes(capId);
+            const newList = exists ? list.filter(x => x !== capId) : [...list, capId];
+            return { ...prev, capabilities: newList };
+        });
+    };
+
     const handleSave = async () => {
         if (!selectedItem) return;
         setMessage('Saving...');
         try {
             await axiosInstance.put(`/populate/update/sidebars/${selectedItem._id}`, {
                 allowedDepartments: selectedItem.allowedDepartments,
-                allowedDesignations: selectedItem.allowedDesignations
+                allowedDesignations: selectedItem.allowedDesignations,
+                capabilities: selectedItem.capabilities
             });
 
             // Update local list
@@ -141,6 +154,25 @@ const SidebarPolicy = () => {
                                 ))}
                             </div>
                             <p className="text-xs text-gray-500 mt-1">If none selected, visible to ALL designations.</p>
+                        </div>
+
+                        {/* Capabilities */}
+                        <div className="mb-6">
+                            <label className="block mb-2 font-medium dark:text-gray-300">Required Capabilities</label>
+                            <div className="grid grid-cols-2 gap-2 p-3 border rounded dark:border-gray-700 bg-gray-50 dark:bg-gray-900 max-h-60 overflow-y-auto">
+                                {capabilities.map(cap => (
+                                    <label key={cap._id} className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedItem.capabilities?.includes(cap._id?.$oid || cap._id)}
+                                            onChange={() => toggleCapability(cap._id?.$oid || cap._id)}
+                                            className="w-4 h-4 accent-blue-600"
+                                        />
+                                        <span className="text-sm dark:text-gray-300">{cap.label || cap.key}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Select capabilities required to view this menu item.</p>
                         </div>
 
                         <div className="flex justify-end items-center gap-4 mt-8">
