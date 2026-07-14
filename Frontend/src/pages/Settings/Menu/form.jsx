@@ -7,293 +7,322 @@ import toast from "react-hot-toast";
 import { Plus, Trash2, Sparkles, Package, Loader2 } from "lucide-react";
 
 // ─── Capability Manager Component ──────────────────────────────────
-const CapabilityManager = ({ resourceId, menuItemId }) => {
-  const [capabilities, setCapabilities] = useState([]);
+const CapabilityManager = ({ formValues, onChange }) => {
+  const [allCapabilities, setAllCapabilities] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [customKey, setCustomKey] = useState("");
-  const [customLabel, setCustomLabel] = useState("");
-  const [resourceInfo, setResourceInfo] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newCap, setNewCap] = useState({
+    key: '',
+    module: '',
+    label: '',
+    description: '',
+    type: 'ui',
+    action: 'view',
+    resourceKey: ''
+  });
 
-  // Fetch resource info and existing capabilities
-  const fetchCapabilities = useCallback(async () => {
-    if (!resourceId) {
-      setCapabilities([]);
-      setResourceInfo(null);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Get resource details to derive prefix
-      const resId = resourceId?._id || resourceId;
-      const resourceRes = await axiosInstance.get(`populate/read/resources/${resId}`);
-      const resource = resourceRes.data?.data;
-      setResourceInfo(resource);
-
-      if (!resource?.modelName) return;
-
-      // Derive prefix from modelName (e.g., 'sidebars' → 'Sidebar')
-      const modelName = resource.modelName;
-      const singular = modelName.endsWith('s') ? modelName.slice(0, -1) : modelName;
-      const prefix = singular.charAt(0).toUpperCase() + singular.slice(1);
-
-      // Fetch capabilities matching this prefix
-      const capsRes = await axiosInstance.post("populate/read/capabilities", {
-        filter: { key: { $regex: `^${prefix}:`, $options: 'i' }, status: 'active' },
-        limit: 50
-      });
-      setCapabilities(capsRes.data?.data || []);
-    } catch (err) {
-      console.error("[CapabilityManager] Fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [resourceId]);
-
+  // Fetch all capabilities
   useEffect(() => {
-    fetchCapabilities();
-  }, [fetchCapabilities]);
-
-  // Derive prefix from resource
-  const getPrefix = () => {
-    if (!resourceInfo?.modelName) return null;
-    const modelName = resourceInfo.modelName;
-    const singular = modelName.endsWith('s') ? modelName.slice(0, -1) : modelName;
-    return singular.charAt(0).toUpperCase() + singular.slice(1);
-  };
-
-  // Get module name from resource or sidebar route
-  const getModule = () => {
-    if (resourceInfo?.displayName) return resourceInfo.displayName;
-    return "General";
-  };
-
-  // Auto-generate standard CRUD capabilities
-  const handleAutoGenerate = async () => {
-    const prefix = getPrefix();
-    if (!prefix) {
-      toast.error("Select a Linked Resource first to derive capability prefix");
-      return;
-    }
-
-    const module = getModule();
-    const standardCaps = [
-      { key: `${prefix}:view`, label: `View ${prefix}`, module, description: `Can view ${prefix} items` },
-      { key: `${prefix}:create`, label: `Create ${prefix}`, module, description: `Can create ${prefix} items` },
-      { key: `${prefix}:edit`, label: `Edit ${prefix}`, module, description: `Can edit ${prefix} items` },
-      { key: `${prefix}:delete`, label: `Delete ${prefix}`, module, description: `Can delete ${prefix} items` },
-    ];
-
-    setAdding(true);
-    let created = 0;
-    let skipped = 0;
-
-    for (const cap of standardCaps) {
-      const exists = capabilities.some(c => c.key === cap.key);
-      if (exists) {
-        skipped++;
-        continue;
-      }
-
+    const fetchCapabilities = async () => {
+      setLoading(true);
       try {
-        await axiosInstance.post("populate/create/capabilities", {
-          key: cap.key,
-          label: cap.label,
-          module: cap.module,
-          description: cap.description,
-          status: 'active'
+        const capsRes = await axiosInstance.post("populate/read/capabilities", {
+          filter: { status: 'active' },
+          limit: 1000
         });
-        created++;
+        setAllCapabilities(capsRes.data?.data || []);
       } catch (err) {
-        if (err.response?.status === 409 || err.response?.data?.message?.includes('duplicate')) {
-          skipped++;
-        } else {
-          console.error(`Failed to create ${cap.key}:`, err);
-          toast.error(`Failed to create ${cap.key}`);
-        }
+        console.error("[CapabilityManager] Fetch error:", err);
+        toast.error("Failed to load capabilities");
+      } finally {
+        setLoading(false);
       }
-    }
-
-    if (created > 0) toast.success(`Created ${created} capabilities`);
-    if (skipped > 0) toast(`${skipped} already existed`, { icon: "ℹ️" });
-
-    setAdding(false);
+    };
     fetchCapabilities();
+  }, []);
+
+  // Toggle capability selection
+  const toggleCapability = (capId) => {
+    const currentCaps = formValues?.capabilities || [];
+    const exists = currentCaps.includes(capId);
+    const newCaps = exists 
+      ? currentCaps.filter(id => id !== capId)
+      : [...currentCaps, capId];
+    
+    onChange({ capabilities: newCaps });
   };
 
-  // Add custom capability
-  const handleAddCustom = async () => {
-    const prefix = getPrefix();
-    if (!prefix) {
-      toast.error("Select a Linked Resource first");
+  // Create new capability
+  const handleCreateCapability = async (e) => {
+    e.preventDefault();
+    if (!newCap.key || !newCap.label || !newCap.module) {
+      toast.error("Key, Label, and Module are required");
       return;
     }
 
-    const key = customKey.includes(':') ? customKey : `${prefix}:${customKey}`;
-    if (!customLabel.trim()) {
-      toast.error("Label is required");
-      return;
-    }
-
-    setAdding(true);
+    setCreating(true);
     try {
-      await axiosInstance.post("populate/create/capabilities", {
-        key,
-        label: customLabel.trim(),
-        module: getModule(),
-        description: `Custom capability: ${key}`,
+      const res = await axiosInstance.post("populate/create/capabilities", {
+        ...newCap,
         status: 'active'
       });
-      toast.success(`Created "${key}"`);
-      setCustomKey("");
-      setCustomLabel("");
-      fetchCapabilities();
+      
+      const createdCap = res.data?.data;
+      if (createdCap) {
+        const capId = createdCap._id?.$oid || createdCap._id;
+        
+        // Add to form values
+        const currentCaps = formValues?.capabilities || [];
+        onChange({ capabilities: [...currentCaps, capId] });
+        
+        // Add to local list
+        setAllCapabilities(prev => [...prev, createdCap]);
+        
+        toast.success(`Created "${newCap.key}"`);
+        
+        // Reset form
+        setNewCap({
+          key: '',
+          module: '',
+          label: '',
+          description: '',
+          type: 'ui',
+          action: 'view',
+          resourceKey: ''
+        });
+        setShowCreateForm(false);
+      }
     } catch (err) {
+      console.error("Create capability error:", err);
       toast.error(err.response?.data?.message || "Failed to create capability");
     } finally {
-      setAdding(false);
+      setCreating(false);
     }
   };
 
-  // Delete capability
-  const handleDelete = async (capId) => {
-    if (!window.confirm("Delete this capability? This may affect existing role assignments.")) return;
-    try {
-      await axiosInstance.delete(`populate/delete/capabilities/${capId}`);
-      toast.success("Capability deleted");
-      fetchCapabilities();
-    } catch (err) {
-      toast.error("Failed to delete");
-    }
-  };
+  // Filter capabilities by search term
+  const filteredCapabilities = allCapabilities.filter(cap => {
+    const search = searchTerm.toLowerCase();
+    return cap.key.toLowerCase().includes(search) || 
+           cap.label.toLowerCase().includes(search) ||
+           cap.module.toLowerCase().includes(search);
+  });
 
-  if (!resourceId) {
-    return (
-      <div className="tracker-card p-6">
-        <div className="flex items-center gap-3 text-ink-muted">
-          <Package className="w-5 h-5" />
-          <div>
-            <p className="font-medium text-ink text-sm">No Linked Resource</p>
-            <p className="text-xs mt-0.5">
-              Select a <strong>Linked Resource</strong> in the Menu Item tab to manage capabilities.
-              Items without a resource will only support DENIED/VIEW in the permissions page.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const selectedCapIds = formValues?.capabilities || [];
 
   return (
     <div className="space-y-4">
-      {/* Resource Info */}
+      {/* Search & Create Button */}
       <div className="tracker-card p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Package className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-ink">
-              Resource: <span className="text-accent">{resourceInfo?.displayName || resourceInfo?.key || '...'}</span>
-            </span>
-            <span className="text-xs text-ink-subtle bg-canvas-muted px-2 py-0.5 rounded-full">
-              {resourceInfo?.modelName || '...'}
-            </span>
-          </div>
-          <span className="text-xs text-ink-muted">
-            Prefix: <code className="font-mono text-accent">{getPrefix() || '...'}</code>
-          </span>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search capabilities by key, label, or module..."
+            className="tracker-input flex-1 text-sm"
+          />
+          <button
+            type="button"
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="tracker-btn-primary flex items-center gap-1.5 text-xs px-3 py-2"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Create New
+          </button>
         </div>
       </div>
 
-      {/* Existing Capabilities */}
+      {/* Create Capability Form */}
+      {showCreateForm && (
+        <div className="tracker-card p-4 space-y-3 border-accent/30">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-ink">Create New Capability</h3>
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(false)}
+              className="text-ink-muted hover:text-ink text-xs"
+            >
+              Cancel
+            </button>
+          </div>
+          
+          <form onSubmit={handleCreateCapability} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-ink-muted mb-1 block">Key *</label>
+                <input
+                  type="text"
+                  value={newCap.key}
+                  onChange={e => setNewCap({...newCap, key: e.target.value})}
+                  placeholder="e.g., Dashboard:view"
+                  className="tracker-input text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs text-ink-muted mb-1 block">Module *</label>
+                <input
+                  type="text"
+                  value={newCap.module}
+                  onChange={e => setNewCap({...newCap, module: e.target.value})}
+                  placeholder="e.g., Dashboard"
+                  className="tracker-input text-sm"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-xs text-ink-muted mb-1 block">Label *</label>
+              <input
+                type="text"
+                value={newCap.label}
+                onChange={e => setNewCap({...newCap, label: e.target.value})}
+                placeholder="e.g., View Dashboard"
+                className="tracker-input text-sm"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-ink-muted mb-1 block">Description</label>
+              <input
+                type="text"
+                value={newCap.description}
+                onChange={e => setNewCap({...newCap, description: e.target.value})}
+                placeholder="Capability description"
+                className="tracker-input text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs text-ink-muted mb-1 block">Type</label>
+                <select
+                  value={newCap.type}
+                  onChange={e => setNewCap({...newCap, type: e.target.value})}
+                  className="tracker-input text-sm"
+                >
+                  <option value="ui">UI (Sidebar)</option>
+                  <option value="business">Business (Action)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-ink-muted mb-1 block">Action</label>
+                <select
+                  value={newCap.action}
+                  onChange={e => setNewCap({...newCap, action: e.target.value})}
+                  className="tracker-input text-sm"
+                >
+                  <option value="view">View</option>
+                  <option value="create">Create</option>
+                  <option value="read">Read</option>
+                  <option value="update">Update</option>
+                  <option value="delete">Delete</option>
+                  <option value="approve">Approve</option>
+                  <option value="reject">Reject</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-ink-muted mb-1 block">Resource Key</label>
+                <input
+                  type="text"
+                  value={newCap.resourceKey}
+                  onChange={e => setNewCap({...newCap, resourceKey: e.target.value})}
+                  placeholder="e.g., employee"
+                  className="tracker-input text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={creating}
+                className="tracker-btn-primary flex items-center gap-1.5 text-xs px-4 py-2 disabled:opacity-50"
+              >
+                {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                Create & Select
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Capabilities List */}
       <div className="tracker-card p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-ink">Capabilities ({capabilities.length})</h3>
-          <button
-            type="button"
-            onClick={handleAutoGenerate}
-            disabled={adding || !getPrefix()}
-            className="tracker-btn-outline flex items-center gap-1.5 text-xs px-3 py-1.5 disabled:opacity-50"
-          >
-            {adding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            Auto-generate CRUD
-          </button>
+          <h3 className="text-sm font-semibold text-ink">
+            Available Capabilities ({filteredCapabilities.length})
+          </h3>
+          <span className="text-xs text-ink-muted">
+            Selected: {selectedCapIds.length}
+          </span>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-6">
             <div className="h-6 w-6 border-2 border-hairline border-t-accent rounded-full animate-spin" />
           </div>
-        ) : capabilities.length === 0 ? (
+        ) : filteredCapabilities.length === 0 ? (
           <div className="text-center py-6 text-ink-muted text-sm">
-            No capabilities found. Click <strong>Auto-generate CRUD</strong> to create standard view/create/edit/delete capabilities.
+            {searchTerm ? "No capabilities match your search." : "No capabilities found. Click 'Create New' to add capabilities."}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {capabilities.map(cap => (
-              <div
-                key={cap._id}
-                className="flex items-center justify-between px-3 py-2 rounded-tracker-md border border-hairline-soft bg-canvas-muted/50 group hover:border-accent/30 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <code className="text-xs font-mono text-accent truncate">{cap.key}</code>
-                  </div>
-                  <p className="text-[11px] text-ink-subtle truncate mt-0.5">{cap.label}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(cap._id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-opacity"
-                  title="Delete capability"
+          <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
+            {filteredCapabilities.map(cap => {
+              const isSelected = selectedCapIds.includes(cap._id?.$oid || cap._id);
+              const capId = cap._id?.$oid || cap._id;
+              
+              return (
+                <div
+                  key={capId}
+                  onClick={() => toggleCapability(capId)}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-tracker-md border cursor-pointer transition-colors ${
+                    isSelected 
+                      ? 'bg-accent/10 border-accent/30' 
+                      : 'bg-canvas-muted/50 border-hairline-soft hover:border-accent/20'
+                  }`}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                      isSelected ? 'bg-accent border-accent text-white' : 'border-hairline bg-canvas'
+                    }`}>
+                      {isSelected && <div className="w-2 h-2 bg-white rounded-sm" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <code className="text-xs font-mono text-accent truncate">{cap.key}</code>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                          cap.type === 'ui' 
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' 
+                            : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
+                        }`}>
+                          {cap.type}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-ink-subtle truncate mt-0.5">{cap.label}</p>
+                      <p className="text-[10px] text-ink-muted truncate">{cap.module}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Add Custom Capability */}
-      <div className="tracker-card p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-ink">Add Custom Capability</h3>
-        <div className="flex gap-2 items-end">
-          <div className="flex-1">
-            <label className="text-xs text-ink-muted mb-1 block">Key (action)</label>
-            <div className="flex items-center">
-              <span className="text-xs text-ink-subtle bg-canvas-muted border border-r-0 border-hairline-soft px-2 py-2 rounded-l-tracker-md font-mono">
-                {getPrefix() || '...'}:
-              </span>
-              <input
-                type="text"
-                value={customKey}
-                onChange={e => setCustomKey(e.target.value)}
-                placeholder="approve"
-                className="tracker-input rounded-l-none text-sm flex-1"
-              />
-            </div>
-          </div>
-          <div className="flex-1">
-            <label className="text-xs text-ink-muted mb-1 block">Label</label>
-            <input
-              type="text"
-              value={customLabel}
-              onChange={e => setCustomLabel(e.target.value)}
-              placeholder="Approve Menu Items"
-              className="tracker-input text-sm"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleAddCustom}
-            disabled={adding || !customKey.trim() || !customLabel.trim()}
-            className="tracker-btn-primary flex items-center gap-1.5 text-xs px-3 py-2 disabled:opacity-50 whitespace-nowrap"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add
-          </button>
-        </div>
+      {/* Info */}
+      <div className="tracker-card p-4">
+        <p className="text-xs text-ink-muted">
+          <strong>Tip:</strong> Select the capabilities required to view this menu item. 
+          Users must have at least one of these capabilities in their role to see this menu.
+          Click "Create New" to add capabilities inline.
+        </p>
       </div>
     </div>
   );
@@ -309,7 +338,7 @@ const MENU_FORM_TABS = [
   {
     id: "capabilities",
     label: "Capabilities",
-    fieldNames: ["resourceId", "isActive"],
+    fieldNames: ["capabilities"],
   },
 ];
 
@@ -333,16 +362,20 @@ const MenuFormPage = () => {
         const res = await axiosInstance.get(`populate/read/sidebars/${id}`, {
           params: {
             populateFields: JSON.stringify([
-              { path: "resourceId", select: "displayName key modelName" },
+              { path: "capabilities", select: "key label module type" },
               { path: "parentId", select: "title" }
             ])
           }
         });
         const item = res.data?.data;
         if (item?._id?.$oid) item._id = item._id.$oid;
+        
+        // Convert capabilities to array of IDs
+        const capIds = item?.capabilities?.map(c => c._id?.$oid || c._id) || [];
+        
         setRecord(item);
-        setFormValues(item || {});
-        setInitialDataForTab(item || {});
+        setFormValues({ ...item, capabilities: capIds });
+        setInitialDataForTab({ ...item, capabilities: capIds });
       } catch (err) {
         toast.error("Failed to load menu item");
       } finally {
@@ -370,7 +403,7 @@ const MenuFormPage = () => {
       isParent: !hasParent,        // If no parent, it IS a parent
       hasChildren: !hasParent,     // Parents can have children
       parentId: mergedData.parentId?._id || mergedData.parentId || null,
-      resourceId: mergedData.resourceId?._id || mergedData.resourceId || null,
+      capabilities: mergedData.capabilities || [],
       visibility: "protected",    // Always protected — CBAC controls visibility
     };
 
@@ -449,22 +482,10 @@ const MenuFormPage = () => {
 
           {activeTab === "capabilities" && (
             <div className="space-y-4">
-              {/* Resource + Active fields from EntityFormPage */}
-              <EntityFormPage
-                title=""
-                subtitle=""
-                backTo="/Settings/Menu"
-                fields={SidebarForm.filter(f => MENU_FORM_TABS[1].fieldNames.includes(f.name))}
-                submitButton={{ text: id ? "Update menu item" : "Create menu item", color: "blue" }}
-                onSubmit={handleSubmit}
-                onChange={handleFormChange}
-                data={initialDataForTab}
-              />
-
               {/* Capabilities Manager */}
               <CapabilityManager
-                resourceId={formValues?.resourceId}
-                menuItemId={id}
+                formValues={formValues}
+                onChange={handleFormChange}
               />
             </div>
           )}
