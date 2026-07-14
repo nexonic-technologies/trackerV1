@@ -43,7 +43,7 @@ export function authorize(config, actionName) {
     action = actionName;
   }
 
-  return (req, res, next) => {
+  return async (req, res, next) => {
     try {
       const user = req.user;
       const role = user?.role;
@@ -73,8 +73,7 @@ export function authorize(config, actionName) {
         });
       }
 
-      // 4. Validate action permission
-      // Check in the virtual permissions map generated in cache.js
+      // 4. Validate action permission using virtual permissions map
       let isAllowed = false;
       if (policy.permissions && typeof policy.permissions === "object") {
         isAllowed = !!(policy.permissions[action] || (policy.permissions.get && policy.permissions.get(action)));
@@ -90,7 +89,7 @@ export function authorize(config, actionName) {
       // -----------------------------------------------------------------------
       // Future Integration Checks (Planned for multi-tenancy and ownership ABAC)
       // -----------------------------------------------------------------------
-      
+
       // A. Multi-tenancy check (checkTenant)
       if (options.checkTenant) {
         const tenantId = user?.tenantId;
@@ -106,7 +105,7 @@ export function authorize(config, actionName) {
       if (options.checkOwnership) {
         const targetId = req.params?.id;
         const currentUserId = user?.id;
-        
+
         // In the future, fetch resource document by targetId, check if:
         // doc.createdBy === currentUserId || doc.userId === currentUserId
         // (Allows users to edit/delete their own assets, leaves, tickets, etc.)

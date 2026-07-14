@@ -81,7 +81,7 @@ export default function DesignationPermissions() {
                     axiosInstance.post('/populate/read/roles'),
                     axiosInstance.post('/populate/read/designations'),
                     axiosInstance.post('/populate/read/sidebars', { filter: { isDeleted: { $ne: true } }, limit: 200 }),
-                    axiosInstance.post('/populate/read/capabilities', { filter: { status: 'active' }, limit: 1000 }),
+                    axiosInstance.post('/populate/read/capabilities', { filter: { status: 'active', type: 'ui' }, limit: 1000 }),
                     axiosInstance.post('/populate/read/resources', { filter: { isActive: true }, limit: 200 })
                 ]);
                 

@@ -218,202 +218,8 @@ export const shiftSubmit = save("Save Shift");
 export const taskTypeSubmit = save("Save Task Type");
 export const projectTypeSubmit = save("Save Project Type");
 export const holidaySubmit = save("Save Holiday");
-export const escalationWorkflowSubmit = save("Save Escalation Workflow");
-export const approvalWorkflowSubmit = save("Save Approval Workflow");
 export const quotationSubmit = save("Save Quotation");
 
-export const escalationWorkflowFormFields = [
-  { name: "name", label: "Workflow Name", type: "text", required: true },
-  {
-    name: "modelName",
-    label: "Module/Model",
-    type: "select",
-    options: [
-      { value: "leaves", label: "Leaves" },
-      { value: "regularizations", label: "Regularizations" },
-      { value: "wfhrequests", label: "WFH Requests" },
-      { value: "compoffrequests", label: "CompOff Requests" },
-      { value: "assetallocations", label: "Asset Allocations" },
-      { value: "assetincidents", label: "Asset Incidents" },
-      { value: "tasks", label: "Tasks" },
-      { value: "tickets", label: "Tickets" }
-    ],
-    required: true
-  },
-  {
-    name: "conditions.departmentId",
-    label: "Department (Optional)",
-    type: "AutoComplete",
-    source: "/populate/read/departments",
-    labelField: "name",
-    fieldName: "_id"
-  },
-  {
-    name: "conditions.priorityLevel",
-    label: "Priority (Optional)",
-    type: "select",
-    options: [
-      { value: "", label: "Any Priority" },
-      { value: "Low", label: "Low" },
-      { value: "Medium", label: "Medium" },
-      { value: "High", label: "High" },
-      { value: "Critical", label: "Critical" },
-      { value: "Weekly Priority", label: "Weekly Priority" }
-    ]
-  },
-  {
-    name: "isActive",
-    label: "Status",
-    type: "select",
-    options: [
-      { value: true, label: "Active" },
-      { value: false, label: "Inactive" }
-    ],
-    defaultValue: true,
-    required: true
-  },
-  {
-    name: "steps",
-    label: "Escalation Steps",
-    type: "SubForm",
-    multiple: true,
-    gridClass: "col-span-2",
-    subFormFields: [
-      { name: "level", label: "Level", type: "number", required: true },
-      { name: "timeoutHours", label: "Timeout (Hours)", type: "number", defaultValue: 72, required: true },
-      {
-        name: "escalateToType",
-        label: "Escalate To",
-        type: "select",
-        options: [
-          { value: "Reporting Manager", label: "Reporting Manager" },
-          { value: "Department Manager", label: "Department Manager" },
-          { value: "HR", label: "HR" },
-          { value: "Specific Role", label: "Specific Role" },
-          { value: "Specific User", label: "Specific User" }
-        ],
-        required: true
-      },
-      {
-        name: "specificRoleId",
-        label: "Specific Role (if selected above)",
-        type: "AutoComplete",
-        source: "/populate/read/roles",
-        labelField: "name",
-        fieldName: "_id"
-      },
-      {
-        name: "specificUserId",
-        label: "Specific User (if selected above)",
-        type: "AutoComplete",
-        source: "/populate/read/employees",
-        transform: (employees) => employees.map(emp => ({
-          _id: emp._id,
-          name: `${emp.basicInfo?.firstName || ''} ${emp.basicInfo?.lastName || ''}`.trim() || emp.basicInfo?.firstName || `Employee-${emp._id.slice(-4)}`
-        })),
-        labelField: "name",
-        fieldName: "_id"
-      },
-      {
-        name: "actions",
-        label: "Actions",
-        type: "select",
-        multiple: true,
-        options: [
-          { value: "ChangeAssignee", label: "Add/Change Assignee" },
-          { value: "AddFollower", label: "Add Follower" },
-          { value: "SendNotification", label: "Send Notification" },
-          { value: "UpdateStatus", label: "Update Status" }
-        ],
-        defaultValue: ["SendNotification"],
-        required: true
-      },
-      {
-        name: "updateStatusTo",
-        label: "Update Status To (Optional)",
-        type: "text"
-      }
-    ]
-  }
-];
-
-export const approvalWorkflowFormFields = [
-  {
-    name: "modelName",
-    label: "Module/Model",
-    type: "select",
-    options: [
-      { value: "leaves", label: "Leaves" },
-      { value: "regularizations", label: "Regularizations" },
-      { value: "assetallocations", label: "Asset Allocations" },
-      { value: "assetincidents", label: "Asset Incidents" }
-    ],
-    required: true
-  },
-  {
-    name: "departmentId",
-    label: "Department (Optional)",
-    type: "AutoComplete",
-    source: "/populate/read/departments",
-    labelField: "name",
-    fieldName: "_id"
-  },
-  {
-    name: "isActive",
-    label: "Status",
-    type: "select",
-    options: [
-      { value: true, label: "Active" },
-      { value: false, label: "Inactive" }
-    ],
-    defaultValue: true,
-    required: true
-  },
-  {
-    name: "steps",
-    label: "Approval Steps",
-    type: "SubForm",
-    multiple: true,
-    gridClass: "col-span-2",
-    subFormFields: [
-      { name: "stepOrder", label: "Step Order", type: "number", required: true },
-      { name: "timeoutDays", label: "Timeout (Days)", type: "number", defaultValue: 3, required: true },
-      {
-        name: "approverType",
-        label: "Approver Type",
-        type: "select",
-        options: [
-          { value: "Reporting Manager", label: "Reporting Manager" },
-          { value: "Department Manager", label: "Department Manager" },
-          { value: "HR", label: "HR" },
-          { value: "Specific Role", label: "Specific Role" },
-          { value: "Specific User", label: "Specific User" }
-        ],
-        required: true
-      },
-      {
-        name: "specificRoleId",
-        label: "Specific Role (if selected above)",
-        type: "AutoComplete",
-        source: "/populate/read/roles",
-        labelField: "name",
-        fieldName: "_id"
-      },
-      {
-        name: "specificUserId",
-        label: "Specific User (if selected above)",
-        type: "AutoComplete",
-        source: "/populate/read/employees",
-        transform: (employees) => employees.map(emp => ({
-          _id: emp._id,
-          name: `${emp.basicInfo?.firstName || ''} ${emp.basicInfo?.lastName || ''}`.trim() || emp.basicInfo?.firstName || `Employee-${emp._id.slice(-4)}`
-        })),
-        labelField: "name",
-        fieldName: "_id"
-      }
-    ]
-  }
-];
 
 export const quotationFormFields = [
   { name: "quotationNumber", label: "Quotation Number", type: "text", required: true, readOnly: true },
@@ -498,6 +304,145 @@ export const quotationFormFields = [
     })),
     labelField: "name",
     fieldName: "_id"
+  }
+];
+
+export const workflowSubmit = save("Save Workflow");
+
+export const workflowFormFields = [
+  { name: "name", label: "Workflow Name", type: "text", required: true },
+  {
+    name: "triggerType",
+    label: "Trigger Type / Context",
+    type: "select",
+    options: [
+      { value: "Approval", label: "Approval Request" },
+      { value: "Escalation", label: "Escalation Policy" },
+      { value: "Onboarding", label: "Employee Onboarding" }
+    ],
+    required: true
+  },
+  {
+    name: "modelName",
+    label: "Module/Model",
+    type: "select",
+    options: [
+      { value: "leaves", label: "Leaves" },
+      { value: "regularizations", label: "Regularizations" },
+      { value: "wfhrequests", label: "WFH Requests" },
+      { value: "compoffrequests", label: "CompOff Requests" },
+      { value: "assetallocations", label: "Asset Allocations" },
+      { value: "assetincidents", label: "Asset Incidents" },
+      { value: "tasks", label: "Tasks" },
+      { value: "tickets", label: "Tickets" },
+      { value: "onboardings", label: "Onboardings" },
+      { value: "candidates", label: "Candidates" },
+      { value: "leads", label: "Leads" },
+      { value: "deals", label: "Deals" }
+    ],
+    required: true
+  },
+  {
+    name: "conditions.departmentId",
+    label: "Department (Optional)",
+    type: "AutoComplete",
+    source: "/populate/read/departments",
+    labelField: "name",
+    fieldName: "_id"
+  },
+  {
+    name: "conditions.priorityLevel",
+    label: "Priority (Optional)",
+    type: "select",
+    options: [
+      { value: "", label: "Any Priority" },
+      { value: "Low", label: "Low" },
+      { value: "Medium", label: "Medium" },
+      { value: "High", label: "High" },
+      { value: "Critical", label: "Critical" },
+      { value: "Weekly Priority", label: "Weekly Priority" }
+    ]
+  },
+  {
+    name: "isActive",
+    label: "Status",
+    type: "select",
+    options: [
+      { value: true, label: "Active" },
+      { value: false, label: "Inactive" }
+    ],
+    defaultValue: true,
+    required: true
+  },
+  {
+    name: "steps",
+    label: "Workflow Steps",
+    type: "SubForm",
+    multiple: true,
+    gridClass: "col-span-2",
+    subFormFields: [
+      { name: "stepOrder", label: "Step Order / Level", type: "number", required: true },
+      { name: "timeoutHours", label: "Timeout (Hours)", type: "number", defaultValue: 72, required: true },
+      {
+        name: "actorType",
+        label: "Actor / Approver Type",
+        type: "select",
+        options: [
+          { value: "Reporting Manager", label: "Reporting Manager" },
+          { value: "Department Manager", label: "Department Manager" },
+          { value: "HR", label: "HR" },
+          { value: "Specific Role", label: "Specific Role" },
+          { value: "Specific User", label: "Specific User" },
+          { value: "Candidate", label: "Candidate" }
+        ],
+        required: true
+      },
+      {
+        name: "specificRoleId",
+        label: "Specific Role (if selected)",
+        type: "AutoComplete",
+        source: "/populate/read/roles",
+        labelField: "name",
+        fieldName: "_id"
+      },
+      {
+        name: "specificUserId",
+        label: "Specific User (if selected)",
+        type: "AutoComplete",
+        source: "/populate/read/employees",
+        transform: (employees) => employees.map(emp => ({
+          _id: emp._id,
+          name: `${emp.basicInfo?.firstName || ''} ${emp.basicInfo?.lastName || ''}`.trim() || emp.basicInfo?.firstName || `Employee-${emp._id.slice(-4)}`
+        })),
+        labelField: "name",
+        fieldName: "_id"
+      },
+      {
+        name: "actions",
+        label: "Actions to Trigger",
+        type: "select",
+        multiple: true,
+        options: [
+          { value: "SendNotification", label: "Send Notification" },
+          { value: "ChangeAssignee", label: "Add/Change Assignee" },
+          { value: "AddFollower", label: "Add Follower" },
+          { value: "UpdateStatus", label: "Update Status" },
+          { value: "VerifyDocument", label: "Verify Document" }
+        ],
+        defaultValue: ["SendNotification"],
+        required: true
+      },
+      {
+        name: "updateStatusTo",
+        label: "Update Status To (Optional)",
+        type: "text"
+      },
+      {
+        name: "requiredDocumentType",
+        label: "Required Document Type (for onboarding)",
+        type: "text"
+      }
+    ]
   }
 ];
 

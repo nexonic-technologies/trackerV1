@@ -224,8 +224,11 @@ class ComputationService {
       const today = new Date();
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
+      const { canReadUnrestricted } = await import('./authService.js');
+      const userObj = { id: userId, role };
+
       let baseFilter = {};
-      if (role !== 'HR') {
+      if (!canReadUnrestricted(userObj, 'tasks')) {
         baseFilter = { assignedTo: userId }; // For tasks
       }
 
@@ -271,7 +274,7 @@ class ComputationService {
           }
         ]),
 
-        role === 'HR' ? Employee.aggregate([
+        canReadUnrestricted(userObj, 'employees') ? Employee.aggregate([
           {
             $group: {
               _id: null,

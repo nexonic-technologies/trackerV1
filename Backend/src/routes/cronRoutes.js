@@ -2,20 +2,13 @@ import express from 'express';
 import attendanceService from '../services/attendanceService.js';
 import { monitor } from '../cron/AttendanceCron.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
+import { authorize } from '../middlewares/authorize.js';
 
 const router = express.Router();
 
 // Get cron job performance stats (HR only)
-router.get('/cron/stats', authenticateToken, async (req, res) => {
+router.get('/cron/stats', authenticateToken, authorize('cron', 'read'), async (req, res) => {
   try {
-    // Check if user has HR permissions
-    if (req.user.role !== 'HR') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. HR role required.'
-      });
-    }
-
     const cronStats = monitor.getStats();
     const queueStats = attendanceService.getQueueStats();
     const memUsage = process.memoryUsage();
@@ -54,15 +47,8 @@ router.get('/cron/stats', authenticateToken, async (req, res) => {
 });
 
 // Manually trigger attendance processing (HR only, for testing)
-router.post('/cron/trigger', authenticateToken, async (req, res) => {
+router.post('/cron/trigger', authenticateToken, authorize('cron', 'update'), async (req, res) => {
   try {
-    if (req.user.role !== 'HR') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. HR role required.'
-      });
-    }
-
     // Prevent multiple simultaneous runs
     const queueStats = attendanceService.getQueueStats();
     if (queueStats.processing > 0 || queueStats.queued > 0) {

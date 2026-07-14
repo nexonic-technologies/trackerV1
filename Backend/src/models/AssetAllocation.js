@@ -86,7 +86,7 @@ const AssetAllocationSchema = new Schema({
   
   workflowId: {
     type: Schema.Types.ObjectId,
-    ref: 'approvalworkflows',
+    ref: 'workflows',
     index: true
   },
   

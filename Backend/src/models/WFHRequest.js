@@ -11,7 +11,7 @@ const WFHRequestSchema = new Schema({
   managerId: { type: Schema.Types.ObjectId, ref: 'employees' },
   approverComment: { type: String },
   currentStepIndex: { type: Number, default: 0 },
-  workflowId: { type: Schema.Types.ObjectId, ref: 'approvalworkflows', index: true },
+  workflowId: { type: Schema.Types.ObjectId, ref: 'workflows', index: true },
   approvals: [{
     stepIndex: { type: Number },
     approverId: { type: Schema.Types.ObjectId, ref: 'employees' },

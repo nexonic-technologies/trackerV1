@@ -148,9 +148,24 @@ const PAGE_CAPABILITY_MAPPING = [
 
   // CRM
   {
+    route: "/crm-parent",
+    capability: "CRM:view",
+    description: "View CRM Menu Parent"
+  },
+  {
     route: "/crm",
     capability: "CRM:view",
     description: "View CRM Dashboard"
+  },
+  {
+    route: "/crm/contacts",
+    capability: "CRM:view",
+    description: "View CRM Contacts"
+  },
+  {
+    route: "/crm/quotations",
+    capability: "CRM:view",
+    description: "View CRM Quotations"
   },
   {
     route: "/crm/calendar",
@@ -161,6 +176,16 @@ const PAGE_CAPABILITY_MAPPING = [
     route: "/crm/oa",
     capability: "CRM:view",
     description: "View Order Acknowledgments"
+  },
+  {
+    route: "/crm/orders",
+    capability: "CRM:view",
+    description: "View CRM Orders"
+  },
+  {
+    route: "/crm/payments",
+    capability: "CRM:view",
+    description: "View CRM Payments"
   },
 
   // Settings

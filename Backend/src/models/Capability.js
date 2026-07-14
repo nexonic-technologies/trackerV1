@@ -29,6 +29,12 @@ const CapabilitySchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'deprecated'],
     default: 'active'
+  },
+  type: {
+    type: String,
+    enum: ['ui', 'business'],
+    default: 'ui',
+    index: true
   }
 }, { 
   timestamps: true,

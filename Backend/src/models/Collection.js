@@ -50,8 +50,6 @@ import statusmappings from "./StatusMapping.js";
 import dashboardwidgets from "./DashboardWidget.js";
 import activitylogs from "./ActivityLog.js";
 import timetrackersessions from "./TimeTrackerSession.js";
-import approvalworkflows from "./ApprovalWorkflow.js";
-import escalationworkflows from "./EscalationWorkflow.js";
 import workflows from "./Workflow.js";
 import wfhrequests from "./WFHRequest.js";
 import compoffrequests from "./CompOffRequest.js";
@@ -168,8 +166,6 @@ const models = {
   dashboardwidgets,
   activitylogs,
   timetrackersessions,
-  approvalworkflows,
-  escalationworkflows,
   workflows,
   ticket_comments,
   ticket_comment_reads,

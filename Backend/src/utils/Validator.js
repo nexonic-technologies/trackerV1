@@ -85,6 +85,34 @@ export function fieldsValidator({ policy, action, modelName, fields }) {
 export function bodyValidator({ policy, action, modelName, body }) {
   if (!body || typeof body !== "object") return body;
 
+  // 🛡️ Global locked fields that are never modifiable via CRUD updates
+  const globalLockedFields = [
+    "_id",
+    "id",
+    "deleted",
+    "deletedAt",
+    "deletedBy",
+    "createdAt",
+    "updatedAt",
+  ];
+
+  if (modelName !== "accesspolicies" && modelName !== "candidates") {
+    globalLockedFields.push("role", "permissions");
+  }
+
+  const match = (field, rule) => field === rule || field.startsWith(rule + ".") || rule.startsWith(field + ".");
+
+  for (const key of Object.keys(body)) {
+    if (globalLockedFields.some(f => match(key, f))) {
+      throw new Error(`⛔ Field "${key}" cannot be modified`);
+    }
+  }
+
+  // 🛡️ Protect authorization credentials from direct CRUD update
+  if (body?.authInfo?.password || body?.authInfo?.otp) {
+    throw new Error(`⛔ Auth fields cannot be modified through UPDATE`);
+  }
+
   const blocked = policy.forbiddenAccess?.[action] || [];
   const allowed = policy.allowAccess?.[action] || [];
 
@@ -94,12 +122,15 @@ export function bodyValidator({ policy, action, modelName, body }) {
   }
 
   for (const key of Object.keys(body)) {
-    if (blocked.includes(key)) {
+    if (blocked.some(b => match(key, b))) {
       throw new Error(`⛔ Cannot ${action} field '${key}' on ${modelName}`);
     }
 
-    if (allowed.length && !allowed.includes("*") && !allowed.includes(key)) {
-      throw new Error(`⛔ Field '${key}' not allowed for ${action} on ${modelName}`);
+    if (allowed.length && !allowed.includes("*")) {
+      const isAllowed = allowed.some(a => match(key, a));
+      if (!isAllowed) {
+        throw new Error(`⛔ Field '${key}' not allowed for ${action} on ${modelName}`);
+      }
     }
   }
 

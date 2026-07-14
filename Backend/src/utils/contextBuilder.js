@@ -129,16 +129,6 @@ export async function buildUserContext(userId, roleId) {
     // Build menu tree using CBAC capabilities for visibility
     navigation = await buildMenuTree(allSidebarItems, user);
 
-    // Add resourceKey to each item for backward compatibility
-    navigation = navigation.map(parent => ({
-      ...parent,
-      resourceKey: parent.resourceId ? resourceById[parent.resourceId.toString()]?.key : null,
-      children: parent.children ? parent.children.map(child => ({
-        ...child,
-        resourceKey: child.resourceId ? resourceById[child.resourceId.toString()]?.key : null
-      })) : []
-    }));
-
     // Cache the constructed tree
     navigationCache.set(navCacheKey, navigation);
   }

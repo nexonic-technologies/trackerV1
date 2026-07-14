@@ -5,7 +5,7 @@ const WorkflowSchema = new Schema({
   name: { type: String, required: true },
   modelName: { 
     type: String, 
-    enum: ['leaves', 'regularizations', 'wfhrequests', 'compoffrequests', 'assetallocations', 'assetincidents', 'tasks', 'tickets', 'candidates', 'onboardings'], 
+    enum: ['leaves', 'regularizations', 'wfhrequests', 'compoffrequests', 'assetallocations', 'assetincidents', 'tasks', 'tickets', 'candidates', 'onboardings', 'leads', 'deals'], 
     required: true, 
     index: true 
   },

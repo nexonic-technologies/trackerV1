@@ -6,16 +6,13 @@ import axiosInstance from '../../../api/axiosInstance';
 import { usePermission } from '../../../context/permissionProvider';
 import FormPageLayout from '../../../components/Forms/FormPageLayout';
 
-const ALL_CAPABILITIES = [
-  { key: 'manage:salarystructures', label: 'Manage Salary Structures', desc: 'Create & update salary structures' },
-  { key: 'manage:payroll',          label: 'Manage Payroll',           desc: 'Run payroll, approve, mark paid' },
-  { key: 'manage:employees',        label: 'Manage Employees',         desc: 'Create & update employee records' },
-  { key: 'manage:expenses',         label: 'Manage Expenses',          desc: 'Approve / reject expense submissions' },
-  { key: 'manage:agents',           label: 'Manage Agents',            desc: 'Create agents' },
-  { key: 'manage:leaves',           label: 'Manage Leaves',            desc: 'Approve / reject leave requests' },
-  { key: 'manage:attendance',       label: 'Manage Attendance',        desc: 'Correct attendance records' },
-  { key: 'view:reports',            label: 'View Reports',             desc: 'Access HR reports & analytics' },
-];
+function getCleanId(id) {
+  if (!id) return '';
+  if (typeof id === 'string') return id;
+  if (id.$oid) return id.$oid;
+  if (id._id) return getCleanId(id._id);
+  return id.toString();
+}
 
 const BASE_PATH = '/master-data/Roles';
 
@@ -26,8 +23,21 @@ export default function RoleFormPage() {
   const { isSuperAdmin: currentUserIsSuperAdmin } = usePermission();
 
   const [form, setForm] = useState({ name: '', description: '', isActive: true, isSuperAdmin: false, capabilities: [] });
+  const [dbCapabilities, setDbCapabilities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Fetch active business capabilities
+  useEffect(() => {
+    axiosInstance.post('/populate/read/capabilities', {
+      filter: { status: 'active', type: 'business' },
+      limit: 1000
+    })
+      .then(res => {
+        setDbCapabilities(res.data?.data || []);
+      })
+      .catch(err => console.error('Failed to fetch capabilities:', err));
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -40,19 +50,19 @@ export default function RoleFormPage() {
           description: d.description || '',
           isActive: d.isActive ?? true,
           isSuperAdmin: d.isSuperAdmin || false,
-          capabilities: d.capabilities || [],
+          capabilities: (d.capabilities || []).map(c => getCleanId(c._id || c)),
         });
       })
       .catch(() => toast.error('Failed to load role'))
       .finally(() => setLoading(false));
   }, [id]);
 
-  const toggleCap = (key) => {
+  const toggleCap = (capId) => {
     setForm(f => ({
       ...f,
-      capabilities: f.capabilities.includes(key)
-        ? f.capabilities.filter(c => c !== key)
-        : [...f.capabilities, key],
+      capabilities: f.capabilities.includes(capId)
+        ? f.capabilities.filter(c => c !== capId)
+        : [...f.capabilities, capId],
     }));
   };
 
@@ -161,7 +171,7 @@ export default function RoleFormPage() {
               <div>
                 <p className="text-sm font-semibold text-ink">Capabilities</p>
                 <p className="text-xs text-ink-muted">
-                  {form.capabilities.length} of {ALL_CAPABILITIES.length} selected
+                  {form.capabilities.length} of {dbCapabilities.length} selected
                 </p>
               </div>
               <button
@@ -170,24 +180,25 @@ export default function RoleFormPage() {
                 onClick={() =>
                   setForm(f => ({
                     ...f,
-                    capabilities: f.capabilities.length === ALL_CAPABILITIES.length
+                    capabilities: f.capabilities.length === dbCapabilities.length
                       ? []
-                      : ALL_CAPABILITIES.map(c => c.key),
+                      : dbCapabilities.map(c => getCleanId(c._id)),
                   }))
                 }
               >
-                {form.capabilities.length === ALL_CAPABILITIES.length ? 'Clear all' : 'Select all'}
+                {form.capabilities.length === dbCapabilities.length ? 'Clear all' : 'Select all'}
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {ALL_CAPABILITIES.map(cap => {
-                const active = form.capabilities.includes(cap.key);
+              {dbCapabilities.map(cap => {
+                const capId = getCleanId(cap._id);
+                const active = form.capabilities.includes(capId);
                 return (
                   <button
-                    key={cap.key}
+                    key={capId}
                     type="button"
-                    onClick={() => toggleCap(cap.key)}
+                    onClick={() => toggleCap(capId)}
                     className={`flex items-start gap-3 p-3 rounded-tracker-md border text-left transition-all ${
                       active
                         ? 'border-accent bg-accent-muted'
@@ -208,7 +219,7 @@ export default function RoleFormPage() {
                       <span className={`block text-xs font-semibold ${active ? 'text-accent' : 'text-ink'}`}>
                         {cap.label}
                       </span>
-                      <span className="block text-xs text-ink-muted mt-0.5">{cap.desc}</span>
+                      <span className="block text-xs text-ink-muted mt-0.5">{cap.description || cap.desc || `Access to ${cap.key}`}</span>
                     </span>
                   </button>
                 );

@@ -20,7 +20,7 @@ const RegularizationSchema = new mongoose.Schema({
   status: { type: String, default: 'Pending', index: true },
   metaStatus: { type: String, default: 'active', index: true },
   currentStepIndex: { type: Number, default: 0 },
-  workflowId: { type: mongoose.Schema.Types.ObjectId, ref: 'approvalworkflows', index: true },
+  workflowId: { type: mongoose.Schema.Types.ObjectId, ref: 'workflows', index: true },
   approvals: [{
     stepIndex: { type: Number },
     approverId: { type: mongoose.Schema.Types.ObjectId, ref: 'employees' },

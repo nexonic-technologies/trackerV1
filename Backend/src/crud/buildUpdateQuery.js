@@ -1,10 +1,8 @@
 // src/crud/buildUpdateQuery.js
 import { getModel } from "../utils/appRegistry.js";
 import { getAllServices } from "../utils/servicesCache.js";
-import { getPolicy } from "../utils/cache.js";
 import { pathToFileURL } from "url";
 import sanitizeUpdate from "../utils/sanitizeUpdate.js";
-import validateFieldUpdateRules from "../utils/validateFieldUpdateRules.js";
 import runRegistry from "../utils/registryExecutor.js";
 import { saveAuditLog } from "../utils/auditLogger.js";
 
@@ -35,11 +33,6 @@ export default async function buildUpdateQuery(ctx) {
    * 2) CLEAN BODY (no unauthorized fields)
    * ----------------------------------------------- */
   body = sanitizeUpdate({ body, policy });
-
-  /** -----------------------------------------------
-   * 3) Prevent critical field update bypasses
-   * ----------------------------------------------- */
-  validateFieldUpdateRules({ body, modelName, role, userId });
 
   /** -----------------------------------------------
    * 4) Registry (ABAC — isSelf, custom logic)
@@ -128,7 +121,7 @@ export default async function buildUpdateQuery(ctx) {
   // Safe background domain event emission
   try {
     const { default: domainEventService } = await import("../services/domainEventService.js");
-    
+
     // Extract a minimal diff snapshot of fields that changed
     const beforeSnapshot = {};
     if (beforeDoc && cleanDoc) {
