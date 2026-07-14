@@ -198,6 +198,118 @@ const PAGE_CAPABILITY_MAPPING = [
     route: "/settings/edit",
     capability: "Settings:edit",
     description: "Edit settings"
+  },
+
+  // Master Data
+  {
+    route: "/master-data",
+    capability: "MasterData:view",
+    description: "View Master Data Hub"
+  },
+  {
+    route: "/master-data/HR-Policies",
+    capability: "HRPolicy:view",
+    description: "View HR Policies"
+  },
+  {
+    route: "/master-data/Leave-Policies",
+    capability: "LeavePolicy:view",
+    description: "View Leave Policies"
+  },
+  {
+    route: "/master-data/Leave-Types",
+    capability: "LeaveType:view",
+    description: "View Leave Types"
+  },
+  {
+    route: "/master-data/Shifts",
+    capability: "Shift:view",
+    description: "View Shifts"
+  },
+  {
+    route: "/master-data/Task-Types",
+    capability: "TaskType:view",
+    description: "View Task Types"
+  },
+  {
+    route: "/master-data/Project-Types",
+    capability: "ProjectType:view",
+    description: "View Project Types"
+  },
+  {
+    route: "/master-data/Holidays",
+    capability: "Holiday:view",
+    description: "View Holidays"
+  },
+  {
+    route: "/master-data/Attendance-Policies",
+    capability: "AttendancePolicy:view",
+    description: "View Attendance Policies"
+  },
+  {
+    route: "/master-data/Workflows",
+    capability: "Workflow:view",
+    description: "View Workflows"
+  },
+  {
+    route: "/master-data/Reference-Types",
+    capability: "ReferenceType:view",
+    description: "View Reference Types"
+  },
+  {
+    route: "/master-data/Lead-Types",
+    capability: "LeadType:view",
+    description: "View Lead Types"
+  },
+  {
+    route: "/master-data/Job-Types",
+    capability: "JobType:view",
+    description: "View Job Types"
+  },
+  {
+    route: "/master-data/Job-Categories",
+    capability: "JobCategory:view",
+    description: "View Job Categories"
+  },
+  {
+    route: "/master-data/Service-Providers",
+    capability: "ServiceProvider:view",
+    description: "View Service Providers"
+  },
+  {
+    route: "/master-data/Leave-Transactions",
+    capability: "LeaveTransaction:view",
+    description: "View Leave Transactions"
+  },
+  {
+    route: "/master-data/Products",
+    capability: "Product:view",
+    description: "View Products"
+  },
+  {
+    route: "/master-data/agents",
+    capability: "Agent:view",
+    description: "View Agents"
+  },
+  {
+    route: "/master-data/clients",
+    capability: "Client:view",
+    description: "View Clients"
+  },
+  {
+    route: "/master-data/departments",
+    capability: "Department:view",
+    description: "View Departments"
+  },
+  {
+    route: "/master-data/designations",
+    capability: "Designation:view",
+    description: "View Designations"
+  },
+  {
+    route: "/master-data/roles",
+    capability: "Role:view",
+    description: "View Roles"
   }
 ];
 
@@ -207,14 +319,15 @@ const PAGE_CAPABILITY_MAPPING = [
  * @returns {string|null} Capability key or null if no mapping exists
  */
 export function getCapabilityForRoute(route) {
-  // Exact match first
-  const exactMatch = PAGE_CAPABILITY_MAPPING.find(m => m.route === route);
+  if (!route) return null;
+  // Case-insensitive exact match
+  const exactMatch = PAGE_CAPABILITY_MAPPING.find(m => m.route.toLowerCase() === route.toLowerCase());
   if (exactMatch) return exactMatch.capability;
 
-  // Pattern match for dynamic routes
+  // Pattern match for dynamic routes (case-insensitive)
   const patternMatch = PAGE_CAPABILITY_MAPPING.find(m => {
     const pattern = m.route.replace(/:[^/]+/g, '[^/]+');
-    const regex = new RegExp(`^${pattern}$`);
+    const regex = new RegExp(`^${pattern}$`, 'i');
     return regex.test(route);
   });
 

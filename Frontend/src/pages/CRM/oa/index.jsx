@@ -211,7 +211,7 @@ const OrderAcknowledgments = () => {
                                 <Clock size={14} /> Mark as Sent
                               </button>
                             )}
-                            {oa.status !== 'Cancelled' && (
+                            {oa.status !== 'Cancelled' && oa.status !== 'Approved' && (
                               <button 
                                 onClick={() => handleUpdateStatus(oa._id, 'Cancelled')}
                                 className="w-full px-4 py-2 hover:bg-canvas text-xs font-semibold text-tracker-danger flex items-center gap-2 cursor-pointer"

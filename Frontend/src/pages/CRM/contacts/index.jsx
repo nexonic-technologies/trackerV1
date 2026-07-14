@@ -193,6 +193,7 @@ const CRMContacts = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [historyFormOpen, setHistoryFormOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
   const contactFields = [
     { name: "firstName", label: "First Name", type: "text", required: true },
@@ -341,34 +342,50 @@ const CRMContacts = () => {
   }));
 
   const filtered = query.trim()
-    ? rows.filter((r) => [r.name, r.ownerName, r.displayEmail, r.displayPhone].some(
+    ? tableData.filter((r) => [r.name, r.companyName, r.email, r.phone].some(
         (v) => v && v.toLowerCase().includes(query.toLowerCase())
       ))
-    : rows;
+    : tableData;
 
   const stats = [
-    { label: "Total",   value: rows.length,                                               color: "text-gray-700" },
-    { label: "Active",  value: rows.filter((r) => r.Status === "Active").length,          color: "text-green-600" },
-    { label: "Won",     value: rows.filter((r) => r.leadStatus === "Closed Won").length,  color: "text-blue-600" },
+    { label: "Total",     value: tableData.length, color: "text-gray-750" },
+    { label: "Converted", value: tableData.filter((r) => r.status === "Converted").length, color: "text-green-600" },
+    { label: "New",       value: tableData.filter((r) => r.status === "New").length, color: "text-blue-600" },
   ];
 
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-3xl font-bold text-gray-800">CRM Contacts Manager</h3>
-        <button
-          onClick={() => {
-            setSelectedContact(null);
-            setFormOpen(true);
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          Add New Contact
-        </button>
+        <div>
+          <h3 className="text-3xl font-bold text-gray-800">CRM Contacts Manager</h3>
+          <p className="text-xs text-gray-500 mt-1">Manage leads, log interactions, and track client conversions.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <SearchBar value={query} onChange={setQuery} />
+          <button
+            onClick={() => {
+              setSelectedContact(null);
+              setFormOpen(true);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition text-sm font-semibold"
+          >
+            Add New Contact
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {stats.map((s) => (
+          <div key={s.label} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{s.label}</p>
+            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+          </div>
+        ))}
       </div>
 
       <TableGenerator
-        data={tableData}
+        data={filtered}
         hiddenColumns={["_id", "contactData"]}
         customRender={{
           status: (row) => (
