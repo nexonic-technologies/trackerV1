@@ -23,25 +23,6 @@ const getCleanId = (id) => {
     return id.toString();
 };
 
-// ROUTE_TO_MODEL_PREFIX has been completely removed in favor of dynamic lookup via Resource metadata.
-
-// Replicate backend routeToCapabilityKey seeder logic
-const getSidebarCapabilityKey = (route) => {
-    if (!route) return '';
-    const parts = route.replace(/^\//, '').split('/');
-    const cleanParts = parts.map(part => part.startsWith(':') ? 'id' : part);
-    if (cleanParts.length === 1) {
-        const prefix = cleanParts[0].charAt(0).toUpperCase() + cleanParts[0].slice(1);
-        return `${prefix}:view`;
-    } else if (cleanParts.length === 2) {
-        const prefix = cleanParts[0].charAt(0).toUpperCase() + cleanParts[0].slice(1);
-        return `${prefix}:${cleanParts[1]}`;
-    } else {
-        const prefix = cleanParts[0].charAt(0).toUpperCase() + cleanParts[0].slice(1);
-        return `${prefix}:${cleanParts[cleanParts.length - 1]}`;
-    }
-};
-
 export default function DesignationPermissions() {
     const { refresh: refreshPermissions } = usePermission();
     
@@ -58,45 +39,29 @@ export default function DesignationPermissions() {
     
     const [capabilities, setCapabilities] = useState([]); // List of active capabilities from DB
     const [stagedCapabilities, setStagedCapabilities] = useState(new Set()); // Staged allowed capability keys
-    const [resourceMap, setResourceMap] = useState({}); // Dynamic mapping from resourceId to modelName
     
     const [loading, setLoading] = useState(false);
     const [savingState, setSavingState] = useState(''); // '', 'saving', 'saved', 'error'
     const [errorMessage, setErrorMessage] = useState('');
 
-    const getModelPrefix = (item) => {
-        if (!item || !item.resourceId) return '';
-        const resId = getCleanId(item.resourceId);
-        const modelName = resourceMap[resId];
-        if (!modelName) return '';
-        let singular = modelName.endsWith('s') ? modelName.slice(0, -1) : modelName;
-        return singular.charAt(0).toUpperCase() + singular.slice(1);
-    };
-
-    // Fetch initial setup data (roles, designations, active capabilities, sidebars, resources)
+    // Fetch initial setup data (roles, designations, active capabilities, sidebars)
     useEffect(() => {
         const fetchSetupData = async () => {
             try {
-                const [rolesRes, designationsRes, sidebarRes, capRes, resourcesRes] = await Promise.all([
+                const [rolesRes, designationsRes, sidebarRes, capRes] = await Promise.all([
                     axiosInstance.post('/populate/read/roles'),
                     axiosInstance.post('/populate/read/designations'),
-                    axiosInstance.post('/populate/read/sidebars', { filter: { isDeleted: { $ne: true } }, limit: 200 }),
-                    axiosInstance.post('/populate/read/capabilities', { filter: { status: 'active', type: 'ui' }, limit: 1000 }),
-                    axiosInstance.post('/populate/read/resources', { filter: { isActive: true }, limit: 200 })
+                    axiosInstance.post('/populate/read/sidebars', { 
+                        filter: { isDeleted: { $ne: true } }, 
+                        limit: 200,
+                        populate: ['capabilities']
+                    }),
+                    axiosInstance.post('/populate/read/capabilities', { filter: { status: 'active' }, limit: 1000 })
                 ]);
                 
                 const rolesData = (rolesRes.data?.data || []).map(r => ({ ...r, _id: getCleanId(r._id) }));
                 const designationsData = (designationsRes.data?.data || []).map(d => ({ ...d, _id: getCleanId(d._id) }));
                 const capsData = capRes.data?.data || [];
-                
-                // Build dynamic resource map
-                const resData = resourcesRes.data?.data || [];
-                const resMap = {};
-                resData.forEach(r => {
-                    const id = getCleanId(r._id);
-                    resMap[id] = r.modelName;
-                });
-                setResourceMap(resMap);
 
                 setRoles(rolesData);
                 if (rolesData.length > 0) {
@@ -190,75 +155,17 @@ export default function DesignationPermissions() {
         setSavingState('saving');
         setErrorMessage('');
 
-        const sidebarKey = getSidebarCapabilityKey(item.mainRoute);
-        const modelPrefix = getModelPrefix(item);
-
-        const sidebarCapExists = capabilities.some(c => c.key === sidebarKey);
-        const modelCapsExist = modelPrefix && capabilities.some(c => c.key.startsWith(modelPrefix + ':'));
-
-        // Identify custom capabilities for this row
-        const customCaps = capabilities.filter(c => {
-            const key = c.key;
-            if (modelPrefix && key.startsWith(modelPrefix + ':')) {
-                const action = key.split(':')[1];
-                return !['view', 'create', 'edit', 'delete'].includes(action);
-            }
-            if (sidebarKey && key.startsWith(sidebarKey.split(':')[0] + ':')) {
-                const action = key.split(':')[1];
-                const expectedAction = sidebarKey.split(':')[1];
-                return !['view', 'create', 'edit', 'delete', expectedAction].includes(action);
-            }
-            return false;
-        });
-
-        // Construct list of all possible capability keys for this row
-        const rowPossibleKeys = [];
-        if (sidebarCapExists) rowPossibleKeys.push(sidebarKey);
-        if (modelCapsExist) {
-            rowPossibleKeys.push(`${modelPrefix}:view`, `${modelPrefix}:create`, `${modelPrefix}:edit`, `${modelPrefix}:delete`);
-        }
-        customCaps.forEach(c => rowPossibleKeys.push(c.key));
-        
         try {
-            // Calculate new desired keys for this row based on selected level
+            // Calculate new desired keys
             const nextStaged = new Set(stagedCapabilities);
-            const wantedKeys = [];
 
             if (customKeyToToggle) {
-                // Toggle a specific custom capability key
+                // Toggle a specific capability key
                 if (stagedCapabilities.has(customKeyToToggle)) {
                     nextStaged.delete(customKeyToToggle);
                 } else {
                     nextStaged.add(customKeyToToggle);
                 }
-            } else {
-                // Changing main access control level
-                if (newLevel === 'view') {
-                    if (sidebarCapExists) wantedKeys.push(sidebarKey);
-                    if (modelCapsExist) wantedKeys.push(`${modelPrefix}:view`);
-                } else if (newLevel === 'edit') {
-                    if (sidebarCapExists) wantedKeys.push(sidebarKey);
-                    if (modelCapsExist) {
-                        wantedKeys.push(`${modelPrefix}:view`, `${modelPrefix}:create`, `${modelPrefix}:edit`);
-                    }
-                    // Keep existing active custom capabilities
-                    customCaps.forEach(c => {
-                        if (stagedCapabilities.has(c.key)) wantedKeys.push(c.key);
-                    });
-                } else if (newLevel === 'full') {
-                    if (sidebarCapExists) wantedKeys.push(sidebarKey);
-                    if (modelCapsExist) {
-                        wantedKeys.push(`${modelPrefix}:view`, `${modelPrefix}:create`, `${modelPrefix}:edit`, `${modelPrefix}:delete`);
-                    }
-                    // Keep existing active custom capabilities
-                    customCaps.forEach(c => {
-                        if (stagedCapabilities.has(c.key)) wantedKeys.push(c.key);
-                    });
-                }
-
-                // Apply changes to staged capabilities set
-                rowPossibleKeys.forEach(k => nextStaged.delete(k));
-                wantedKeys.forEach(k => nextStaged.add(k));
             }
 
             // Optimistic UI state update
@@ -304,58 +211,22 @@ export default function DesignationPermissions() {
         return !!selectedRole && !!selectedDesignation;
     };
 
-    // Calculate level for UI
-    const getRowAccessLevel = (sidebarKey, modelPrefix, sidebarCapExists, modelCapsExist) => {
-        if (modelCapsExist) {
-            const viewKey = `${modelPrefix}:view`;
-            const createKey = `${modelPrefix}:create`;
-            const editKey = `${modelPrefix}:edit`;
-            const deleteKey = `${modelPrefix}:delete`;
-            
-            const hasView = stagedCapabilities.has(viewKey);
-            const hasCreate = stagedCapabilities.has(createKey);
-            const hasEdit = stagedCapabilities.has(editKey);
-            const hasDelete = stagedCapabilities.has(deleteKey);
-            
-            if (hasView && hasCreate && hasEdit && hasDelete) return 'full';
-            if (hasView && hasCreate && hasEdit) return 'edit';
-            if (hasView) return 'view';
-            return 'denied';
-        } else if (sidebarCapExists) {
-            return stagedCapabilities.has(sidebarKey) ? 'view' : 'denied';
-        }
-        return 'denied';
-    };
-
     // Render a row in the menu tree
     const renderMenuRow = (item, isChild = false) => {
         const hasChildren = item.children && item.children.length > 0;
         const isExpanded = expandedNodes.has(item._id);
 
-        const sidebarKey = getSidebarCapabilityKey(item.mainRoute);
-        const modelPrefix = getModelPrefix(item);
+        // Use sidebar's capabilities directly instead of generating keys
+        const sidebarCapabilities = item.capabilities || [];
+        const sidebarCapKeys = sidebarCapabilities.map(c => c.key);
 
-        const sidebarCapExists = capabilities.some(c => c.key === sidebarKey);
-        const modelCapsExist = modelPrefix && capabilities.some(c => c.key.startsWith(modelPrefix + ':'));
+        // Identify custom actions (e.g. approve, reject) from the sidebar's capabilities
+        const customCaps = sidebarCapabilities.filter(c => {
+            const action = c.action;
+            return action && !['view', 'create', 'read', 'update', 'delete'].includes(action);
+        });
 
-        const level = getRowAccessLevel(sidebarKey, modelPrefix, sidebarCapExists, modelCapsExist);
-        
-        // Identify custom actions (e.g. approve, reject)
-        const customCaps = (modelCapsExist || sidebarCapExists) ? capabilities.filter(c => {
-            const key = c.key;
-            if (modelPrefix && key.startsWith(modelPrefix + ':')) {
-                const action = key.split(':')[1];
-                return !['view', 'create', 'edit', 'delete'].includes(action);
-            }
-            if (sidebarKey && key.startsWith(sidebarKey.split(':')[0] + ':')) {
-                const action = key.split(':')[1];
-                const expectedAction = sidebarKey.split(':')[1];
-                return !['view', 'create', 'edit', 'delete', expectedAction].includes(action);
-            }
-            return false;
-        }) : [];
-        
-        const permitsEdit = level === 'edit' || level === 'full';
+        const permitsEdit = sidebarCapKeys.some(key => stagedCapabilities.has(key));
 
         return (
             <div key={item._id} className="w-full">
@@ -391,66 +262,53 @@ export default function DesignationPermissions() {
 
                         <div className="flex flex-col">
                             <span className="text-sm font-bold text-ink truncate">{item.title}</span>
-                            {modelPrefix && (
-                                <span className="text-[10px] font-mono text-ink-muted">Model: {modelPrefix}</span>
-                            )}
                         </div>
                     </div>
 
                     {/* Inline controls */}
                     <div className="flex items-center gap-4 flex-shrink-0 self-end sm:self-center">
-                        {(sidebarCapExists || modelCapsExist) ? (
+                        {sidebarCapKeys.length > 0 ? (
                             <div className="flex items-center gap-3">
-                                {/* Compact Segmented Control */}
-                                <div className="grid grid-cols-4 bg-canvas border border-hairline-soft rounded-lg p-0.5 gap-0.5 w-60">
-                                    {[
-                                        { id: 'denied', label: 'Denied', disabled: false },
-                                        { id: 'view', label: 'View', disabled: false },
-                                        { id: 'edit', label: 'Add/Edit', disabled: !modelCapsExist },
-                                        { id: 'full', label: 'Full', disabled: !modelCapsExist }
-                                    ].map(opt => {
-                                        const isActive = level === opt.id;
+                                {/* Show sidebar capabilities as checkboxes */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {sidebarCapabilities.map(cap => {
+                                        const isChecked = stagedCapabilities.has(cap.key);
                                         return (
                                             <button
-                                                key={opt.id}
+                                                key={cap.key}
                                                 type="button"
-                                                disabled={opt.disabled}
-                                                onClick={() => handleSaveCapability(item, opt.id)}
-                                                className={`py-1 text-center text-[9px] font-black uppercase tracking-wider rounded transition-all ${
-                                                    isActive
-                                                        ? opt.id === 'full'
-                                                            ? 'bg-emerald-500 text-white shadow-sm'
-                                                            : opt.id === 'edit'
-                                                            ? 'bg-amber-500 text-white shadow-sm'
-                                                            : opt.id === 'view'
-                                                            ? 'bg-sky-500 text-white shadow-sm'
-                                                            : 'bg-rose-500 text-white shadow-sm'
-                                                        : opt.disabled
-                                                        ? 'text-ink-muted/30 cursor-not-allowed bg-canvas/40'
-                                                        : 'text-ink-muted hover:bg-canvas'
+                                                onClick={() => handleSaveCapability(item, null, cap.key)}
+                                                className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 border transition-all ${
+                                                    isChecked
+                                                        ? 'bg-accent/10 border-accent/30 text-accent'
+                                                        : 'bg-surface border-hairline text-ink-muted hover:border-hairline'
                                                 }`}
-                                                style={{ minHeight: '26px' }}
                                             >
-                                                {opt.label}
+                                                <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+                                                    isChecked ? 'bg-accent border-transparent text-white' : 'border-hairline bg-canvas'
+                                                }`}>
+                                                    {isChecked && <CheckIcon className="w-3 h-3" />}
+                                                </div>
+                                                <span>{cap.label || cap.key}</span>
                                             </button>
                                         );
                                     })}
                                 </div>
                             </div>
                         ) : (
-                            <span className="text-xs text-ink-muted font-medium pr-12">—</span>
+                            <span className="text-xs text-ink-muted font-medium pr-12">No capabilities defined</span>
                         )}
                     </div>
                 </div>
 
                 {/* Inline custom capabilities if edit allowed */}
-                {(sidebarCapExists || modelCapsExist) && permitsEdit && customCaps.length > 0 && (
+                {permitsEdit && customCaps.length > 0 && (
                     <div className={`py-2 border-b border-hairline-soft bg-canvas/30 ${isChild ? 'pl-16 pr-4' : 'pl-12 pr-4'}`}>
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-[10px] font-bold text-ink-muted uppercase tracking-wider mr-2">Additional:</span>
                             {customCaps.map(cap => {
                                 const isChecked = stagedCapabilities.has(cap.key);
-                                const actionName = cap.key.split(':')[1];
+                                const actionName = cap.action;
                                 return (
                                     <button
                                         key={cap.key}

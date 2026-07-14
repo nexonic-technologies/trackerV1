@@ -1,16 +1,16 @@
 # Graph Report - trackerV1  (2026-07-14)
 
 ## Corpus Check
-- 918 files · ~764,758 words
+- 918 files · ~765,091 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 9447 nodes · 11758 edges · 761 communities (649 shown, 112 thin omitted)
+- 9447 nodes · 11758 edges · 762 communities (650 shown, 112 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 79 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6e60b2ef`
+- Built from commit: `35968269`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -654,6 +654,7 @@
 - [[_COMMUNITY_Community 758|Community 758]]
 - [[_COMMUNITY_Community 759|Community 759]]
 - [[_COMMUNITY_Community 760|Community 760]]
+- [[_COMMUNITY_Community 761|Community 761]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `useAuth()` - 111 edges
@@ -679,7 +680,7 @@
 - `buildUpdateQuery()` --calls--> `afterUpdate()`  [INFERRED]
   Backend/src/crud/buildUpdateQuery.js → backend/src/services/tasks.js
 
-## Communities (761 total, 112 thin omitted)
+## Communities (762 total, 112 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.01
@@ -782,8 +783,8 @@ Cohesion: 0.19
 Nodes (8): createMilestoneTask(), getDefaultTaskType(), updateClientMilestone(), afterUpdate(), resolveTicketStatus(), syncLinkedTickets(), syncMilestoneStatus(), updateLinkedTicketStatus()
 
 ### Community 26 - "Community 26"
-Cohesion: 0.23
-Nodes (10): Dashboard(), getFormattedDate(), getGreeting(), StatCard(), StatCardProps, useAnimatedCounter(), getFormattedDate(), getGreeting() (+2 more)
+Cohesion: 0.17
+Nodes (12): Dashboard(), getFormattedDate(), getGreeting(), StatCard(), StatCardProps, useAnimatedCounter(), getFormattedDate(), getGreeting() (+4 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.12
@@ -946,16 +947,16 @@ Cohesion: 0.23
 Nodes (10): ThemeToggler(), prefersReducedMotion(), runThemeTransition(), ThemeContext, ThemeProvider(), useTheme(), Login(), app (+2 more)
 
 ### Community 68 - "Community 68"
-Cohesion: 0.08
-Nodes (11): getCountryCode(), getStateCode(), Vendors(), formatColumnName(), formatIndianDate(), formatValueForExport(), isDateString(), normalizeData() (+3 more)
+Cohesion: 0.10
+Nodes (10): formatColumnName(), formatIndianDate(), formatValueForExport(), isDateString(), normalizeData(), sortData(), TableGenerator(), hrPolicyFormFields (+2 more)
 
 ### Community 69 - "Community 69"
 Cohesion: 0.12
 Nodes (17): 1. **Role-Based Component Architecture** (Your Latest Innovation), 2. **Mobile-First Responsive Architecture**, 3. **Universal Hook Pattern** (Frontend Efficiency), 4. **Component Composition Architecture**, 5. **Context-Driven State Management**, 6. **Dynamic Route Architecture** (React + React Native), 7. **Progressive Enhancement Pattern**, 8. **Atomic Design System** (Emerging Pattern) (+9 more)
 
 ### Community 70 - "Community 70"
-Cohesion: 0.13
-Nodes (9): axiosInstance, forceLogout(), getDeviceUUID(), incrementFailedCount(), MONTHS, PayrollRecord, STATUS_CHIPS, statusColors (+1 more)
+Cohesion: 0.22
+Nodes (6): axiosInstance, forceLogout(), getDeviceUUID(), incrementFailedCount(), statusColors, Task
 
 ### Community 71 - "Community 71"
 Cohesion: 0.12
@@ -1006,8 +1007,8 @@ Cohesion: 0.13
 Nodes (14): 1. High-Level Overview, 2. Key Architectural Patterns, 3. Data Flow & Resilience, 4. Performance Optimization, 5. Directory Structure Map, A. The "Populate" Pattern (Dynamic CRUD), B. Attribute-Based Access Control (ABAC) & Strict Mode, C. Hybrid Service Layer (+6 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.12
-Nodes (14): 10. Files Summary, 11. Brain Update (Post-Implementation), 2. Core Architecture Principle, 5. API Calls (All via Populate Engine), 7. Business Logic Rules, 8. Data Flow Summary, 9. TODO / Extension Points (Do Not Build Now), Changelog from v1.1 (+6 more)
+Cohesion: 0.15
+Nodes (11): 11. Brain Update (Post-Implementation), 2. Core Architecture Principle, 5. API Calls (All via Populate Engine), 7. Business Logic Rules, 8. Data Flow Summary, 9. TODO / Extension Points (Do Not Build Now), Changelog from v1.1, Changelog from v1.2 (+3 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.12
@@ -1426,8 +1427,8 @@ Cohesion: 0.29
 Nodes (6): compilerOptions, paths, strict, extends, include, @/*
 
 ### Community 194 - "Community 194"
-Cohesion: 0.29
-Nodes (4): ActionCard(), ActionCard(), HRDashboardStats, Props
+Cohesion: 0.16
+Nodes (4): getCountryCode(), getStateCode(), Vendors(), StatusBadge()
 
 ### Community 195 - "Community 195"
 Cohesion: 0.33
@@ -1946,8 +1947,8 @@ Cohesion: 0.50
 Nodes (4): code:block43 (Backend:), Current Test Coverage, Recommended Test Implementation, 🔍 TESTING STRATEGY
 
 ### Community 331 - "Community 331"
-Cohesion: 0.29
-Nodes (8): ExternalTicketView(), EmployeeDashboard(), EmployeeDashboard(), EmployeeDashboardStats, getAttendanceConfig(), getStatusColor(), Props, StatCard()
+Cohesion: 0.21
+Nodes (10): ActionCard(), ExternalTicketView(), EmployeeDashboard(), EmployeeDashboard(), EmployeeDashboardStats, getAttendanceConfig(), getStatusColor(), Props (+2 more)
 
 ### Community 332 - "Community 332"
 Cohesion: 0.50
@@ -2322,8 +2323,8 @@ Cohesion: 0.16
 Nodes (15): build, CachedAvatar, Color, Container, ../../core/api_config.dart, ../../core/theme/app_theme.dart, _getInitials, _getInitialsColor (+7 more)
 
 ### Community 572 - "Community 572"
-Cohesion: 0.18
-Nodes (7): FloatingCard(), milestoneFormFields, milestoneSubmitButton, milestonesConfig, taskTypesConfig, FloatingCard(), FloatingCardProps
+Cohesion: 0.50
+Nodes (3): milestoneFormFields, milestoneSubmitButton, milestonesConfig
 
 ### Community 573 - "Community 573"
 Cohesion: 0.50
@@ -2386,8 +2387,8 @@ Cohesion: 0.33
 Nodes (6): FileViewerModal(), formatBytes(), getFileIcon(), FileViewerModal(), formatBytes(), getFileIcon()
 
 ### Community 598 - "Community 598"
-Cohesion: 0.08
-Nodes (19): leaveTypeFormFields, leaveTypeSubmit, holidaysConfig, jobCategoriesConfig, jobCategoryFormFields, jobCategorySubmit, statusField, jobTypeFormFields (+11 more)
+Cohesion: 0.09
+Nodes (17): holidaysConfig, jobCategoriesConfig, jobCategoryFormFields, jobCategorySubmit, statusField, jobTypeFormFields, jobTypesConfig, jobTypeSubmit (+9 more)
 
 ### Community 599 - "Community 599"
 Cohesion: 0.18
@@ -2614,8 +2615,8 @@ Cohesion: 0.40
 Nodes (4): ApprovalEntrySchema, QuotationItemSchema, QuotationLineItemSchema, QuotationSchema
 
 ### Community 683 - "Community 683"
-Cohesion: 0.38
-Nodes (3): hrPolicyFormFields, hrPolicySubmit, hrPoliciesConfig
+Cohesion: 0.33
+Nodes (3): MONTHS, PayrollRecord, STATUS_CHIPS
 
 ### Community 684 - "Community 684"
 Cohesion: 0.29
@@ -2638,8 +2639,8 @@ Cohesion: 0.29
 Nodes (7): 1. **Authentication Flow**, 2. **Business Operation Flow**, 3. **Error Handling Flow**, code:block2 (Client Request → CORS Check → Extract JWT → Validate Device ), code:block3 (Authenticated Request → Controller Validation → Service Laye), code:block4 (Error Occurs → Error Handler Middleware → Log to Database →), Request → Processing → Response Flow
 
 ### Community 691 - "Community 691"
-Cohesion: 0.38
-Nodes (3): projectTypeFormFields, projectTypeSubmit, projectTypesConfig
+Cohesion: 0.14
+Nodes (9): FloatingCard(), leaveTypeFormFields, leaveTypeSubmit, projectTypeFormFields, projectTypeSubmit, leaveTypesConfig, projectTypesConfig, FloatingCard() (+1 more)
 
 ### Community 692 - "Community 692"
 Cohesion: 0.43
@@ -2788,6 +2789,10 @@ Nodes (3): __dirname, __filename, updatePassword()
 ### Community 760 - "Community 760"
 Cohesion: 0.50
 Nodes (4): Existing Capabilities, Initialization Flow, Linked Resource Analysis, Section 1 – Capability System Audit
+
+### Community 761 - "Community 761"
+Cohesion: 0.67
+Nodes (3): 10. Files Summary, Modified Files, New Files
 
 ## Knowledge Gaps
 - **5100 isolated node(s):** `name`, `version`, `main`, `type`, `test` (+5095 more)

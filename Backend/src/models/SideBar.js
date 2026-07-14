@@ -48,6 +48,14 @@ const SideBarSchema = new mongoose.Schema({
     default: []
   }],
 
+  // Sidebar capabilities: define which capabilities are required to view this menu item
+  // These are compared against user's role capabilities to determine visibility
+  capabilities: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Capability',
+    default: []
+  }],
+
   routes: [{
     type: String,
   }],
