@@ -2,13 +2,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getMessaging, getToken, onMessage, isSupported, Messaging } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBYE6khUUPjyDpTI1ZgO_meYYbPnvW4SbA",
-  authDomain: "tracker-a27af.firebaseapp.com",
-  projectId: "tracker-a27af",
-  storageBucket: "tracker-a27af.firebasestorage.app",
-  messagingSenderId: "212199400489",
-  appId: "1:212199400489:web:6583e9435f18617f192838",
-  measurementId: "G-61GDBGL2F6"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase (SSR-safe initialization check)
@@ -35,8 +35,22 @@ export const requestFirebaseToken = async (): Promise<string | null> => {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
+      let registration;
+      if (typeof window !== "undefined" && 'serviceWorker' in navigator) {
+        const swUrl = `/firebase-messaging-sw.js` +
+          `?apiKey=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '')}` +
+          `&authDomain=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '')}` +
+          `&projectId=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '')}` +
+          `&storageBucket=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '')}` +
+          `&messagingSenderId=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '')}` +
+          `&appId=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '')}` +
+          `&measurementId=${encodeURIComponent(process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '')}`;
+        registration = await navigator.serviceWorker.register(swUrl);
+      }
+
       const currentToken = await getToken(messaging, { 
-        vapidKey: 'BBdOYk64h_iZLQSPNu5TikSKjuH4nCfefTMgnvC1iDbxFh_WsRUyYsbPxV8fpNg_cpxtWLbvrHuJoM2UYtpDftc' 
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || '',
+        serviceWorkerRegistration: registration
       });
       return currentToken || null;
     } else {

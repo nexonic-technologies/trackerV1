@@ -2,13 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBYE6khUUPjyDpTI1ZgO_meYYbPnvW4SbA",
-  authDomain: "tracker-a27af.firebaseapp.com",
-  projectId: "tracker-a27af",
-  storageBucket: "tracker-a27af.firebasestorage.app",
-  messagingSenderId: "212199400489",
-  appId: "1:212199400489:web:6583e9435f18617f192838",
-  measurementId: "G-61GDBGL2F6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -34,8 +34,22 @@ export const requestFirebaseToken = async () => {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
+      let registration;
+      if ('serviceWorker' in navigator) {
+        const swUrl = `/firebase-messaging-sw.js` +
+          `?apiKey=${encodeURIComponent(import.meta.env.VITE_FIREBASE_API_KEY || '')}` +
+          `&authDomain=${encodeURIComponent(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '')}` +
+          `&projectId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_PROJECT_ID || '')}` +
+          `&storageBucket=${encodeURIComponent(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '')}` +
+          `&messagingSenderId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')}` +
+          `&appId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_APP_ID || '')}` +
+          `&measurementId=${encodeURIComponent(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '')}`;
+        registration = await navigator.serviceWorker.register(swUrl);
+      }
+      
       const currentToken = await getToken(messaging, { 
-        vapidKey: 'BBdOYk64h_iZLQSPNu5TikSKjuH4nCfefTMgnvC1iDbxFh_WsRUyYsbPxV8fpNg_cpxtWLbvrHuJoM2UYtpDftc' 
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: registration
       });
       if (currentToken) {
         return currentToken;
