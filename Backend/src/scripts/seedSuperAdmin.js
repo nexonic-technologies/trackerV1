@@ -79,6 +79,41 @@ async function seed() {
       console.log(`Configured full permissions for model: ${modelName}`);
     }
 
+    // 4.5 Seed Capabilities from pageCapabilityMapping
+    console.log('--- Seeding Capabilities ---');
+    const { default: pageCapabilityMappingHelper } = await import('../Config/pageCapabilityMapping.js');
+    const capIdMap = new Map();
+    for (const mapping of pageCapabilityMappingHelper.PAGE_CAPABILITY_MAPPING) {
+      const key = mapping.capability;
+      const parts = key.split(':');
+      const module = parts[0].toLowerCase();
+      const action = parts[1] || 'view';
+
+      // Avoid duplicate keys just in case
+      let capDoc = await models.capabilities.findOne({ key });
+      if (!capDoc) {
+        capDoc = await models.capabilities.create({
+          key,
+          module,
+          action,
+          label: mapping.description || `Access to ${parts[0]} ${action}`,
+          description: mapping.description || `Access to ${parts[0]} ${action}`,
+          status: 'active',
+          type: 'ui'
+        });
+      }
+      capIdMap.set(key, capDoc._id);
+    }
+    console.log(`Seeded ${capIdMap.size} capabilities`);
+
+    const getSidebarCapabilities = (route) => {
+      const key = pageCapabilityMappingHelper.getCapabilityForRoute(route);
+      if (key && capIdMap.has(key)) {
+        return [capIdMap.get(key)];
+      }
+      return [];
+    };
+
     // 5. Seed Developer Employee
     console.log('--- Seeding Developer Employee ---');
     const email = 'developer@workhub.com';
@@ -190,7 +225,7 @@ async function seed() {
             },
             mainRoute: `/${folderNameLower}`,
             visibility: 'protected',
-            capabilities: [],
+            capabilities: getSidebarCapabilities(`/${folderNameLower}`),
             routes: [],
             isParent: true,
             hasChildren: false,
@@ -210,7 +245,7 @@ async function seed() {
             },
             mainRoute: `/${folderNameLower}`,
             visibility: 'protected',
-            capabilities: [],
+            capabilities: getSidebarCapabilities(`/${folderNameLower}`),
             routes: [],
             isParent: true,
             hasChildren: true,
@@ -233,7 +268,7 @@ async function seed() {
               },
               mainRoute: childRoute,
               visibility: 'protected',
-              capabilities: [],
+              capabilities: getSidebarCapabilities(childRoute),
               routes: [],
               parentId: parentId,
               isParent: false,
@@ -257,7 +292,7 @@ async function seed() {
           },
           mainRoute: `/${fileNameLower}`,
           visibility: 'protected',
-          capabilities: [],
+          capabilities: getSidebarCapabilities(`/${fileNameLower}`),
           routes: [],
           isParent: true,
           hasChildren: false,

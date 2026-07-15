@@ -155,11 +155,11 @@ const RoleBasedTasks = () => {
   const isFullAccessUser = userId === '68d8b98af397d1d97620ba97';
 
   const renderTasksComponent = () => {
-    if (isFullAccessUser || hasCapability("tasks.all.read")) {
+    if (isFullAccessUser || hasCapability("tasks:all:read")) {
       return <HRTasks />;
     }
 
-    if (hasCapability("tasks.team.read")) {
+    if (hasCapability("tasks:team:read")) {
       return <ManagerTasks />;
     }
 

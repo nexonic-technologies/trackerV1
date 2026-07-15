@@ -51,155 +51,147 @@ function V2StatCard({ title, value, subtitle, color, to }) {
   return content;
 }
 
-export default function V2StatsRow({ stats = {}, layoutVariant = 'employee' }) {
-  if (layoutVariant === 'employee') return null;
+export default function V2StatsRow({ stats = {}, can }) {
+  if (!can) return null;
 
-  const renderManagerCards = () => {
+  const cards = [];
+
+  // 1. Pending Approvals
+  if (can('v2_stat_pending_approvals')) {
     const pending = stats.pendingApprovals?.value ?? 0;
-    const overdue = stats.overdueTasks?.value ?? 0;
-    const tickets = stats.openTickets?.value ?? 0;
-
-    return (
-      <>
-        <V2StatCard
-          title="Pending Approvals"
-          value={pending}
-          subtitle="+1 today"
-          color={pending > 0 ? 'yellow' : 'green'}
-        />
-        <V2StatCard
-          title="Overdue Tasks"
-          value={overdue}
-          subtitle="+0 today"
-          color={overdue > 0 ? 'red' : 'green'}
-          to="/tasks"
-        />
-        <V2StatCard
-          title="Open Tickets"
-          value={tickets}
-          subtitle="-1 today"
-          color={tickets > 0 ? 'orange' : 'green'}
-          to="/tasks" // link to tasks/tickets area
-        />
-      </>
+    cards.push(
+      <V2StatCard
+        key="pending_approvals"
+        title="Pending Approvals"
+        value={pending}
+        subtitle="+1 today"
+        color={pending > 0 ? 'yellow' : 'green'}
+      />
     );
-  };
+  }
 
-  const renderAdminCards = () => {
-    const pending = stats.pendingApprovals?.value ?? 0;
+  // 2. Overdue Tasks
+  if (can('v2_stat_overdue_tasks')) {
+    const overdue = stats.overdueTasks?.value ?? 0;
+    cards.push(
+      <V2StatCard
+        key="overdue_tasks"
+        title="Overdue Tasks"
+        value={overdue}
+        subtitle="+0 today"
+        color={overdue > 0 ? 'red' : 'green'}
+        to="/tasks"
+      />
+    );
+  }
+
+  // 3. Open Tickets
+  if (can('v2_stat_open_tickets')) {
+    const tickets = stats.openTickets?.value ?? 0;
+    cards.push(
+      <V2StatCard
+        key="open_tickets"
+        title="Open Tickets"
+        value={tickets}
+        subtitle="-1 today"
+        color={tickets > 0 ? 'orange' : 'green'}
+        to="/tasks"
+      />
+    );
+  }
+
+  // 4. Attendance Issues
+  if (can('v2_stat_attendance_issues')) {
     const issues = stats.attendanceIssues?.value ?? 0;
     const issuesBreakdown = stats.attendanceIssues?.breakdown || {};
     const late = issuesBreakdown['Late Entry'] || 0;
     const lop = issuesBreakdown['LOP'] || 0;
+    cards.push(
+      <V2StatCard
+        key="attendance_issues"
+        title="Attendance Issues"
+        value={issues}
+        subtitle={`Late: ${late}  LOP: ${lop}`}
+        color={issues > 0 ? 'orange' : 'green'}
+        to="/Attendance"
+      />
+    );
+  }
 
+  // 5. Payroll Status
+  if (can('v2_stat_payroll_status')) {
     const payroll = stats.payrollStatus?.value ?? 'Not Started';
     const payrollMonth = stats.payrollStatus?.month
       ? new Date(2026, stats.payrollStatus.month - 1).toLocaleDateString('en-US', { month: 'short' })
       : 'Current';
-
     let payrollColor = 'yellow';
     if (payroll === 'Processed' || payroll === 'Approved') payrollColor = 'green';
     if (payroll === 'Processing') payrollColor = 'orange';
-
-    return (
-      <>
-        <V2StatCard
-          title="ALL Pending Approvals"
-          value={pending}
-          subtitle="+3 today"
-          color={pending > 0 ? 'yellow' : 'green'}
-        />
-        <V2StatCard
-          title="Attendance Issues"
-          value={issues}
-          subtitle={`Late: ${late}  LOP: ${lop}`}
-          color={issues > 0 ? 'orange' : 'green'}
-          to="/Attendance"
-        />
-        <V2StatCard
-          title="Payroll Status"
-          value={payroll}
-          subtitle={`${payrollMonth} Run`}
-          color={payrollColor}
-          to="/Payroll"
-        />
-      </>
+    cards.push(
+      <V2StatCard
+        key="payroll_status"
+        title="Payroll Status"
+        value={payroll}
+        subtitle={`${payrollMonth} Run`}
+        color={payrollColor}
+        to="/Payroll"
+      />
     );
-  };
+  }
 
-  const renderExecutiveCards = () => {
-    const overdue = stats.overdueTasks?.value ?? 0;
-    const crit = stats.criticalTickets?.value ?? 0;
-    const unassigned = stats.criticalTickets?.unassigned ?? 0;
+  // 6. Payroll Cost
+  if (can('v2_stat_payroll_cost')) {
     const cost = stats.payrollCost?.value ?? 0;
-
-    return (
-      <>
-        <V2StatCard
-          title="Overdue Tasks"
-          value={overdue}
-          subtitle="Org Overdue"
-          color={overdue > 0 ? 'red' : 'green'}
-          to="/tasks"
-        />
-        <V2StatCard
-          title="Critical Tickets"
-          value={crit}
-          subtitle={`Unassigned: ${unassigned}`}
-          color={crit > 0 ? 'red' : 'green'}
-          to="/tasks"
-        />
-        <V2StatCard
-          title="Payroll Cost"
-          value={formatLakhs(cost)}
-          subtitle="Current Month Est."
-          color="green"
-          to="/Payroll"
-        />
-      </>
+    cards.push(
+      <V2StatCard
+        key="payroll_cost"
+        title="Payroll Cost"
+        value={formatLakhs(cost)}
+        subtitle="Current Month Est."
+        color="green"
+        to="/Payroll"
+      />
     );
-  };
+  }
 
-  const renderMDCards = () => {
+  // 7. Workforce Health
+  if (can('v2_stat_workforce_health')) {
     const health = stats.workforceHealth?.value ?? 0;
     const healthLabel = stats.workforceHealth?.label || 'Healthy';
     const healthColor = stats.workforceHealth?.color || 'green';
+    cards.push(
+      <V2StatCard
+        key="workforce_health"
+        title="Workforce Health"
+        value={health > 0 ? `${health}%` : '—'}
+        subtitle={`${healthLabel} · ${stats.workforceHealth?.late || 0} late, ${stats.workforceHealth?.lop || 0} LOP`}
+        color={healthColor === 'green' ? 'green' : healthColor === 'yellow' ? 'yellow' : 'red'}
+      />
+    );
+  }
 
+  // 8. Financial Exposure
+  if (can('v2_stat_financial_exposure')) {
     const exposure = stats.financialExposure?.value ?? 0;
     const lopImpact = stats.financialExposure?.lopImpact ?? 0;
-
-    return (
-      <>
-        <div className="h-[100px] flex-1">
-          <V2StatCard
-            title="Workforce Health"
-            value={health > 0 ? `${health}%` : '—'}
-            subtitle={`${healthLabel} · ${stats.workforceHealth?.late || 0} late, ${stats.workforceHealth?.lop || 0} LOP`}
-            color={healthColor === 'green' ? 'green' : healthColor === 'yellow' ? 'yellow' : 'red'}
-          />
-        </div>
-        <div className="h-[100px] flex-1">
-          <V2StatCard
-            title="Financial Exposure"
-            value={formatLakhs(exposure)}
-            subtitle={`${lopImpact} LOP impact`}
-            color="green"
-          />
-        </div>
-      </>
+    cards.push(
+      <V2StatCard
+        key="financial_exposure"
+        title="Financial Exposure"
+        value={formatLakhs(exposure)}
+        subtitle={`${lopImpact} LOP impact`}
+        color="green"
+      />
     );
-  };
+  }
+
+  if (cards.length === 0) return null;
 
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-${
-        layoutVariant === 'md' ? '2' : '3'
-      } gap-4 w-full`}
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${Math.min(cards.length, 3)} gap-4 w-full`}
     >
-      {layoutVariant === 'manager' && renderManagerCards()}
-      {layoutVariant === 'admin' && renderAdminCards()}
-      {layoutVariant === 'executive' && renderExecutiveCards()}
-      {layoutVariant === 'md' && renderMDCards()}
+      {cards}
     </div>
   );
 }

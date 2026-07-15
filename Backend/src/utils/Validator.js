@@ -105,7 +105,7 @@ export function bodyValidator({ policy, action, modelName, body }) {
     "updatedAt",
   ];
 
-  if (modelName !== "accesspolicies" && modelName !== "candidates") {
+  if (modelName !== "accesspolicies" && modelName !== "candidates" && modelName !== "dashboardwidgets") {
     globalLockedFields.push("role", "permissions");
   }
 
@@ -118,7 +118,7 @@ export function bodyValidator({ policy, action, modelName, body }) {
   }
 
   // 🛡️ Protect authorization credentials from direct CRUD update
-  if (body?.authInfo?.password || body?.authInfo?.otp) {
+  if (action === "update" && (body?.authInfo?.password || body?.authInfo?.otp)) {
     throw new Error(`⛔ Auth fields cannot be modified through UPDATE`);
   }
 

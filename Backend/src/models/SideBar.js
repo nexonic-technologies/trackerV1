@@ -27,27 +27,6 @@ const SideBarSchema = new mongoose.Schema({
     index: true
   },
 
-  // References the Resource collection for permission derivation.
-  // Required when visibility = "protected".
-  // Replaces the old string-based resourceKey (no more string drift).
-  resourceId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "resources",
-    default: null,
-    index: true
-  },
-  // Role-based visibility
-  allowedDepartments: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'departments',
-    default: []
-  }],
-  allowedDesignations: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'designations',
-    default: []
-  }],
-
   // Sidebar capabilities: define which capabilities are required to view this menu item
   // These are compared against user's role capabilities to determine visibility
   capabilities: [{

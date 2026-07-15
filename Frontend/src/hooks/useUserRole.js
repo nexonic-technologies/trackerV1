@@ -17,30 +17,7 @@ export const useUserRole = () => {
             if (roleDoc) {
                 setUserRole(roleDoc.name?.toLowerCase());
                 setCapabilities(roleDoc.capabilities || []);
-                
-                // Fetch dynamic access policies for this role
-                const policyRes = await axiosInstance.get(`/populate/read/accesspolicies`, {
-                    params: {
-                        filter: JSON.stringify({ role: user.role }),
-                        limit: 1000
-                    }
-                });
-                const policyMap = {};
-                (policyRes?.data?.data || []).forEach(p => {
-                    const permissionsObj = {};
-                    if (Array.isArray(p.actions)) {
-                        p.actions.forEach(act => {
-                            permissionsObj[act] = true;
-                        });
-                    }
-                    ["read", "create", "update", "delete"].forEach(act => {
-                        if (permissionsObj[act] === undefined) {
-                            permissionsObj[act] = false;
-                        }
-                    });
-                    policyMap[p.modelName] = permissionsObj;
-                });
-                setPolicies(policyMap);
+                setPolicies({});
             }
         }
         catch (error) {

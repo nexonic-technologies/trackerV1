@@ -701,12 +701,12 @@ export const getContext = async (req, res, next) => {
     }
 
     // Set ETag header
-    res.setHeader("ETag", eTag);
+    // res.setHeader("ETag", eTag);
 
     // If client already has the latest context version, return 304 immediately
-    if (req.headers["if-none-match"] === eTag) {
-      return res.status(304).end();
-    }
+    // if (req.headers["if-none-match"] === eTag) {
+    //   return res.status(304).end();
+    // }
 
     // Agents get a minimal context (no sidebar, basic permissions)
     if (userType === "agent") {

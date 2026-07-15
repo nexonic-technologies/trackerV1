@@ -11,10 +11,6 @@ const CapabilitySchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-  name: {
-    type: String,
-    trim: true
-  },
   action: {
     type: String,
     trim: true,

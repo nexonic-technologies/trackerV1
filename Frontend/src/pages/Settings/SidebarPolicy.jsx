@@ -3,8 +3,6 @@ import axiosInstance from '../../api/axiosInstance';
 
 const SidebarPolicy = () => {
     const [sidebars, setSidebars] = useState([]);
-    const [departments, setDepartments] = useState([]);
-    const [designations, setDesignations] = useState([]);
     const [capabilities, setCapabilities] = useState([]);
 
     const [selectedItem, setSelectedItem] = useState(null);
@@ -14,15 +12,11 @@ const SidebarPolicy = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [sidRes, depRes, desRes, capRes] = await Promise.all([
+                const [sidRes, capRes] = await Promise.all([
                     axiosInstance.get('/populate/list/sidebars?limit=100&sort={"order":1}'),
-                    axiosInstance.post('/populate/list/departments'),
-                    axiosInstance.post('/populate/list/designations'),
                     axiosInstance.post('/populate/read/capabilities', { filter: { status: 'active' }, limit: 1000 })
                 ]);
                 setSidebars((sidRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
-                setDepartments((depRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
-                setDesignations((desRes.data.data || []).map(item => ({...item, _id: item._id?.$oid || item._id})));
                 setCapabilities(capRes.data.data || []);
             } catch (err) {
                 console.error("Failed to load sidebar data", err);
@@ -36,14 +30,7 @@ const SidebarPolicy = () => {
         setMessage('');
     };
 
-    const toggleSelection = (listType, id) => {
-        setSelectedItem(prev => {
-            const list = prev[listType] || [];
-            const exists = list.includes(id);
-            const newList = exists ? list.filter(x => x !== id) : [...list, id];
-            return { ...prev, [listType]: newList };
-        });
-    };
+
 
     const toggleCapability = (capId) => {
         setSelectedItem(prev => {
@@ -59,8 +46,8 @@ const SidebarPolicy = () => {
         setMessage('Saving...');
         try {
             await axiosInstance.put(`/populate/update/sidebars/${selectedItem._id}`, {
-                allowedDepartments: selectedItem.allowedDepartments,
-                allowedDesignations: selectedItem.allowedDesignations,
+                allowedDepartments: [],
+                allowedDesignations: [],
                 capabilities: selectedItem.capabilities
             });
 
@@ -118,43 +105,7 @@ const SidebarPolicy = () => {
                     <div className="flex-1 overflow-auto">
                         <h3 className="text-lg font-semibold mb-2 dark:text-gray-200">Editing: {selectedItem.title}</h3>
 
-                        {/* Departments */}
-                        <div className="mb-6">
-                            <label className="block mb-2 font-medium dark:text-gray-300">Allowed Departments</label>
-                            <div className="grid grid-cols-2 gap-2 p-3 border rounded dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                                {departments.map(dept => (
-                                    <label key={dept._id} className="flex items-center space-x-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedItem.allowedDepartments?.includes(dept._id)}
-                                            onChange={() => toggleSelection('allowedDepartments', dept._id)}
-                                            className="w-4 h-4 accent-blue-600"
-                                        />
-                                        <span className="text-sm dark:text-gray-300">{dept.departmentName}</span>
-                                    </label>
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">If none selected, visible to ALL departments.</p>
-                        </div>
 
-                        {/* Designations */}
-                        <div className="mb-6">
-                            <label className="block mb-2 font-medium dark:text-gray-300">Allowed Designations</label>
-                            <div className="grid grid-cols-2 gap-2 p-3 border rounded dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                                {designations.map(des => (
-                                    <label key={des._id} className="flex items-center space-x-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedItem.allowedDesignations?.includes(des._id)}
-                                            onChange={() => toggleSelection('allowedDesignations', des._id)}
-                                            className="w-4 h-4 accent-blue-600"
-                                        />
-                                        <span className="text-sm dark:text-gray-300">{des.designationName}</span>
-                                    </label>
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">If none selected, visible to ALL designations.</p>
-                        </div>
 
                         {/* Capabilities */}
                         <div className="mb-6">

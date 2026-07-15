@@ -14,7 +14,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newCap, setNewCap] = useState({
-    name: '',
+    key: '',
     module: '',
     label: '',
     description: '',
@@ -57,8 +57,8 @@ const CapabilityManager = ({ formValues, onChange }) => {
   // Create new capability
   const handleCreateCapability = async (e) => {
     e.preventDefault();
-    if (!newCap.name || !newCap.label || !newCap.module) {
-      toast.error("Name, Label, and Module are required");
+    if (!newCap.key || !newCap.label || !newCap.module) {
+      toast.error("Key, Label, and Module are required");
       return;
     }
 
@@ -66,7 +66,6 @@ const CapabilityManager = ({ formValues, onChange }) => {
     try {
       const res = await axiosInstance.post("populate/create/capabilities", {
         ...newCap,
-        key: newCap.name ? newCap.name.replace(/\./g, ':') : '',
         status: 'active'
       });
       
@@ -85,7 +84,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
         
         // Reset form
         setNewCap({
-          name: '',
+          key: '',
           module: '',
           label: '',
           description: '',
@@ -153,12 +152,12 @@ const CapabilityManager = ({ formValues, onChange }) => {
           <form onSubmit={handleCreateCapability} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-ink-muted mb-1 block">Name *</label>
+                <label className="text-xs text-ink-muted mb-1 block">Key *</label>
                 <input
                   type="text"
-                  value={newCap.name}
-                  onChange={e => setNewCap({...newCap, name: e.target.value})}
-                  placeholder="e.g., dashboard.view"
+                  value={newCap.key}
+                  onChange={e => setNewCap({...newCap, key: e.target.value})}
+                  placeholder="e.g., dashboard:view"
                   className="tracker-input text-sm"
                   required
                 />
@@ -494,6 +493,16 @@ const MenuFormPage = () => {
                 formValues={formValues}
                 onChange={handleFormChange}
               />
+
+              <div className="flex justify-end pt-4 border-t border-hairline-soft">
+                <button
+                  type="button"
+                  onClick={() => handleSubmit(formValues)}
+                  className="tracker-btn-primary px-6 py-2 text-sm font-medium"
+                >
+                  {id ? "Update menu item" : "Create menu item"}
+                </button>
+              </div>
             </div>
           )}
         </div>

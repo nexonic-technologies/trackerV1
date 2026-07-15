@@ -7,7 +7,8 @@ const LEAVE_COLORS = [
   'bg-pink-500', 'bg-teal-500', 'bg-indigo-500', 'bg-rose-500',
 ];
 
-export default function V2EmployeeLeaveBalance({ leaveBalance = [] }) {
+export default function V2EmployeeLeaveBalance({ leaveBalance }) {
+  const balance = leaveBalance || [];
   return (
     <section className="lmx-section-card p-4 sm:p-5 flex flex-col justify-between h-full">
       <div className="flex items-center justify-between mb-4 border-b border-hairline-soft pb-2">
@@ -35,14 +36,14 @@ export default function V2EmployeeLeaveBalance({ leaveBalance = [] }) {
         </div>
       </div>
 
-      {leaveBalance.length === 0 ? (
+      {balance.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-ink-subtle text-center">
           <Calendar className="h-8 w-8 mb-2" />
           <p className="text-xs">No leave balances found</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {leaveBalance.map((item, idx) => {
+          {balance.map((item, idx) => {
             const total = item.available + item.usedThisYear;
             const pct = total > 0 ? (item.available / total) * 100 : 100;
             const barColor = LEAVE_COLORS[idx % LEAVE_COLORS.length];

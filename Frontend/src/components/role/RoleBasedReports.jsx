@@ -440,13 +440,13 @@ const RoleBasedReports = () => {
   }
 
   const renderReportsComponent = () => {
-    if (hasCapability("reports.system.read")) {
+    if (hasCapability("reports:system:read")) {
       return <SuperAdminReports />;
     }
-    if (hasCapability("reports.all.read")) {
+    if (hasCapability("reports:all:read")) {
       return <HRReports />;
     }
-    if (hasCapability("reports.team.read")) {
+    if (hasCapability("reports:team:read")) {
       return <ManagerReports />;
     }
     return <EmployeeReports userId={userId} />;

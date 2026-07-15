@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import toast from "react-hot-toast";
-import { ChevronDown, X, Search, Upload, FileText, Plus, Trash2, Check, Calendar } from "lucide-react";
+import { ChevronDown, X, Search, Upload, FileText, Plus, Trash2, Check, Calendar, Eye, EyeOff } from "lucide-react";
 import { Country, State, City } from "country-state-city";
 import {
   buildDirtyPatch,
@@ -317,7 +317,7 @@ const CustomDatePicker = ({ value, onChange, label, required }) => {
               : 'border-hairline hover:border-ink-subtle'}
           `}
         >
-          {getDisplayValue() || <span className="text-ink-subtle text-[13px]">Select date...</span>}
+          {getDisplayValue() || ((open || isFilled) ? <span className="text-ink-subtle text-[13px]">Select date...</span> : "\u00A0")}
         </button>
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none">
           <Calendar size={15} />
@@ -541,6 +541,7 @@ const FormRenderer = ({
   const [changedFields, setChangedFields] = useState({});
   const [dynamicOptions, setDynamicOptions] = useState({});
   const [focusedField, setFocusedField] = useState(null);
+  const [showPasswords, setShowPasswords] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const baselineRef = useRef(null);
   const recordId = data?._id;
@@ -918,6 +919,41 @@ const FormRenderer = ({
           label={field.label}
           required={field.required}
         />
+      );
+    }
+
+    /* ── Password ── */
+    if (field.type === "password") {
+      const showPassword = !!showPasswords[field.name];
+      const toggleShow = () => {
+        setShowPasswords(prev => ({
+          ...prev,
+          [field.name]: !prev[field.name]
+        }));
+      };
+
+      return (
+        <FloatingField label={field.label} required={field.required} filled={filled} focused={isFocused}>
+          <div className="relative w-full">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={typeof value === 'object' && value !== null ? JSON.stringify(value) : (value || "")}
+              onChange={(e) => {
+                onFieldChange(e.target.value);
+              }}
+              onFocus={() => setFocusedField(field.name)}
+              onBlur={() => setFocusedField(null)}
+              className={`${inputCls} pr-10`}
+            />
+            <button
+              type="button"
+              onClick={toggleShow}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink transition-colors cursor-pointer"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </FloatingField>
       );
     }
 

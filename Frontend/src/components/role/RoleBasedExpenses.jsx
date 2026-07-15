@@ -43,7 +43,7 @@ const RoleBasedExpenses = ({ onRefresh }) => {
   const fetchStats = async () => {
     try {
       setStatsLoading(true);
-      const filter = !hasCapability("expenses.team.read") ? { employeeId: userId } : {};
+      const filter = !hasCapability("expenses:team:read") ? { employeeId: userId } : {};
       const res = await axiosInstance.post("/populate/read/expenses", { filter, type: 3 });
       const d = res?.data?.data || res?.data?.stats || {};
       setStats({
@@ -66,7 +66,7 @@ const RoleBasedExpenses = ({ onRefresh }) => {
       </div>
     );
 
-  const isManager = hasCapability("expenses.team.read");
+  const isManager = hasCapability("expenses:team:read");
   const tiles     = isManager ? MANAGER_TILES : EMPLOYEE_TILES;
   const heading   = isManager ? "Team Expenses" : "My Expenses";
 

@@ -72,7 +72,7 @@ export const PermissionProvider = ({ children }) => {
       if (ctx) {
         versionRef.current = ctx._v || 0;
         const capObjects = ctx.capabilities || [];
-        const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : (cap.name || cap.key));
+        const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : cap.key);
 
         setState({
           permissions: ctx.permissions || {},
@@ -161,7 +161,7 @@ export const PermissionProvider = ({ children }) => {
           console.log(`[PermissionProvider] Version bumped to v${ctx._v}, refreshing context...`);
           versionRef.current = ctx._v || 0;
           const capObjects = ctx.capabilities || [];
-          const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : (cap.name || cap.key));
+          const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : cap.key);
 
           setState({
             permissions: ctx.permissions || {},
@@ -227,6 +227,20 @@ export const PermissionProvider = ({ children }) => {
     [state.permissions, state.isSuperAdmin]
   );
 
+const normalizeCap = (cap) => {
+  if (!cap) return '';
+  let key = (typeof cap === 'string' ? cap : (cap.key || cap.name || '')).toLowerCase().trim();
+  if (key.includes(':')) {
+    const parts = key.split(':');
+    let module = parts[0];
+    if (module.endsWith('s') && module !== 'hrms' && module !== 'crm' && module !== 'status') {
+      module = module.slice(0, -1);
+    }
+    return `${module}:${parts[1]}`;
+  }
+  return key;
+};
+
   /**
    * Check if the current user has a specific UI capability (CBAC).
    * Use this for in-page button/feature visibility controlled by the
@@ -238,7 +252,9 @@ export const PermissionProvider = ({ children }) => {
   const hasCapability = useCallback(
     (capabilityKey) => {
       if (state.isSuperAdmin) return true;
-      return state.uiCapabilities?.includes(capabilityKey) || false;
+      const normalizedKey = normalizeCap(capabilityKey);
+      const userCaps = state.uiCapabilities?.map(normalizeCap) || [];
+      return userCaps.includes(normalizedKey);
     },
     [state.uiCapabilities, state.isSuperAdmin]
   );
@@ -249,7 +265,7 @@ export const PermissionProvider = ({ children }) => {
       if (menu.visibility === 'public') return true;
       if (!menu.capabilities || menu.capabilities.length === 0) return true;
       return menu.capabilities.some(cap => {
-        const capKey = typeof cap === 'string' ? cap : (cap.name || cap.key || cap._id);
+        const capKey = typeof cap === 'string' ? cap : (cap.key || cap._id);
         return hasCapability(capKey);
       });
     },

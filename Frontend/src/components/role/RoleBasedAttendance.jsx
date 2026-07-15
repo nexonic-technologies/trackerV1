@@ -199,10 +199,10 @@ const RoleBasedAttendance = () => {
   }
 
   const renderAttendanceComponent = () => {
-    if (hasCapability("attendance.all.read")) {
+    if (hasCapability("attendance:all:read")) {
       return <HRAttendance />;
     }
-    if (hasCapability("attendance.team.read")) {
+    if (hasCapability("attendance:team:read")) {
       return <ManagerAttendance />;
     }
     return <EmployeeAttendance />;

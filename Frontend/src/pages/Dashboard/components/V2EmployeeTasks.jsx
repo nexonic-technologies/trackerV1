@@ -26,7 +26,8 @@ const formatDueDate = (dateStr) => {
   return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 };
 
-export default function V2EmployeeTasks({ tasks = [] }) {
+export default function V2EmployeeTasks({ tasks }) {
+  const taskList = tasks || [];
   const [timerRunning, setTimerRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
 
@@ -68,19 +69,19 @@ export default function V2EmployeeTasks({ tasks = [] }) {
             📋 My Tasks
           </h3>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300">
-            {tasks.length}
+            {taskList.length}
           </span>
         </div>
       </div>
 
-      {tasks.length === 0 ? (
+      {taskList.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-ink-subtle text-center">
           <CheckSquare className="h-8 w-8 mb-2" />
           <p className="text-xs">No active tasks assigned to you</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {tasks.slice(0, 5).map((task, index) => {
+          {taskList.slice(0, 5).map((task, index) => {
             const isTopTask = index === 0;
             const priorityColor = PRIORITY_COLORS[task.priorityLevel] || 'bg-gray-400';
             const dueDateText = formatDueDate(task.endDate);
@@ -109,11 +110,10 @@ export default function V2EmployeeTasks({ tasks = [] }) {
                 {isTopTask && (
                   <button
                     onClick={handleStartStopTimer}
-                    className={`px-3 py-1 text-[10px] font-bold rounded-tracker-md cursor-pointer flex items-center gap-1.5 transition-colors border select-none ${
-                      timerRunning
+                    className={`px-3 py-1 text-[10px] font-bold rounded-tracker-md cursor-pointer flex items-center gap-1.5 transition-colors border select-none ${timerRunning
                         ? 'bg-red-50 text-red-700 hover:bg-red-100 border-red-200/50 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40'
                         : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200/50 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40'
-                    }`}
+                      }`}
                   >
                     {timerRunning ? (
                       <>

@@ -94,98 +94,44 @@ export default function Dashboard() {
   if (isV2 && dashboardData) {
     const { layoutVariant, pulse, stats: v2Stats, alerts, actionCenter, employee, teamGrid } = dashboardData;
 
-    // A) EMPLOYEE V2 LAYOUT (Compact, above-the-fold, 60/40 cols)
-    if (layoutVariant === 'employee') {
-      return (
-        <div className="space-y-4 animate-fade-in" data-module={MODULES.project.id}>
-          {can('v2_employee_header') && (
-            <V2EmployeeHeader attendance={employee?.attendance} refresh={refresh} />
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              {can('v2_employee_tasks') && (
-                <V2EmployeeTasks tasks={employee?.tasks} />
-              )}
-            </div>
-            <div>
-              {can('v2_employee_leave_balance') && (
-                <V2EmployeeLeaveBalance leaveBalance={employee?.leaveBalance} />
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // B) MANAGER V2 LAYOUT (Pulse + 3 stats + Action Center & Team Grid)
-    if (layoutVariant === 'manager') {
-      return (
-        <div className="space-y-4 animate-fade-in" data-module={MODULES.project.id}>
-          {can('v2_alert_banner') && <V2AlertBanner alerts={alerts} />}
-
-          {can('v2_workforce_pulse') && (
-            <V2WorkforcePulse pulse={pulse} scope="team" />
-          )}
-
-          <V2StatsRow stats={v2Stats} layoutVariant={layoutVariant} />
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              {can('v2_action_center') && (
-                <V2ActionCenter items={actionCenter} layoutVariant={layoutVariant} refresh={refresh} />
-              )}
-            </div>
-            <div>
-              {can('v2_team_attendance_grid') && (
-                <V2TeamAttendanceGrid teamGrid={teamGrid} />
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // C) ADMIN / EXECUTIVE / MD V2 LAYOUT (Pulse + stats + Action Center + Org Grid)
     return (
       <div className="space-y-4 animate-fade-in" data-module={MODULES.project.id}>
         {can('v2_alert_banner') && <V2AlertBanner alerts={alerts} />}
 
-        {can('v2_workforce_pulse') && layoutVariant !== 'md' && (
-          <V2WorkforcePulse pulse={pulse} scope="org" />
+        {can('v2_employee_header') && (
+          <V2EmployeeHeader attendance={employee?.attendance} refresh={refresh} />
         )}
 
-        <V2StatsRow stats={v2Stats} layoutVariant={layoutVariant} />
-
-        {/* Action Center + optional Org Attendance Grid */}
-        {(can('v2_action_center') || can('v2_team_attendance_grid')) && (
-          <div className={`grid grid-cols-1 ${can('v2_action_center') && can('v2_team_attendance_grid') ? 'lg:grid-cols-3' : ''} gap-4`}>
-            {can('v2_action_center') && (
-              <div className={can('v2_team_attendance_grid') ? 'lg:col-span-2' : 'lg:col-span-3'}>
-                <V2ActionCenter items={actionCenter} layoutVariant={layoutVariant} refresh={refresh} />
-              </div>
-            )}
-            {can('v2_team_attendance_grid') && (
-              <div>
-                <V2TeamAttendanceGrid teamGrid={teamGrid} />
-              </div>
-            )}
-          </div>
+        {can('v2_workforce_pulse') && (
+          <V2WorkforcePulse pulse={pulse} scope={layoutVariant === 'manager' ? 'team' : 'org'} />
         )}
 
-        {/* Secondary row: Employee Tasks + Leave Balance (if enabled for admin) */}
-        {(can('v2_employee_tasks') || can('v2_employee_leave_balance')) && (
-          <div className={`grid grid-cols-1 ${can('v2_employee_tasks') && can('v2_employee_leave_balance') ? 'lg:grid-cols-3' : ''} gap-4`}>
-            {can('v2_employee_tasks') && (
-              <div className={can('v2_employee_leave_balance') ? 'lg:col-span-2' : 'lg:col-span-3'}>
+        <V2StatsRow stats={v2Stats} can={can} />
+
+        {/* Dynamic cols: Employee Tasks, Action Center, Team Attendance Grid, Leave Balance */}
+        {(can('v2_employee_tasks') || can('v2_action_center') || can('v2_team_attendance_grid') || can('v2_employee_leave_balance')) && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            
+            {/* Left 2/3 column: Tasks & Action Center */}
+            <div className="lg:col-span-2 space-y-4">
+              {can('v2_employee_tasks') && (
                 <V2EmployeeTasks tasks={employee?.tasks} />
-              </div>
-            )}
-            {can('v2_employee_leave_balance') && (
-              <div>
+              )}
+              {can('v2_action_center') && (
+                <V2ActionCenter items={actionCenter} layoutVariant={layoutVariant} refresh={refresh} />
+              )}
+            </div>
+
+            {/* Right 1/3 column: Attendance Grid & Leave Balance */}
+            <div className="space-y-4">
+              {can('v2_team_attendance_grid') && (
+                <V2TeamAttendanceGrid teamGrid={teamGrid} />
+              )}
+              {can('v2_employee_leave_balance') && (
                 <V2EmployeeLeaveBalance leaveBalance={employee?.leaveBalance} />
-              </div>
-            )}
+              )}
+            </div>
+
           </div>
         )}
       </div>

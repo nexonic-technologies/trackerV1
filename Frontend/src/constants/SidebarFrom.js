@@ -46,17 +46,6 @@ export const SidebarForm = [
         width: "half"
     },
     {
-        name: "resourceId",
-        label: "Linked Resource (for CRUD capabilities)",
-        type: "AutoComplete",
-        source: "populate/read/resources",
-        labelField: "displayName",
-        fieldName: "displayName",
-        valueField: "_id",
-        required: false,
-        width: "half"
-    },
-    {
         name: "isActive",
         label: "Active?",
         type: "select",

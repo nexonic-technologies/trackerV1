@@ -23,7 +23,8 @@ const formatTime = (d) => {
   });
 };
 
-export default function V2TeamAttendanceGrid({ teamGrid = [] }) {
+export default function V2TeamAttendanceGrid({ teamGrid }) {
+  const grid = teamGrid || [];
   return (
     <section className="lmx-section-card p-4 sm:p-5 flex flex-col justify-between">
       <div className="flex items-center justify-between mb-4 border-b border-hairline-soft pb-2">
@@ -32,19 +33,19 @@ export default function V2TeamAttendanceGrid({ teamGrid = [] }) {
             👥 Team Today
           </h3>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300">
-            {teamGrid.length}
+            {grid.length}
           </span>
         </div>
       </div>
 
-      {teamGrid.length === 0 ? (
+      {grid.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-ink-subtle text-center">
           <Users className="h-8 w-8 mb-2" />
           <p className="text-xs">No direct reports found</p>
         </div>
       ) : (
         <div className="space-y-2 overflow-y-auto max-h-[350px] pr-1">
-          {teamGrid.map((member) => {
+          {grid.map((member) => {
             const statusClass =
               STATUS_STYLING[member.status] ||
               'text-gray-500 bg-gray-50 dark:bg-zinc-800/40';

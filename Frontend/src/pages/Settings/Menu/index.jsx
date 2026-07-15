@@ -61,6 +61,22 @@ const Menu = () => {
       </div>
     ),
     parentId: (row) => <span>{row.parentId?.title || "-"}</span>,
+    capabilities: (row) => {
+      const caps = row.capabilities || [];
+      if (caps.length === 0) return <span className="text-gray-400 text-xs">-</span>;
+      return (
+        <div className="flex flex-wrap gap-1">
+          {caps.map((cap) => {
+            const capKey = typeof cap === 'string' ? cap : (cap.key || cap._id);
+            return (
+              <span key={capKey} className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800/40">
+                {capKey}
+              </span>
+            );
+          })}
+        </div>
+      );
+    },
     isActive: (row) => (
       <span
         className={`px-2 py-1 rounded text-xs ${
@@ -97,7 +113,7 @@ const Menu = () => {
           customRender={customRender}
           onEdit={hasCapability("Sidebar:edit") ? (row) => navigate(entityFormPath(basePath, row._id)) : undefined}
           onDelete={hasCapability("Sidebar:delete") ? handleDelete : undefined}
-          hiddenColumns={["_id", "__v", "createdAt", "updatedAt", "routes", "allowedDepartments", "allowedDesignations", "isParent", "hasChildren", "isDeleted"]}
+          hiddenColumns={["_id", "__v", "createdAt", "updatedAt", "routes", "allowedDepartments", "allowedDesignations", "isParent", "hasChildren", "isDeleted", "resourceId"]}
           loading={loading}
         />
       </div>

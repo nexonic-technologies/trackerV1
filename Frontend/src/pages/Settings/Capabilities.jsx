@@ -16,7 +16,7 @@ const Capabilities = () => {
     const [message, setMessage] = useState('');
 
     const [formData, setFormData] = useState({
-        name: '',
+        key: '',
         module: '',
         label: '',
         description: '',
@@ -48,7 +48,7 @@ const Capabilities = () => {
         if (cap) {
             setEditingCap(cap);
             setFormData({
-                name: cap.name || cap.key || '',
+                key: cap.key || '',
                 module: cap.module || '',
                 label: cap.label || '',
                 description: cap.description || '',
@@ -60,7 +60,7 @@ const Capabilities = () => {
         } else {
             setEditingCap(null);
             setFormData({
-                name: '',
+                key: '',
                 module: '',
                 label: '',
                 description: '',
@@ -78,7 +78,7 @@ const Capabilities = () => {
         setShowModal(false);
         setEditingCap(null);
         setFormData({
-            name: '',
+            key: '',
             module: '',
             label: '',
             description: '',
@@ -93,10 +93,8 @@ const Capabilities = () => {
         e.preventDefault();
         setMessage('Saving...');
 
-        // Map name to key representation under the hood (e.g. dashboard.read -> dashboard:read)
         const submitData = {
-            ...formData,
-            key: formData.name ? formData.name.replace(/\./g, ':') : ''
+            ...formData
         };
 
         try {
@@ -158,7 +156,7 @@ const Capabilities = () => {
                     <table className="w-full">
                         <thead className="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Key</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Label</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Module</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
@@ -171,7 +169,7 @@ const Capabilities = () => {
                             {capabilities.map((cap) => (
                                 <tr key={cap._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                        {cap.name || cap.key}
+                                        {cap.key}
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                         {cap.label}
@@ -242,15 +240,15 @@ const Capabilities = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Name *
+                                            Key *
                                         </label>
                                         <input
                                             type="text"
                                             required
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            value={formData.key}
+                                            onChange={(e) => setFormData({...formData, key: e.target.value})}
                                             className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            placeholder="e.g., dashboard.view"
+                                            placeholder="e.g., dashboard:view"
                                         />
                                     </div>
                                     <div>

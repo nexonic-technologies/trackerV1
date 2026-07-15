@@ -377,7 +377,7 @@
     -webkit-text-fill-color: var(--tracker-ink) !important;
     caret-color: var(--tracker-ink) !important;
     transition: background-color 5000s ease-in-out 0s !important;
-    box-shadow: inset 0 0 0 30px var(--tracker-surface) !important;
+    box-shadow: inset 0 0 0 30px transparent !important;
   }
 
   input {
@@ -824,6 +824,147 @@
     margin-top: 0.125rem;
     color: var(--pay-ink-muted);
   }
+}
+
+/* ── Login page — floating cards ──────────────────────────────────────────
+ * Two independent cards on a shared gradient background.
+ * Feature card (left, hidden on mobile) + Login card (right / centered).
+ * ─────────────────────────────────────────────────────────────────────── */
+
+.lmx-glass-bubble {
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.45) 0%, rgba(240, 245, 255, 0.2) 30%, rgba(160, 170, 240, 0.08) 65%, transparent 100%);
+  box-shadow:
+    inset -15px -15px 40px rgba(120, 110, 220, 0.15),
+    inset 15px 15px 30px rgba(255, 255, 255, 0.5),
+    0 20px 45px rgba(108, 61, 232, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.dark .lmx-glass-bubble {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(120, 110, 220, 0.05) 50%, transparent 100%);
+  box-shadow:
+    inset -15px -15px 40px rgba(0, 0, 0, 0.4),
+    inset 15px 15px 30px rgba(255, 255, 255, 0.1),
+    0 20px 45px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lmx-login-bg {
+  background: linear-gradient(135deg, #eef0fb 0%, #dde3f8 55%, #e4d5f8 100%);
+  min-height: 100vh;
+}
+
+.dark .lmx-login-bg {
+  background: linear-gradient(135deg, #0f111a 0%, #141728 55%, #1a1030 100%);
+}
+
+.lmx-login-card,
+.lmx-login-feature-card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 4px 6px rgb(0 0 0 / 0.04),
+    0 16px 48px rgb(108 61 232 / 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dark .lmx-login-card,
+.dark .lmx-login-feature-card {
+  background: rgba(26, 29, 46, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 6px rgb(0 0 0 / 0.3),
+    0 16px 48px rgb(0 0 0 / 0.35);
+}
+
+.lmx-login-inner-row {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.04);
+}
+
+.dark .lmx-login-inner-row {
+  background: rgba(34, 38, 58, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.2);
+}
+
+.lmx-login-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1.5px solid var(--tracker-border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tracker-ink);
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.lmx-login-social-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
+  border-color: var(--tracker-ink-subtle);
+}
+
+.lmx-login-social-btn:active {
+  transform: translateY(0);
+}
+
+.dark .lmx-login-social-btn {
+  background: var(--tracker-surface-1);
+  border-color: var(--tracker-border);
+}
+
+.lmx-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--tracker-ink-subtle);
+  text-transform: uppercase;
+}
+
+.lmx-login-divider::before,
+.lmx-login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--tracker-border);
+}
+
+.lmx-login-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #3b5bdb;
+}
+
+.dark .lmx-login-eyebrow {
+  color: #a5b4fc;
 }
 
 @media (max-width: 1023px) {

@@ -217,9 +217,9 @@ export default function RoleFormPage() {
                     </span>
                     <span>
                       <span className={`block text-xs font-semibold ${active ? 'text-accent' : 'text-ink'}`}>
-                        {cap.label || cap.name || cap.key}
+                        {cap.label || cap.key}
                       </span>
-                      <span className="block text-xs text-ink-muted mt-0.5">{cap.description || cap.desc || `Access to ${cap.name || cap.key}`}</span>
+                      <span className="block text-xs text-ink-muted mt-0.5">{cap.description || cap.desc || `Access to ${cap.key}`}</span>
                     </span>
                   </button>
                 );

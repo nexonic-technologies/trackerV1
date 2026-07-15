@@ -19,42 +19,57 @@ import { getUserCapabilities } from './cbacCacheService.js';
  * @param {Object} roleMeta - Role metadata with capabilities array
  * @returns {boolean} Whether the menu item should be visible
  */
+function normalizeCap(cap) {
+  if (!cap) return '';
+  let key = (typeof cap === 'string' ? cap : (cap.key || cap.name || '')).toLowerCase().trim();
+  if (key.includes(':')) {
+    const parts = key.split(':');
+    let module = parts[0];
+    if (module.endsWith('s') && module !== 'hrms' && module !== 'crm' && module !== 'status') {
+      module = module.slice(0, -1);
+    }
+    return `${module}:${parts[1]}`;
+  }
+  return key;
+}
+
+const UTILITY_ROUTES = new Set(['/logout', '/profile', '/search']);
+
+function isUtilityRoute(route) {
+  if (!route) return false;
+  return UTILITY_ROUTES.has(route.toLowerCase().trim());
+}
+
 export function isMenuItemVisible(menuItem, user, userCapabilities, roleMeta) {
+  // Super Admin bypasses visibility checks and can see all menu items
+  if (roleMeta?.isSuperAdmin) {
+    return true;
+  }
+
   // 1. Check visibility type
   if (menuItem.visibility === 'public') {
     return true; // Public items always visible
   }
 
-  // 2. Check department/designation filters
-  const userDeptId = user.professionalInfo?.department?._id?.toString();
-  const userDesigId = user.professionalInfo?.designation?._id?.toString();
-
-  if (menuItem.allowedDepartments && menuItem.allowedDepartments.length > 0) {
-    const allowedDeptIds = menuItem.allowedDepartments.map(d => d._id?.toString());
-    if (!allowedDeptIds.includes(userDeptId)) {
-      return false;
-    }
-  }
-
-  if (menuItem.allowedDesignations && menuItem.allowedDesignations.length > 0) {
-    const allowedDesigIds = menuItem.allowedDesignations.map(d => d._id?.toString());
-    if (!allowedDesigIds.includes(userDesigId)) {
-      return false;
-    }
-  }
+  // 2. Check department/designation filters (DEPRECATED - Rely strictly on capabilities)
 
   // 3. Check sidebar capabilities for protected items
   if (menuItem.visibility === 'protected') {
-    // If sidebar has no capabilities defined, default to visible (backward compatibility)
-    if (!menuItem.capabilities || menuItem.capabilities.length === 0) {
+    // Utility/public routes bypass capability checks
+    if (isUtilityRoute(menuItem.mainRoute)) {
       return true;
     }
 
+    // If sidebar has no capabilities defined, default to hidden (fail-secure by default)
+    if (!menuItem.capabilities || menuItem.capabilities.length === 0) {
+      return false;
+    }
+
     // Get user's capabilities from role
-    const userCaps = roleMeta?.capabilities || [];
+    const userCaps = (roleMeta?.capabilities || []).map(normalizeCap);
 
     // Check if user has at least one of the required capabilities
-    const requiredCaps = menuItem.capabilities.map(c => c.key);
+    const requiredCaps = menuItem.capabilities.map(c => normalizeCap(c.key || c));
     const hasCapability = requiredCaps.some(cap => userCaps.includes(cap));
 
     return hasCapability;
@@ -98,6 +113,7 @@ export async function filterMenuItems(menuItems, user, roleMeta) {
  */
 export async function buildMenuTree(menuItems, user, roleMeta) {
   const visibleItems = await filterMenuItems(menuItems, user, roleMeta);
+  // return visibleItems;
 
   // Separate parents and children
   const parents = visibleItems
@@ -106,20 +122,40 @@ export async function buildMenuTree(menuItems, user, roleMeta) {
 
   const children = visibleItems.filter(item => item.parentId);
 
-  // Build tree
-  const tree = parents.map(parent => ({
-    ...parent,
-    children: children
-      .filter(child =>
-        String(child.parentId) === String(parent._id) ||
-        child.parentId === parent.mainRoute?.replace('/', '')
-      )
-      .sort((a, b) => (a.order || 0) - (b.order || 0))
-  }));
+  // Helper to map and clean a menu item's fields to keep only the minimum UI fields
+  const cleanMenuItem = (item) => ({
+    _id: item._id?.toString() || item._id,
+    title: item.title,
+    icon: item.icon,
+    mainRoute: item.mainRoute,
+    visibility: item.visibility,
+    parentId: item.parentId?.toString() || item.parentId || null,
+    hasChildren: !!item.hasChildren,
+    isParent: !!item.isParent,
+    order: item.order || 0
+  });
 
-  // Remove empty parent containers
+  // Build tree
+  const tree = parents.map(parent => {
+    const parentIdStr = parent._id.toString();
+    const parentChildren = children
+      .filter(child => {
+        const childParentIdStr = child.parentId?.toString();
+        return childParentIdStr === parentIdStr || child.parentId === parent.mainRoute?.replace('/', '');
+      })
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map(cleanMenuItem);
+
+    return {
+      ...cleanMenuItem(parent),
+      children: parentChildren
+    };
+  });
+
+  // Remove empty parent containers (only if parent has no children and has no valid mainRoute)
   return tree.filter(parent => {
-    if (parent.hasChildren && (!parent.children || parent.children.length === 0)) {
+    const hasRoute = parent.mainRoute && parent.mainRoute !== '#';
+    if (parent.hasChildren && !hasRoute && (!parent.children || parent.children.length === 0)) {
       return false;
     }
     return true;

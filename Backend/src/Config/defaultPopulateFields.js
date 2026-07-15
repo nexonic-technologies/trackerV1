@@ -72,6 +72,10 @@ export const DEFAULT_POPULATE_FIELDS = {
     'employeeId': 'basicInfo.firstName,basicInfo.lastName,professionalInfo.empId',
     'departmentId': 'name',
     'managerId': 'basicInfo.firstName,basicInfo.lastName'
+  },
+  sidebars: {
+    'capabilities': 'key action',
+    'parentId': 'title'
   }
 };
 

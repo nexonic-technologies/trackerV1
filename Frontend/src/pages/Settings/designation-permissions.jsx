@@ -137,7 +137,6 @@ export default function DesignationPermissions() {
                     const allowed = new Set();
                     caps.forEach(c => {
                         if (c.key) allowed.add(c.key);
-                        if (c.name) allowed.add(c.name);
                     });
                     setStagedCapabilities(allowed);
                 } else {
@@ -175,13 +174,10 @@ export default function DesignationPermissions() {
             setStagedCapabilities(nextStaged);
 
             // Update Role.capabilities array directly
-            // Convert capability keys/names to Capability ObjectIds
+            // Convert capability keys to Capability ObjectIds
             const allCapabilityDocs = await axiosInstance.post('/populate/read/capabilities', {
                 filter: {
-                    $or: [
-                        { key: { $in: Array.from(nextStaged) } },
-                        { name: { $in: Array.from(nextStaged) } }
-                    ]
+                    key: { $in: Array.from(nextStaged) }
                 },
                 limit: 1000
             });
@@ -226,7 +222,7 @@ export default function DesignationPermissions() {
 
         // Use sidebar's capabilities directly instead of generating keys
         const sidebarCapabilities = item.capabilities || [];
-        const sidebarCapKeys = sidebarCapabilities.map(c => c.name || c.key);
+        const sidebarCapKeys = sidebarCapabilities.map(c => c.key);
 
         // Separate standard capabilities vs custom capabilities
         const standardCapabilities = sidebarCapabilities.filter(c => 
@@ -258,7 +254,7 @@ export default function DesignationPermissions() {
             }
             return (
                 <span className="flex items-center justify-center">
-                    <span className="text-xs font-bold capitalize">{cap.label || cap.name || cap.key}</span>
+                    <span className="text-xs font-bold capitalize">{cap.label || cap.key}</span>
                 </span>
             );
         };
@@ -307,8 +303,8 @@ export default function DesignationPermissions() {
                                 {/* Show sidebar capabilities as checkboxes */}
                                 <div className="flex items-center gap-2 flex-wrap">
                                     {standardCapabilities.map(cap => {
-                                        const capKey = cap.name || cap.key;
-                                        const isChecked = stagedCapabilities.has(cap.key) || (cap.name && stagedCapabilities.has(cap.name));
+                                        const capKey = cap.key;
+                                        const isChecked = stagedCapabilities.has(cap.key);
                                         return (
                                             <button
                                                 key={capKey}

@@ -9,10 +9,10 @@ import { writeLedgerEntry } from './assetHooksService.js';
 // ── Status transition rules ────────────────────────────────────────────────────
 const ALLOWED_TRANSITIONS = {
   'Pending Approval': ['Active', 'Rejected'],
-  'Active':           ['Returned', 'Transferred'],
-  'Returned':         [],  // Terminal
-  'Transferred':      [],  // Terminal
-  'Rejected':         [],  // Terminal
+  'Active': ['Returned', 'Transferred'],
+  'Returned': [],  // Terminal
+  'Transferred': [],  // Terminal
+  'Rejected': [],  // Terminal
 };
 
 export default function () {
@@ -35,17 +35,6 @@ export default function () {
       // 1. Enforce createdBy
       if (userId) {
         data.createdBy = userId;
-      }
-
-      // 2. Enforce self-request for Employee tier (levels 1-3)
-      if (role) {
-        const roleDoc = await models.roles.findById(role).lean();
-        const level = roleDoc?.level || 1;
-        if (level >= 1 && level <= 3) {
-          if (!data.employeeId || data.employeeId.toString() !== userId.toString()) {
-            throw new Error('Employees are only allowed to request asset allocations for themselves.');
-          }
-        }
       }
 
       // 3. Validate employee
@@ -153,30 +142,6 @@ export default function () {
       const { role, userId, body, docId } = ctx;
       const data = body;
 
-      // Enforce self-return and field restrictions for Employee tier (levels 1-3)
-      if (role) {
-        const roleDoc = await models.roles.findById(role).lean();
-        const level = roleDoc?.level || 1;
-        if (level >= 1 && level <= 3) {
-          const currentRec = await models.assetallocations.findById(docId).lean();
-          if (!currentRec) {
-            throw new Error('Asset allocation record not found.');
-          }
-          if (currentRec.employeeId.toString() !== userId.toString()) {
-            throw new Error('You are only allowed to return assets allocated to yourself.');
-          }
-          const keys = Object.keys(data);
-          const allowedKeys = ['status', 'returnedCondition', 'returnNotes'];
-          const invalidKeys = keys.filter(k => !allowedKeys.includes(k));
-          if (invalidKeys.length > 0) {
-            throw new Error(`Employees are not allowed to update fields: ${invalidKeys.join(', ')}`);
-          }
-          if (data.status && data.status !== 'Returned') {
-            throw new Error('Employees can only transition allocation status to "Returned".');
-          }
-        }
-      }
-
       if (data.status !== undefined) {
         const current = await models.assetallocations.findById(docId)
           .select('status')
@@ -230,6 +195,7 @@ export default function () {
      * 3. If status changes to 'Returned':
      *    - Based on returnedCondition, update asset status ('Available', 'Under Repair', 'Lost') and condition state.
      */
+
     afterUpdate: async (ctx) => {
       const { docId, data, beforeDoc, userId } = ctx;
       const statusChanged = data.status && data.status !== beforeDoc.status;

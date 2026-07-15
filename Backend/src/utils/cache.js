@@ -2,6 +2,7 @@
 
 import AccessPolicies from "../models/AccessPolicies.js";
 import Role from "../models/Role.js";
+import "../models/Capability.js";
 import mongoose from "mongoose";
 
 const cache = new Map();
@@ -74,8 +75,8 @@ export async function setCache() {
         roles.forEach((r) => {
             const id = r._id.toString();
             const capKeys = (r.capabilities || [])
-                .filter(cap => cap && (cap.name || cap.key) && cap.status === 'active')
-                .map(cap => cap.name || cap.key);
+                .filter(cap => cap && cap.key && cap.status === 'active')
+                .map(cap => cap.key);
             roleCapabilityCache.set(id, new Set(capKeys));
             roleLevelCache.set(id, r.level || 1);
             roleMetaCache.set(id, {

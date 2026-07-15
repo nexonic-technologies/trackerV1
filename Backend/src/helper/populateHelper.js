@@ -68,6 +68,9 @@ export async function populateHelper(req, res, next) {
 
     const { type, page = 1, limit = 20, useCache = 'true' } = optionsSource;
     let { fields, filter, populateFields: rawPopulateFields, sort, ...params } = optionsSource;
+    if (!rawPopulateFields && optionsSource.populate) {
+      rawPopulateFields = optionsSource.populate;
+    }
 
 
 

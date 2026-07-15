@@ -92,7 +92,10 @@ export default function V2EmployeeHeader({ attendance, refresh }) {
     if (busy || !user) return;
     setBusy(true);
     try {
-      const todayStr = new Date().toISOString().split('T')[0];
+      // Get the correct local calendar date (YYYY-MM-DD) for the employee's current timezone
+      const tzOffset = new Date().getTimezoneOffset();
+      const localTime = new Date(Date.now() - (tzOffset * 60 * 1000));
+      const todayStr = localTime.toISOString().split('T')[0];
 
       // Retrieve today's record if it exists
       const checkRes = await read('attendances', {

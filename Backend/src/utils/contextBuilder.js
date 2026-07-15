@@ -62,7 +62,7 @@ export async function buildUserContext(userId, roleId) {
   const allResources = await Resource.find({ isActive: true }).lean();
   const resourceById = {};
   const resourceByModel = {};
-  
+
   allResources.forEach((res) => {
     resourceById[res._id.toString()] = res;
     if (res.modelName) {
@@ -70,41 +70,13 @@ export async function buildUserContext(userId, roleId) {
     }
   });
 
-  // 4. Build permission map from cached AccessPolicies
-  const allPolicies = getPolicy(roleStr); // entire role's policy map { modelName: policyDoc }
-  const permissions = {};
+  // 4. Determine if Super Admin
   const isSuperAdmin = !!roleMeta?.isSuperAdmin || roleStr === 'agent' || roleStr === '6a25cbc1cd36294f5e578696';
-
-  if (allPolicies && typeof allPolicies === "object") {
-    for (const [modelName, policy] of Object.entries(allPolicies)) {
-      const permMap = {};
-
-      if (policy.permissions && typeof policy.permissions === "object") {
-        // .lean() converts Mongoose Map → plain object, so Object.entries works
-        for (const [action, allowed] of Object.entries(policy.permissions)) {
-          // Super admin: override all to true
-          permMap[action] = isSuperAdmin ? true : !!allowed;
-        }
-      }
-
-      // For super admin, ensure standard CRUD is always present
-      if (isSuperAdmin) {
-        permMap.read = true;
-        permMap.create = true;
-        permMap.update = true;
-        permMap.delete = true;
-      }
-
-      // Decouple Mongoose modelName from frontend: map to Resource.key if registered
-      const permissionKey = resourceByModel[modelName]?.key || modelName;
-      permissions[permissionKey] = permMap;
-    }
-  }
 
   // 5. Build or retrieve cached navigation tree
   const userDept = user.professionalInfo?.department?._id;
   const userDesig = user.professionalInfo?.designation?._id;
-  
+
   const userDeptStr = userDept ? userDept.toString() : "all";
   const userDesigStr = userDesig ? userDesig.toString() : "all";
   const navCacheKey = `${roleStr}:${userDeptStr}:${userDesigStr}`;
@@ -129,7 +101,6 @@ export async function buildUserContext(userId, roleId) {
 
     // Build menu tree using sidebar capabilities comparison
     navigation = await buildMenuTree(allSidebarItems, user, roleMeta);
-
     // Cache the constructed tree
     navigationCache.set(navCacheKey, navigation);
   }
@@ -149,7 +120,7 @@ export async function buildUserContext(userId, roleId) {
         .filter(cap => cap && cap.status === 'active')
         .map(cap => ({
           _id: cap._id?.toString(),
-          name: cap.name || cap.key,
+          key: cap.key,
           action: cap.action || '',
           description: cap.description || ''
         }));
@@ -175,7 +146,6 @@ export async function buildUserContext(userId, roleId) {
         isSuperAdmin
       }
     },
-    permissions, // Backend permissions from AccessPolicies (single source of truth)
     capabilities: roleCapabilities, // User capabilities for visibility check
     navigation,
     _v: currentVersion,

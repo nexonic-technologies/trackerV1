@@ -3,7 +3,7 @@
 // RULE: Zero hardcoded role names or designation strings.
 // Layout variant is determined purely by roles.level (1-10).
 
-import { getPolicy, getRoleLevel } from '../utils/cache.js';
+import { getPolicy, getRoleLevel, canDo } from '../utils/cache.js';
 import models from '../models/Collection.js';
 import mongoose from 'mongoose';
 
@@ -24,18 +24,6 @@ export function getLayoutVariant(level) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function todayStart() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function todayEnd() {
-  const d = new Date();
-  d.setHours(23, 59, 59, 999);
-  return d;
-}
-
 function canRead(roleId, modelName) {
   const policy = getPolicy(roleId, modelName);
   return !!policy?.permissions?.read;
@@ -51,16 +39,15 @@ function formatDuration(checkInDate) {
 
 // ─── Employee Stats (Level 1-3) ───────────────────────────────────────────────
 
-async function computeEmployeeStats(userId, roleId) {
+async function computeEmployeeStats(userId, roleId, today, todayEnd) {
   const result = { attendance: null, tasks: [], leaveBalance: [] };
-  const today = todayStart();
 
   // Own attendance
   if (canRead(roleId, 'attendances')) {
     try {
       const att = await models.attendances.findOne({
         employee: new mongoose.Types.ObjectId(userId),
-        date: { $gte: today, $lte: todayEnd() }
+        date: { $gte: today, $lte: todayEnd }
       }).lean();
       if (att) {
         result.attendance = {
@@ -114,19 +101,16 @@ async function computeEmployeeStats(userId, roleId) {
 
 // ─── Workforce Pulse ──────────────────────────────────────────────────────────
 
-async function computePulse(roleId, userId, level) {
+async function computePulse(roleId, userId, level, today, todayEnd) {
   if (!canRead(roleId, 'attendances') || !canRead(roleId, 'employees')) return null;
 
-  const today = todayStart();
-
   try {
-    // Determine scope: team (level 4-6) or org (level 7+)
+    // Determine scope: team (if restricted) or org
     let employeeFilter = { status: 'Active' };
-    if (level >= 4 && level <= 6) {
+    if (canDo(roleId, 'attendance:team:read') && !canDo(roleId, 'attendance:all:read')) {
       // Team scope: direct reports of this user
       employeeFilter['professionalInfo.reportingManager'] = new mongoose.Types.ObjectId(userId);
     }
-    // level >= 7 → org scope, no additional filter
 
     const activeEmployees = await models.employees.find(employeeFilter)
       .select('_id')
@@ -139,7 +123,7 @@ async function computePulse(roleId, userId, level) {
 
     const todayAttendance = await models.attendances.find({
       employee: { $in: employeeIds },
-      date: { $gte: today, $lte: todayEnd() }
+      date: { $gte: today, $lte: todayEnd }
     }).select('employee status').lean();
 
     const statusCounts = { Present: 0, Leave: 0, 'Work From Home': 0, 'Late Entry': 0, Unchecked: 0, LOP: 0, Absent: 0 };
@@ -179,9 +163,8 @@ async function computePulse(roleId, userId, level) {
 
 // ─── Stat Cards ───────────────────────────────────────────────────────────────
 
-async function computeStatCards(roleId, userId, level) {
+async function computeStatCards(roleId, userId, level, today, todayEnd) {
   const stats = {};
-  const today = todayStart();
 
   // Manager (4-6): Pending Approvals, Overdue Tasks, Open Tickets
   // Admin (7-8): ALL Pending Approvals, Attendance Issues, Payroll Status
@@ -189,9 +172,9 @@ async function computeStatCards(roleId, userId, level) {
   // MD (10): Workforce Health, Financial Exposure
 
   // --- Pending Approvals (Manager scope: managerId=self, Admin scope: all) ---
-  if (level >= 4 && level <= 8) {
+  if (canRead(roleId, 'leaves') || canRead(roleId, 'regularizations')) {
     let approvalCount = 0;
-    const managerFilter = level <= 6 ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
+    const managerFilter = (!canDo(roleId, 'leaves:all:read') && !canDo(roleId, 'leaves:all:approve')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
 
     if (canRead(roleId, 'leaves')) {
       try {
@@ -218,7 +201,7 @@ async function computeStatCards(roleId, userId, level) {
   }
 
   // --- Overdue Tasks (Manager: team scope, Executive: org scope) ---
-  if ((level >= 4 && level <= 6) || level === 9) {
+  if (canRead(roleId, 'tasks')) {
     if (canRead(roleId, 'tasks')) {
       try {
         let taskFilter = {
@@ -227,7 +210,7 @@ async function computeStatCards(roleId, userId, level) {
           metaStatus: 'active'
         };
 
-        if (level <= 6) {
+        if (!canDo(roleId, 'tasks:all:read')) {
           // Manager: tasks assigned to team members
           const teamMembers = await models.employees.find({
             'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
@@ -258,20 +241,28 @@ async function computeStatCards(roleId, userId, level) {
   }
 
   // --- Open Tickets (Manager scope: team) ---
-  if (level >= 4 && level <= 6) {
+  if (canRead(roleId, 'tickets')) {
     if (canRead(roleId, 'tickets')) {
       try {
-        const teamMembers = await models.employees.find({
-          'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
-          status: 'Active'
-        }).select('_id').lean();
-
-        const count = await models.tickets.countDocuments({
-          assignedTo: { $in: teamMembers.map(m => m._id) },
-          status: { $nin: ['Resolved', 'Closed'] },
-          metaStatus: 'active'
-        });
-        stats.openTickets = { value: count };
+        if (!canDo(roleId, 'tickets:all:read')) {
+          const teamMembers = await models.employees.find({
+            'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
+            status: 'Active'
+          }).select('_id').lean();
+          
+          const count = await models.tickets.countDocuments({
+            assignedTo: { $in: teamMembers.map(m => m._id) },
+            status: { $nin: ['Resolved', 'Closed'] },
+            metaStatus: 'active'
+          });
+          stats.openTickets = { value: count };
+        } else {
+          const count = await models.tickets.countDocuments({
+            status: { $nin: ['Resolved', 'Closed'] },
+            metaStatus: 'active'
+          });
+          stats.openTickets = { value: count };
+        }
       } catch (e) {
         stats.openTickets = { value: 0 };
       }
@@ -279,11 +270,11 @@ async function computeStatCards(roleId, userId, level) {
   }
 
   // --- Attendance Issues (Admin/HR only) ---
-  if (level >= 7 && level <= 8) {
+  if (canRead(roleId, 'attendances')) {
     if (canRead(roleId, 'attendances')) {
       try {
         const issues = await models.attendances.aggregate([
-          { $match: { date: { $gte: today, $lte: todayEnd() }, status: { $in: ['Late Entry', 'LOP', 'Unchecked'] } } },
+          { $match: { date: { $gte: today, $lte: todayEnd }, status: { $in: ['Late Entry', 'LOP', 'Unchecked'] } } },
           { $group: { _id: '$status', count: { $sum: 1 } } }
         ]);
         const issueMap = {};
@@ -297,7 +288,7 @@ async function computeStatCards(roleId, userId, level) {
   }
 
   // --- Payroll Status (Admin 7-8, Executive 9, MD 10) ---
-  if (level >= 7) {
+  if (canRead(roleId, 'payrollruns')) {
     if (canRead(roleId, 'payrollruns')) {
       try {
         const now = new Date();
@@ -308,7 +299,7 @@ async function computeStatCards(roleId, userId, level) {
           .select('status totalNet totalEmployees')
           .lean();
 
-        if (level <= 8) {
+        if (canDo(roleId, 'v2_stat_payroll_status')) {
           // Admin: show status
           stats.payrollStatus = {
             value: run?.status || 'Not Started',
@@ -316,7 +307,7 @@ async function computeStatCards(roleId, userId, level) {
             year: currentYear
           };
         }
-        if (level === 9) {
+        if (canDo(roleId, 'v2_stat_payroll_cost')) {
           // Executive: show cost
           stats.payrollCost = {
             value: run?.totalNet || 0,
@@ -359,8 +350,8 @@ async function computeStatCards(roleId, userId, level) {
     }
   }
 
-  // --- Workforce Health (MD) ---
-  if (level === 10) {
+  // --- Workforce Health ---
+  if (canRead(roleId, 'attendances')) {
     // Computed from pulse — will be merged in the route handler
     stats.workforceHealth = { value: null }; // placeholder, filled from pulse
   }
@@ -373,7 +364,7 @@ async function computeStatCards(roleId, userId, level) {
       stats.assetAllocatedCount = { value: await models.assets.countDocuments({ status: 'Allocated', metaStatus: 'active' }) };
       
       if (canRead(roleId, 'assetallocations')) {
-        const managerFilter = level <= 6 ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
+        const managerFilter = (!canDo(roleId, 'assets:all:read') && !canDo(roleId, 'assetallocations:all:read')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
         stats.assetPendingApproval = {
           value: await models.assetallocations.countDocuments({
             ...managerFilter,
@@ -446,18 +437,18 @@ function computeUrgencyScore(baseType, createdAt, affectsCount = 1, affectsPayro
   return score;
 }
 
-async function computeActionCenter(roleId, userId, level) {
+async function computeActionCenter(roleId, userId, level, today, todayEnd) {
   const items = [];
-  const managerFilter = (level >= 4 && level <= 6) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
-
-  // Manager (4-6) & Admin (7-8): Pending leaves, regularizations, WFH, comp-off
-  if (level >= 4 && level <= 8) {
+  const managerFilter = (!canDo(roleId, 'leaves:all:read') && !canDo(roleId, 'leaves:all:approve')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
+ 
+  // Pending leaves, regularizations, WFH, comp-off
+  if (canRead(roleId, 'leaves') || canRead(roleId, 'regularizations')) {
     // Pending Leaves
     if (canRead(roleId, 'leaves')) {
       try {
         const pendingLeaves = await models.leaves.find({ ...managerFilter, status: 'Pending', metaStatus: 'active' })
           .sort({ createdAt: -1 })
-          .limit(level <= 6 ? 20 : 50)
+          .limit(managerFilter.managerId ? 20 : 50)
           .select('employeeName employeeId departmentId startDate endDate totalDays leaveName isEmergency createdAt')
           .populate('departmentId', 'name')
           .lean();
@@ -566,8 +557,8 @@ async function computeActionCenter(roleId, userId, level) {
     }
   }
 
-  // Manager (4-6): Overdue tasks (team), Critical tickets (team)
-  if (level >= 4 && level <= 6) {
+  // Manager: Overdue tasks (team), Critical tickets (team)
+  if (canRead(roleId, 'tasks') && !canDo(roleId, 'tasks:all:read')) {
     if (canRead(roleId, 'tasks')) {
       try {
         const teamMembers = await models.employees.find({
@@ -577,7 +568,7 @@ async function computeActionCenter(roleId, userId, level) {
 
         const overdue = await models.tasks.find({
           assignedTo: { $in: teamMembers.map(m => m._id) },
-          endDate: { $lt: todayStart() },
+          endDate: { $lt: today },
           status: { $nin: ['Completed', 'Done'] },
           metaStatus: 'active'
         }).limit(5).select('title endDate assignedTo createdAt').lean();
@@ -601,8 +592,8 @@ async function computeActionCenter(roleId, userId, level) {
     }
   }
 
-  // Executive (9): Critical tickets (unassigned), overdue tasks (>2 days, all)
-  if (level === 9) {
+  // Executive: Critical tickets (unassigned), overdue tasks (>2 days, all)
+  if (canDo(roleId, 'v2_action_center') && canDo(roleId, 'tickets:all:read')) {
     if (canRead(roleId, 'tickets')) {
       try {
         const critical = await models.tickets.find({
@@ -634,8 +625,8 @@ async function computeActionCenter(roleId, userId, level) {
     }
   }
 
-  // MD (10): Aggregated items, max 3
-  if (level === 10) {
+  // MD: Aggregated items, max 3
+  if (canDo(roleId, 'v2_action_center') && canRead(roleId, 'tickets')) {
     // Critical tickets aggregated
     if (canRead(roleId, 'tickets')) {
       try {
@@ -666,7 +657,7 @@ async function computeActionCenter(roleId, userId, level) {
   items.sort((a, b) => b.urgencyScore - a.urgencyScore);
 
   // MD gets max 3 items
-  if (level === 10) return items.slice(0, 3);
+  if (canDo(roleId, 'v2_action_center') && canRead(roleId, 'tickets') && !canDo(roleId, 'tickets:team:read')) return items.slice(0, 3);
 
   return items;
 }
@@ -749,11 +740,11 @@ function computeAlerts(stats, pulse, actionCenter) {
 // WHETHER this data is rendered is controlled entirely by the DashboardWidget config
 // in the database (can('v2_team_attendance_grid') in the frontend). No level gate here.
 
-async function computeTeamGrid(roleId, userId, level) {
+async function computeTeamGrid(roleId, userId, level, today, todayEnd) {
   if (!canRead(roleId, 'attendances') || !canRead(roleId, 'employees')) return null;
-
+ 
   try {
-    const isAdminScope = level >= 7;
+    const isAdminScope = canDo(roleId, 'attendance:all:read');
 
     const employeeQuery = isAdminScope
       ? { status: 'Active', isActive: true }
@@ -769,10 +760,9 @@ async function computeTeamGrid(roleId, userId, level) {
 
     if (members.length === 0) return [];
 
-    const today = todayStart();
     const attendance = await models.attendances.find({
       employee: { $in: members.map(m => m._id) },
-      date: { $gte: today, $lte: todayEnd() }
+      date: { $gte: today, $lte: todayEnd }
     }).select('employee status checkIn').lean();
 
     const attMap = {};
@@ -805,6 +795,29 @@ export async function getDashboardStats(userId, roleId) {
   const level = getRoleLevel(roleId);
   const variant = getLayoutVariant(level);
 
+  // Resolve company timezone dynamically from General Settings
+  let tz = 'Asia/Kolkata';
+  try {
+    const settings = await models.generalsettings.findOne().lean();
+    if (settings?.localization?.timezone) {
+      tz = settings.localization.timezone;
+    }
+  } catch (e) {}
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  const parts = formatter.formatToParts(new Date());
+  const year = parseInt(parts.find(p => p.type === 'year').value, 10);
+  const month = parseInt(parts.find(p => p.type === 'month').value, 10) - 1; // 0-indexed
+  const day = parseInt(parts.find(p => p.type === 'day').value, 10);
+
+  const today = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+  const todayEndVal = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+
   const result = {
     layoutVariant: variant,
     roleLevel: level,
@@ -816,39 +829,19 @@ export async function getDashboardStats(userId, roleId) {
     teamGrid: null
   };
 
-  // Run computations in parallel based on variant
-  const promises = [];
-
-  // Employee stats (all levels get their own attendance/tasks/leave)
-  if (level <= 3) {
-    promises.push(computeEmployeeStats(userId, roleId).then(d => { result.employee = d; }));
-  }
-
-  // Pulse (level 4+)
-  if (level >= 4) {
-    promises.push(computePulse(roleId, userId, level).then(d => { result.pulse = d; }));
-  }
-
-  // Stat cards (level 4+)
-  if (level >= 4) {
-    promises.push(computeStatCards(roleId, userId, level).then(d => { result.stats = d; }));
-  }
-
-  // Action center (level 4+)
-  if (level >= 4) {
-    promises.push(computeActionCenter(roleId, userId, level).then(d => { result.actionCenter = d; }));
-  }
-
-  // Team / Org grid — scope is determined inside computeTeamGrid by level.
-  // Whether it *renders* is decided by the DashboardWidget config per role (frontend can()).
-  if (level >= 4) {
-    promises.push(computeTeamGrid(roleId, userId, level).then(d => { result.teamGrid = d; }));
-  }
+  // Run computations in parallel
+  const promises = [
+    computeEmployeeStats(userId, roleId, today, todayEndVal).then(d => { result.employee = d; }),
+    computePulse(roleId, userId, level, today, todayEndVal).then(d => { result.pulse = d; }),
+    computeStatCards(roleId, userId, level, today, todayEndVal).then(d => { result.stats = d; }),
+    computeActionCenter(roleId, userId, level, today, todayEndVal).then(d => { result.actionCenter = d; }),
+    computeTeamGrid(roleId, userId, level, today, todayEndVal).then(d => { result.teamGrid = d; })
+  ];
 
   await Promise.all(promises);
 
-  // Post-processing: fill MD workforce health from pulse
-  if (level === 10 && result.pulse) {
+  // Post-processing: fill workforce health from pulse if enabled or Admin
+  if (canRead(roleId, 'attendances') && result.pulse) {
     result.stats.workforceHealth = {
       value: result.pulse.attendanceRate,
       label: result.pulse.attendanceRate >= 85 ? 'Healthy' : result.pulse.attendanceRate >= 70 ? 'Caution' : 'Critical',
@@ -859,9 +852,7 @@ export async function getDashboardStats(userId, roleId) {
   }
 
   // Alerts (derived from stats + pulse + action center)
-  if (level >= 4) {
-    result.alerts = computeAlerts(result.stats, result.pulse, result.actionCenter);
-  }
+  result.alerts = computeAlerts(result.stats, result.pulse, result.actionCenter);
 
   return result;
 }
