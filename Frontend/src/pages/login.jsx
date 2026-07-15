@@ -124,13 +124,7 @@ const Login = () => {
         <div className="lmx-glass-bubble absolute top-[25%] left-[28%] w-48 h-48 opacity-80" />
       </div>
 
-      {/* Top-left Brand Logo (Desktop only) */}
-      <div className="absolute top-6 left-8 z-20 hidden lg:flex items-center gap-2.5 select-none">
-        <div className="h-9 w-9 rounded-lg bg-[#ede9fe] flex items-center justify-center">
-          <Shield className="h-5 w-5 text-[#7c3aed]" />
-        </div>
-        <span className="text-md font-bold text-[var(--tracker-ink)]">WorkHub</span>
-      </div>
+
 
       {/* Theme toggle */}
       <button
@@ -150,6 +144,14 @@ const Login = () => {
 
           {/* ── LEFT CARD — Feature list ──────────────────────────────── */}
           <div className="lmx-login-feature-card hidden lg:flex flex-col w-[440px] flex-shrink-0 p-8 gap-5">
+
+            {/* Top Brand Logo inside card */}
+            <div className="flex items-center gap-2.5 select-none">
+              <div className="h-9 w-9 rounded-lg bg-[#ede9fe] flex items-center justify-center">
+                <Shield className="h-5 w-5 text-[#7c3aed]" />
+              </div>
+              <span className="text-md font-bold text-[var(--tracker-ink)]">WorkHub</span>
+            </div>
 
             {/* Heading */}
             <div>
