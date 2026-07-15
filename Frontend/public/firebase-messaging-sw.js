@@ -1,14 +1,16 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
+// Parse configuration from query parameters
+const urlParams = new URLSearchParams(location.search);
 const firebaseConfig = {
-  apiKey: "AIzaSyBYE6khUUPjyDpTI1ZgO_meYYbPnvW4SbA",
-  authDomain: "tracker-a27af.firebaseapp.com",
-  projectId: "tracker-a27af",
-  storageBucket: "tracker-a27af.firebasestorage.app",
-  messagingSenderId: "212199400489",
-  appId: "1:212199400489:web:6583e9435f18617f192838",
-  measurementId: "G-61GDBGL2F6"
+  apiKey: urlParams.get('apiKey'),
+  authDomain: urlParams.get('authDomain'),
+  projectId: urlParams.get('projectId'),
+  storageBucket: urlParams.get('storageBucket'),
+  messagingSenderId: urlParams.get('messagingSenderId'),
+  appId: urlParams.get('appId'),
+  measurementId: urlParams.get('measurementId')
 };
 
 firebase.initializeApp(firebaseConfig);
