@@ -86,6 +86,18 @@ const axiosInstance = axios.create({
 
 // Generate or get device UUID
 // Only auto-generate if user is logged in (has auth token)
+const getSecureRandomSuffix = (length = 9) => {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const randomBytes = new Uint8Array(length);
+  window.crypto.getRandomValues(randomBytes);
+
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars[randomBytes[i] % chars.length];
+  }
+  return result;
+};
+
 const getDeviceUUID = () => {
   let uuid = localStorage.getItem('device_uuid');
 
@@ -94,7 +106,7 @@ const getDeviceUUID = () => {
 
   if (!uuid && hasAuthToken) {
     // Only generate new UUID if user is authenticated
-    uuid = 'web_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    uuid = 'web_' + Date.now() + '_' + getSecureRandomSuffix(9);
     localStorage.setItem('device_uuid', uuid);
   }
 
