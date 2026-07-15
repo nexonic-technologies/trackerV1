@@ -6900,8 +6900,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\External\\app\\api\\client-products\\route.ts": {
-    "mtime": 1783959842.719266,
-    "ast_hash": "c935968c4911ce143931d53035575250",
+    "mtime": 1784121216.4297209,
+    "ast_hash": "818d529183b0597764ce8c557eae9aa7",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\External\\app\\api\\clients\\[id]\\route.ts": {
@@ -7005,8 +7005,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\public\\firebase-messaging-sw.js": {
-    "mtime": 1784119581.591835,
-    "ast_hash": "a5abcfab279e14601200ff33867ec415",
+    "mtime": 1784120772.4384036,
+    "ast_hash": "1c1a147dc82d57aefb5aeb6b2bd6a66a",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\App.jsx": {
@@ -7020,8 +7020,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\api\\axiosInstance.js": {
-    "mtime": 1783800427.3589256,
-    "ast_hash": "2b6671f5c0be296e3dee49b2a54da739",
+    "mtime": 1784121109.267014,
+    "ast_hash": "e38c76052db5e70f3f4986faadbd457f",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\components\\CapabilityGuard.jsx": {
@@ -7500,8 +7500,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\pages\\login.jsx": {
-    "mtime": 1784088402.3307698,
-    "ast_hash": "25709a10b7225310265c24316181a6c3",
+    "mtime": 1784120767.7008688,
+    "ast_hash": "e50337565a4f788a959f293ca7a0ce8f",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\pages\\Logout.jsx": {
@@ -8420,8 +8420,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\utils\\firebase.js": {
-    "mtime": 1784119575.549216,
-    "ast_hash": "d39388c4ed628379ecc19ce20ce1b714",
+    "mtime": 1784120772.438793,
+    "ast_hash": "2b29051c70b3d330eef499a56ab577e1",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\utils\\formDrafts.js": {
@@ -10190,8 +10190,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\External\\app\\firebase.ts": {
-    "mtime": 1784119609.8225498,
-    "ast_hash": "9405688c704143a8a5d45148433917a5",
+    "mtime": 1784120772.4237702,
+    "ast_hash": "dc35c9e4c83887e94374f5d56069c314",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\External\\app\\useGenericAPI.ts": {
@@ -10225,8 +10225,8 @@
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\External\\public\\firebase-messaging-sw.js": {
-    "mtime": 1784119628.522508,
-    "ast_hash": "a5abcfab279e14601200ff33867ec415",
+    "mtime": 1784120772.4237702,
+    "ast_hash": "1c1a147dc82d57aefb5aeb6b2bd6a66a",
     "semantic_hash": ""
   },
   "E:\\Loigmax\\trackerV1\\scripts\\verify\\check-raw-routes.js": {
@@ -10307,6 +10307,16 @@
   "E:\\Loigmax\\trackerV1\\Frontend\\src\\pages\\Settings\\Capabilities.jsx": {
     "mtime": 1784088402.314736,
     "ast_hash": "ee5c262d27257b2ee051281dc271e0f6",
+    "semantic_hash": ""
+  },
+  "E:\\Loigmax\\trackerV1\\.github\\workflows\\code-coverage.yml": {
+    "mtime": 1784120767.5432837,
+    "ast_hash": "d7609efbfe94e79c13d29a60fdee1991",
+    "semantic_hash": ""
+  },
+  "E:\\Loigmax\\trackerV1\\.github\\workflows\\codeql.yml": {
+    "mtime": 1784120767.5473368,
+    "ast_hash": "ce2a0190be3982268803fde973d0c8b9",
     "semantic_hash": ""
   }
 }

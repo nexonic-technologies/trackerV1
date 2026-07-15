@@ -14,6 +14,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Validate that agentId is a valid 24-character hex string (MongoDB ObjectId)
+    const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
+    if (!OBJECT_ID_REGEX.test(agentId)) {
+      return NextResponse.json(
+        { error: 'Invalid Agent ID format' },
+        { status: 400 }
+      );
+    }
+
     const response = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/populate/read/agents/${agentId}?clientProducts=true`, {
       method: 'GET',
       headers: {
