@@ -18,8 +18,6 @@ export default async function buildCreateQuery(ctx) {
   const role = user?.role;
   const userId = user?.id;
 
-  console.log("[buildCreateQuery] body:", body);
-
   const Model = getModel(modelName);
   if (!Model) throw new Error(`Model "${modelName}" not found`);
 
@@ -36,7 +34,6 @@ export default async function buildCreateQuery(ctx) {
   body = sanitizeWrite({ body, policy, action: "create" }); // applies allowAccess + forbiddenAccess
   ctx.body = body;
 
-  console.log("[buildCreateQuery] body after sanitizeWrite:", body, "policy:", policy);
   /** -----------------------------------------------
    * 3) Registry rules (ABAC: isSelf, custom)
    * ----------------------------------------------- */
