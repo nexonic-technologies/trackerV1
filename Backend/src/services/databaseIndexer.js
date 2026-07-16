@@ -145,23 +145,27 @@ class DatabaseIndexer {
   async indexModel(modelName, indexes) {
     try {
       const collection = mongoose.connection.db.collection(modelName);
+      const existingIndexes = await collection.indexes().catch(() => []);
 
       for (const index of indexes) {
-        const indexName = Object.keys(index).join('_');
+        try {
+          const indexName = Object.keys(index).join('_');
 
-        // Check if index already exists
-        const existingIndexes = await collection.indexes();
-        const indexExists = existingIndexes.some(existing =>
-          existing.name === indexName ||
-          JSON.stringify(existing.key) === JSON.stringify(index)
-        );
+          // Check if index already exists
+          const indexExists = existingIndexes.some(existing =>
+            existing.name === indexName ||
+            JSON.stringify(existing.key) === JSON.stringify(index)
+          );
 
-        if (!indexExists) {
-          await collection.createIndex(index, {
-            background: true,
-            name: indexName
-          });
-          // console.log(`  ✓ Created index on ${modelName}: ${indexName}`);
+          if (!indexExists) {
+            await collection.createIndex(index, {
+              background: true,
+              name: indexName
+            });
+            // console.log(`  ✓ Created index on ${modelName}: ${indexName}`);
+          }
+        } catch (indexError) {
+          console.warn(`  ⚠️  Warning: Failed to create index on ${modelName}:`, indexError.message);
         }
       }
 

@@ -1,11 +1,12 @@
 import { useRoutes, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "../context/authProvider.jsx";
 import routes from "~react-pages";
-import Sidebar from "./Sidebar";
+import Sidebar from "./sidebar.jsx";
 import TopNavBar from "./topNavBar.jsx";
 import Login from "../pages/login.jsx";
-import ForgotPassword from "../pages/forgot-password.jsx";
-import ResetPassword from "../pages/reset-password.jsx";
+import ForgotPassword from "../pages/forgotPassword.jsx";
+import ResetPassword from "../pages/resetPassword.jsx";
+import AcademyLayout from "../pages/academy/index.jsx"
 import { useState, useEffect, useRef } from "react";
 import ModernLoader from "../components/Common/ModernLoader.jsx";
 
@@ -16,6 +17,7 @@ const BaseLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const prevPathname = useRef(location.pathname);
+
 
   // Trigger minimum 300ms loading overlay on page navigation
   useEffect(() => {
@@ -44,6 +46,7 @@ const BaseLayout = () => {
   }, [location.pathname]);
 
   const publicPaths = ["/login", "/forgot-password", "/reset-password", "/academy"];
+  console.log(routes.map((r) => r.path));
 
   if (loading) {
     return (
@@ -67,6 +70,7 @@ const BaseLayout = () => {
   if (location.pathname === "/login") return <Login />;
   if (location.pathname === "/forgot-password") return <ForgotPassword />;
   if (location.pathname === "/reset-password") return <ResetPassword />;
+  if (location.pathname === "/academy") return <AcademyLayout />;
 
   return (
     <div className="lmx-app-shell">

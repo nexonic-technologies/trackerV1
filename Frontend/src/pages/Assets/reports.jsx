@@ -3,7 +3,7 @@ import axiosInstance from "../../api/axiosInstance";
 import TableGenerator from "../../components/Common/TableGenerator";
 import toast from "react-hot-toast";
 import { StatusBadge } from "../../components/StatusBadge";
-import * as MD from "react-icons/md";
+import { MdRefresh } from "react-icons/md";
 
 const Reports = () => {
   const [stats, setStats] = useState({
@@ -104,7 +104,7 @@ const Reports = () => {
           onClick={fetchReportData}
           className="tracker-btn-secondary flex items-center gap-1.5 px-4 py-2"
         >
-          <MD.MdRefresh className="text-lg" />
+          <MdRefresh className="text-lg" />
           Refresh
         </button>
       </div>

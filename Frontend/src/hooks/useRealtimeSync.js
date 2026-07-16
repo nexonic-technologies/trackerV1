@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTaskStore } from '../store/taskStore';
 import { socketService } from '../services/socketService';
-import { useUserProfile } from './useUserProfile'; // Existing hook in Tracker project
+import { useAuth } from '../context/authProvider';
 import axios from 'axios';
 
 const api = axios.create({
@@ -12,7 +12,7 @@ const api = axios.create({
 export const useRealtimeSync = () => {
   const store = useTaskStore();
   const [isConnected, setIsConnected] = useState(false);
-  const { user } = useUserProfile();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return;
@@ -20,7 +20,7 @@ export const useRealtimeSync = () => {
     // We assume token might be handled by cookies (withCredentials), or passed here if needed.
     const token = localStorage.getItem('token') || '';
     
-    socketService.connect(user._id, token);
+    socketService.connect(user.id || user._id, token);
 
     // Listen for task updates
     const unsubUpdate = socketService.on('task:updated', (payload) => {

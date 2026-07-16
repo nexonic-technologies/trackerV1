@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../../context/authProvider.jsx";
-import useGenericAPI from "../../components/useGenericAPI";
+import useGenericAPI from "../../components/useGenericAPI.js";
 import {
   Clock, ChevronLeft, ChevronRight, Users, Calendar, ArrowRightLeft
 } from "lucide-react";
@@ -144,7 +144,7 @@ const ShiftRoster = () => {
 
   return (
     <div data-module="hr" className="h-full flex flex-col gap-3 overflow-hidden bg-canvas text-ink" style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
-      
+
       {/* ─── HEADER ─── */}
       <div className="flex flex-wrap items-center justify-between gap-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -245,7 +245,7 @@ const ShiftRoster = () => {
                     const isToday = isSameDay(date, new Date());
                     const isSun = date.getDay() === 0;
                     const att = attMap[`${empId}_${date.toDateString()}`];
-                    
+
                     const shiftName = shiftData?.name || "General";
                     const shiftTime = shiftData ? `${shiftData.startTime}–${shiftData.endTime}` : "9:00–18:00";
 
@@ -261,8 +261,8 @@ const ShiftRoster = () => {
                               <div className={`mt-1 text-[9px] font-medium px-1.5 py-0.5 rounded-full inline-block
                                 ${att.status === "Present" || att.status === "Check-Out" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
                                   att.status === "Late Entry" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" :
-                                  att.status === "Absent" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" :
-                                  "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}
+                                    att.status === "Absent" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" :
+                                      "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}
                               >
                                 {att.status}
                               </div>

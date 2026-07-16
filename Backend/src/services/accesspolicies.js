@@ -5,6 +5,7 @@
 // invalidated and all connected frontend clients are notified via Socket.io.
 
 import { invalidatePermissions } from "../utils/permissionInvalidator.js";
+import Role from "../models/Role.js";
 
 export default function () {
   return {
@@ -16,7 +17,6 @@ export default function () {
       const roleId = data?.role?.toString?.() || null;
       if (roleId) {
         try {
-          const { default: Role } = await import("../models/Role.js");
           await Role.findByIdAndUpdate(roleId, { $inc: { permissionVersion: 1 } });
         } catch (err) {
           console.warn("[AccessPoliciesHook] Failed to increment role permissionVersion:", err.message);
@@ -33,7 +33,6 @@ export default function () {
       const roleId = data?.role?.toString?.() || beforeDoc?.role?.toString?.() || null;
       if (roleId) {
         try {
-          const { default: Role } = await import("../models/Role.js");
           await Role.findByIdAndUpdate(roleId, { $inc: { permissionVersion: 1 } });
         } catch (err) {
           console.warn("[AccessPoliciesHook] Failed to increment role permissionVersion:", err.message);
@@ -51,7 +50,6 @@ export default function () {
       const roleId = deletedDoc?.role?.toString?.() || null;
       if (roleId) {
         try {
-          const { default: Role } = await import("../models/Role.js");
           await Role.findByIdAndUpdate(roleId, { $inc: { permissionVersion: 1 } });
         } catch (err) {
           console.warn("[AccessPoliciesHook] Failed to increment role permissionVersion:", err.message);

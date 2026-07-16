@@ -214,8 +214,14 @@ export const authMiddleware = async (req, res, next) => {
     // Verify with stored secret
     jwt.verify(token, userSession.generatedToken.secret);
 
-    userSession.lastUsedAt = new Date();
-    await userSession.save();
+    const now = new Date();
+    const lastUsed = userSession.lastUsedAt || new Date(0);
+    // Debounce session update to once every 1 minute
+    if (now.getTime() - lastUsed.getTime() > 60000) {
+      userSession.lastUsedAt = now;
+      // Save asynchronously so it doesn't block the request response time
+      userSession.save().catch(err => console.error("[SessionSave] Failed to update lastUsedAt:", err.message));
+    }
 
     req.user = decoded;
     next();

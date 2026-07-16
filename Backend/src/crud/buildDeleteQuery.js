@@ -5,6 +5,7 @@ import { getPolicy } from "../utils/cache.js";
 import { pathToFileURL } from "url";
 import runRegistry from "../utils/registryExecutor.js";
 import {saveAuditLog } from "../utils/auditLogger.js"
+import { cachedImport } from "../utils/importCache.js";
 
 export default async function buildDeleteQuery(ctx) {
   let {
@@ -52,7 +53,7 @@ export default async function buildDeleteQuery(ctx) {
 
   if (modelService) {
     const fileUrl = pathToFileURL(modelService).href;
-    const serviceModule = await import(fileUrl);
+    const serviceModule = await cachedImport(fileUrl);
     serviceInstance = serviceModule.default?.();
   }
 

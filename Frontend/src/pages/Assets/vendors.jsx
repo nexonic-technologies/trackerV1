@@ -3,7 +3,7 @@ import axiosInstance from "../../api/axiosInstance";
 import TableGenerator from "../../components/Common/TableGenerator";
 import toast from "react-hot-toast";
 import { StatusBadge } from "../../components/StatusBadge";
-import * as MD from "react-icons/md";
+import { MdAdd, MdClose } from "react-icons/md";
 import { Country, State, City } from "country-state-city";
 import SearchableDropdown from "../../components/Common/SearchableDropdown";
 
@@ -173,7 +173,7 @@ const Vendors = () => {
           onClick={handleOpenAddModal}
           className="tracker-btn-accent flex items-center gap-1.5 px-4 py-2"
         >
-          <MD.MdAdd className="text-lg" />
+          <MdAdd className="text-lg" />
           Add Vendor
         </button>
       </div>
@@ -207,7 +207,7 @@ const Vendors = () => {
                 {editingVendor ? "Edit Vendor Details" : "Add New Vendor"}
               </h3>
               <button onClick={() => setModalOpen(false)} className="text-ink-subtle hover:text-ink">
-                <MD.MdClose className="text-xl" />
+                <MdClose className="text-xl" />
               </button>
             </div>
 

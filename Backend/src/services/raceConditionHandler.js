@@ -423,8 +423,13 @@ export const raceConditionMiddleware = (options = {}) => {
       return next();
     }
 
-    // Only apply to mutations
-    if (req.method === 'GET') {
+    // Only apply to mutations. Skip for GET, or if the action is a read-only query (read, list, statistics)
+    const isGet = req.method === 'GET';
+    const action = req.params?.action;
+    const isReadAction = ['read', 'list', 'statistics'].includes(action);
+    const isReadPath = req.path?.includes('/read/') || req.path?.includes('/list/') || req.path?.includes('/statistics/');
+
+    if (isGet || isReadAction || isReadPath) {
       return next();
     }
 
