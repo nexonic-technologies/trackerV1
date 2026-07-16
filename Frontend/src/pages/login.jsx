@@ -268,7 +268,7 @@ const Login = () => {
             </div>
 
             {/* Feature rows */}
-            <div className="flex flex-col gap-2.5 w-80%">
+            <div className="flex flex-col gap-2.5 w-[80%]">
               {FEATURES.map((feat) => (
                 <div
                   key={feat.title}
