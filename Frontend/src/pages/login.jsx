@@ -119,7 +119,7 @@ const Login = () => {
       let deviceUuid = localStorage.getItem("device_uuid");
       if (!deviceUuid) {
         deviceUuid =
-          "web_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+          "web_" + Date.now() + "_" + Math.random().toString(36).substring(2, 11);
         localStorage.setItem("device_uuid", deviceUuid);
       }
       const response = await axiosInstance.post("/auth/login", {
