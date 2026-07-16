@@ -3,7 +3,8 @@ import axiosInstance from "../../api/axiosInstance";
 import TableGenerator from "../../components/Common/TableGenerator";
 import toast from "react-hot-toast";
 import { StatusBadge } from "../../components/StatusBadge";
-import * as MD from "react-icons/md";
+import { MdAdd, MdPrint, MdClose, MdPersonAdd, MdDelete } from "react-icons/md";
+const MD = { MdAdd, MdPrint, MdClose, MdPersonAdd, MdDelete };
 import SearchableDropdown from "../../components/Common/SearchableDropdown";
 
 

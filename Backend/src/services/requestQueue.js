@@ -6,17 +6,25 @@
 
 import { getFingerprintKey } from '../utils/deviceFingerprint.js';
 
+// Read limits from environment — allows runtime tuning without code changes
+const ENV_MAX_CONCURRENT_PER_DEVICE = parseInt(process.env.QUEUE_MAX_CONCURRENT_PER_DEVICE || '2', 10);
+const ENV_MAX_SERVER_CONCURRENT     = parseInt(process.env.QUEUE_MAX_SERVER_CONCURRENT     || '50', 10);
+const ENV_MAX_SIZE_PER_DEVICE       = parseInt(process.env.QUEUE_MAX_SIZE_PER_DEVICE       || '100', 10);
+const ENV_REQUEST_TIMEOUT_MS        = parseInt(process.env.QUEUE_REQUEST_TIMEOUT_MS        || '30000', 10);
+
 class RequestQueue {
   constructor(options = {}) {
-    this.queues = new Map(); // fingerprint -> queue array
-    this.processing = new Map(); // fingerprint -> isProcessing
-    this.metrics = new Map(); // fingerprint -> metrics
-    
+    this.queues = new Map();     // fingerprint -> queue array
+    this.processing = new Map(); // fingerprint -> active count
+    this.metrics = new Map();    // fingerprint -> metrics
+    this._serverProcessing = 0;  // global active count across all devices
+
     this.config = {
-      maxConcurrentPerDevice: options.maxConcurrentPerDevice || 1,
-      maxQueueSize: options.maxQueueSize || 100,
-      requestTimeout: options.requestTimeout || 30000, // 30 seconds
-      cleanupInterval: options.cleanupInterval || 60 * 60 * 1000
+      maxConcurrentPerDevice: options.maxConcurrentPerDevice ?? ENV_MAX_CONCURRENT_PER_DEVICE,
+      maxServerConcurrent:    options.maxServerConcurrent    ?? ENV_MAX_SERVER_CONCURRENT,
+      maxQueueSize:           options.maxQueueSize           ?? ENV_MAX_SIZE_PER_DEVICE,
+      requestTimeout:         options.requestTimeout         ?? ENV_REQUEST_TIMEOUT_MS,
+      cleanupInterval:        options.cleanupInterval        || 60 * 60 * 1000
     };
 
     this.startCleanup();
@@ -100,12 +108,15 @@ class RequestQueue {
     const queue = this.queues.get(fingerprint);
     const processing = this.processing.get(fingerprint);
 
-    if (!queue || queue.length === 0 || processing >= this.config.maxConcurrentPerDevice) {
+    if (!queue || queue.length === 0 ||
+        processing >= this.config.maxConcurrentPerDevice ||
+        this._serverProcessing >= this.config.maxServerConcurrent) {
       return;
     }
 
     const entry = queue.shift();
     this.processing.set(fingerprint, processing + 1);
+    this._serverProcessing++;
     entry.status = 'processing';
     entry.startedAt = Date.now();
 
@@ -137,9 +148,10 @@ class RequestQueue {
 
       console.error(`Queue error for ${fingerprint}: ${error.message}`);
     } finally {
-      // Decrement processing counter
+      // Decrement processing counters (per-device + global)
       const newProcessing = Math.max(0, this.processing.get(fingerprint) - 1);
       this.processing.set(fingerprint, newProcessing);
+      this._serverProcessing = Math.max(0, this._serverProcessing - 1);
 
       // Process next in queue
       setImmediate(() => this.processNext(fingerprint));
@@ -237,8 +249,11 @@ class RequestQueue {
       totalProcessed,
       totalFailed,
       currentlyProcessing: totalProcessing,
-      avgQueueSize: this.queues.size > 0 
-        ? Array.from(this.queues.values()).reduce((sum, q) => sum + q.length, 0) / this.queues.size 
+      serverConcurrentLimit: this.config.maxServerConcurrent,
+      perDeviceConcurrentLimit: this.config.maxConcurrentPerDevice,
+      serverUtilization: `${totalProcessing}/${this.config.maxServerConcurrent}`,
+      avgQueueSize: this.queues.size > 0
+        ? Array.from(this.queues.values()).reduce((sum, q) => sum + q.length, 0) / this.queues.size
         : 0,
       successRate: totalQueued > 0 ? ((totalProcessed / (totalProcessed + totalFailed)) * 100).toFixed(2) + '%' : 'N/A'
     };
@@ -276,12 +291,8 @@ class RequestQueue {
   }
 }
 
-// Global queue instance
-const requestQueue = new RequestQueue({
-  maxConcurrentPerDevice: 2, // Allow up to 2 concurrent requests per device
-  maxQueueSize: 100,
-  requestTimeout: 30000
-});
+// Global singleton — limits fully driven by environment variables
+const requestQueue = new RequestQueue();
 
 /**
  * Express middleware for request queueing

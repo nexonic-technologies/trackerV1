@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { promisify } from 'util';
 import stream from 'stream';
 import crypto from 'node:crypto';
+import sharp from 'sharp';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,8 +14,11 @@ const pipeline = promisify(stream.pipeline);
 const router = express.Router();
 const UPLOAD_PATH = process.env.UPLOAD_PATH || path.join(__dirname, '../../uploads');
 const CDN_URL = process.env.CDN_URL || null;
+// On-disk thumbnail cache directory (next to uploads)
+const CACHE_PATH = path.join(UPLOAD_PATH, '_cache');
+if (!fs.existsSync(CACHE_PATH)) fs.mkdirSync(CACHE_PATH, { recursive: true });
 
-// Enhanced file serving with CDN support and streaming
+// Enhanced file serving with CDN support, on-demand resize, and streaming
 router.get('/serve/:folder/:year/:month/:filename', async (req, res) => {
   try {
     const { folder, year, month, filename } = req.params;
@@ -53,39 +57,66 @@ router.get('/serve/:folder/:year/:month/:filename', async (req, res) => {
 
     const contentType = mimeTypes[ext] || 'application/octet-stream';
 
-    // Handle range requests for large files
-    const range = req.headers.range;
-    if (range) {
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : stat.size - 1;
-      const chunksize = (end - start) + 1;
+    // On-demand image resize: ?w=200&q=80
+    // Only applies to images; all other file types skip directly to streaming.
+    const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+    const { w, q } = req.query;
 
-      res.status(206);
-      res.setHeader('Content-Range', `bytes ${start}-${end}/${stat.size}`);
-      res.setHeader('Accept-Ranges', 'bytes');
-      res.setHeader('Content-Length', chunksize);
-      res.setHeader('Content-Type', contentType);
+    if (isImage && w) {
+      const width = Math.min(parseInt(w, 10), 3000); // cap at 3000px
+      const quality = Math.min(parseInt(q || '80', 10), 100);
+      const cacheKey = `${folder}_${year}_${month}_${width}w_${quality}q_${filename}.webp`;
+      const cachePath = path.join(CACHE_PATH, cacheKey);
 
-      const stream = fs.createReadStream(filePath, { start, end });
-      await pipeline(stream, res);
-    } else {
-      // Standard file serving with caching
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Length', stat.size);
-      res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year
-      res.setHeader('ETag', `"${stat.mtime.getTime()}-${stat.size}"`);
-
-      // Check if client has cached version
-      const ifNoneMatch = req.headers['if-none-match'];
-      const etag = `"${stat.mtime.getTime()}-${stat.size}"`;
-      if (ifNoneMatch === etag) {
-        return res.status(304).end();
+      // Serve already-cached thumbnail instantly
+      if (fs.existsSync(cachePath)) {
+        const cacheStat = fs.statSync(cachePath);
+        const cacheEtag = `"${cacheStat.mtime.getTime()}-${cacheStat.size}"`;
+        if (req.headers['if-none-match'] === cacheEtag) return res.status(304).end();
+        res.setHeader('Content-Type', 'image/webp');
+        res.setHeader('Content-Length', cacheStat.size);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.setHeader('ETag', cacheEtag);
+        res.setHeader('X-Image-Source', 'cache');
+        return fs.createReadStream(cachePath).pipe(res);
       }
 
-      const stream = fs.createReadStream(filePath);
-      await pipeline(stream, res);
+      // Generate thumbnail on-the-fly, save to cache, then serve
+      try {
+        await sharp(filePath)
+          .resize({ width, withoutEnlargement: true })
+          .webp({ quality })
+          .toFile(cachePath);
+
+        const cacheStat = fs.statSync(cachePath);
+        res.setHeader('Content-Type', 'image/webp');
+        res.setHeader('Content-Length', cacheStat.size);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.setHeader('ETag', `"${cacheStat.mtime.getTime()}-${cacheStat.size}"`);
+        res.setHeader('X-Image-Source', 'generated');
+        return fs.createReadStream(cachePath).pipe(res);
+      } catch (sharpError) {
+        console.warn('[FileServe] sharp resize failed, falling back to original:', sharpError.message);
+        // Fall through to serve original below
+      }
     }
+
+    // Standard file serving — original quality (or non-image fallback)
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', stat.size);
+    // immutable tells the browser this URL's content will NEVER change (use versioned URLs for updates)
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('ETag', `"${stat.mtime.getTime()}-${stat.size}"`);
+
+    // Check if client has cached version
+    const ifNoneMatch = req.headers['if-none-match'];
+    const etag = `"${stat.mtime.getTime()}-${stat.size}"`;
+    if (ifNoneMatch === etag) {
+      return res.status(304).end();
+    }
+
+    const stream = fs.createReadStream(filePath);
+    await pipeline(stream, res);
 
   } catch (error) {
     console.error('Error serving file:', error);

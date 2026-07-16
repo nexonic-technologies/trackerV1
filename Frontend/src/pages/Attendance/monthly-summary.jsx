@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "../../context/authProvider.jsx";
-import useGenericAPI from "../../components/useGenericAPI";
-import StatCard from "../../components/Common/StatCard";
-import MonthNavigator from "../../components/Common/MonthNavigator";
-import PageLoader from "../../components/Common/PageLoader";
+import useGenericAPI from "../../components/useGenericAPI.js";
+import StatCard from "../../components/Common/StatCard.jsx";
+import MonthNavigator from "../../components/Common/MonthNavigator.jsx";
+import PageLoader from "../../components/Common/PageLoader.jsx";
 import {
   Calendar, Users, Download,
   CheckCircle, Clock, AlertTriangle, Sun
@@ -18,19 +18,19 @@ const MONTH_NAMES = [
 ];
 
 const STATUS_MAP = {
-  "Present":         { short: "P",  color: "bg-emerald-500",  text: "text-white" },
-  "Check-Out":       { short: "P",  color: "bg-emerald-500",  text: "text-white" },
-  "Late Entry":      { short: "L",  color: "bg-amber-500",    text: "text-white" },
-  "Early check-out": { short: "E",  color: "bg-orange-500",   text: "text-white" },
-  "Half Day":        { short: "H",  color: "bg-yellow-500",   text: "text-black" },
-  "Absent":          { short: "A",  color: "bg-red-500",      text: "text-white" },
-  "Leave":           { short: "Lv", color: "bg-blue-500",     text: "text-white" },
-  "Holiday":         { short: "Ho", color: "bg-purple-500",   text: "text-white" },
-  "Week Off":        { short: "W",  color: "bg-slate-400",    text: "text-white" },
-  "Work From Home":  { short: "WH", color: "bg-teal-500",     text: "text-white" },
-  "Unchecked":       { short: "U",  color: "bg-gray-400",     text: "text-white" },
-  "LOP":             { short: "LP", color: "bg-red-700",      text: "text-white" },
-  "Pending":         { short: "?",  color: "bg-sky-500",      text: "text-white" },
+  "Present": { short: "P", color: "bg-emerald-500", text: "text-white" },
+  "Check-Out": { short: "P", color: "bg-emerald-500", text: "text-white" },
+  "Late Entry": { short: "L", color: "bg-amber-500", text: "text-white" },
+  "Early check-out": { short: "E", color: "bg-orange-500", text: "text-white" },
+  "Half Day": { short: "H", color: "bg-yellow-500", text: "text-black" },
+  "Absent": { short: "A", color: "bg-red-500", text: "text-white" },
+  "Leave": { short: "Lv", color: "bg-blue-500", text: "text-white" },
+  "Holiday": { short: "Ho", color: "bg-purple-500", text: "text-white" },
+  "Week Off": { short: "W", color: "bg-slate-400", text: "text-white" },
+  "Work From Home": { short: "WH", color: "bg-teal-500", text: "text-white" },
+  "Unchecked": { short: "U", color: "bg-gray-400", text: "text-white" },
+  "LOP": { short: "LP", color: "bg-red-700", text: "text-white" },
+  "Pending": { short: "?", color: "bg-sky-500", text: "text-white" },
 };
 
 const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
@@ -79,7 +79,7 @@ const MonthlySummary = () => {
           filter: { "professionalInfo.isActive": { $ne: false } }
         });
         setEmployees(res?.data || []);
-        
+
         // Extract unique departments
         const depts = [...new Set(
           (res?.data || [])
@@ -99,7 +99,7 @@ const MonthlySummary = () => {
       try {
         const startDate = `${year}-${String(month + 1).padStart(2, "0")}-01T00:00:00.000Z`;
         const endDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(daysCount).padStart(2, "0")}T23:59:59.999Z`;
-        
+
         const res = await read("attendances", {
           filter: { date: { $gte: startDate, $lte: endDate } },
           limit: 50000,
@@ -129,7 +129,7 @@ const MonthlySummary = () => {
     return employees.filter(emp => {
       const name = `${emp.basicInfo?.firstName || ""} ${emp.basicInfo?.lastName || ""}`.toLowerCase();
       const dept = emp.professionalInfo?.department?.name || "";
-      
+
       if (deptFilter !== "all" && dept !== deptFilter) return false;
       if (searchQuery && !name.includes(searchQuery.toLowerCase())) return false;
       return true;
@@ -140,9 +140,9 @@ const MonthlySummary = () => {
   const stats = useMemo(() => {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    
+
     let totalPresent = 0, totalAbsent = 0, totalLate = 0, totalLeave = 0;
-    
+
     attendanceData.forEach(rec => {
       const s = rec.status;
       if (["Present", "Check-Out", "Work From Home"].includes(s)) totalPresent++;
@@ -178,7 +178,7 @@ const MonthlySummary = () => {
       const name = `${emp.basicInfo?.firstName || ""} ${emp.basicInfo?.lastName || ""}`;
       const dept = emp.professionalInfo?.department?.name || "—";
       let present = 0, absent = 0, late = 0, leave = 0;
-      
+
       const dayCols = dayNumbers.map(day => {
         const dateStr = getLocalDateStr(year, month, day);
         const rec = empDayMap[empId]?.[dateStr];
@@ -212,7 +212,7 @@ const MonthlySummary = () => {
 
   return (
     <div data-module="hr" className="h-full flex flex-col gap-3 overflow-hidden bg-canvas text-ink" style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
-      
+
       {/* ─── HEADER ─── */}
       <div className="flex flex-wrap items-center justify-between gap-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -229,11 +229,11 @@ const MonthlySummary = () => {
 
       {/* ─── STATS ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 flex-shrink-0">
-        <StatCard title="Employees"    value={filteredEmployees.length} icon={Users}         color="blue" />
-        <StatCard title="Present Today" value={stats.todayPresentCount} icon={CheckCircle}   color="green" />
-        <StatCard title="Late Entries"  value={stats.totalLate}         icon={Clock}         color="yellow" />
-        <StatCard title="On Leave"      value={stats.totalLeave}        icon={Sun}           color="purple" />
-        <StatCard title="Total Absent"  value={stats.totalAbsent}       icon={AlertTriangle} color="red" />
+        <StatCard title="Employees" value={filteredEmployees.length} icon={Users} color="blue" />
+        <StatCard title="Present Today" value={stats.todayPresentCount} icon={CheckCircle} color="green" />
+        <StatCard title="Late Entries" value={stats.totalLate} icon={Clock} color="yellow" />
+        <StatCard title="On Leave" value={stats.totalLeave} icon={Sun} color="purple" />
+        <StatCard title="Total Absent" value={stats.totalAbsent} icon={AlertTriangle} color="red" />
       </div>
 
       {/* ─── FILTERS ─── */}
@@ -253,7 +253,7 @@ const MonthlySummary = () => {
           <option value="all">All Departments</option>
           {departments.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
-        
+
         {/* Legend */}
         <div className="ml-auto flex items-center gap-2 flex-wrap text-[11px]">
           {Object.entries(STATUS_MAP).slice(0, 7).map(([key, val]) => (
@@ -282,7 +282,7 @@ const MonthlySummary = () => {
                     ${isToday ? 'bg-accent/10 text-accent' : ''}`}
                   >
                     <div className="flex flex-col items-center leading-tight">
-                      <span className="text-[10px]">{["S","M","T","W","T","F","S"][new Date(year, month, day).getDay()]}</span>
+                      <span className="text-[10px]">{["S", "M", "T", "W", "T", "F", "S"][new Date(year, month, day).getDay()]}</span>
                       <span>{day}</span>
                     </div>
                   </th>
@@ -323,12 +323,12 @@ const MonthlySummary = () => {
                       const sm = STATUS_MAP[rec.status] || { short: "?", color: "bg-gray-300", text: "text-white" };
                       cellContent = sm.short;
                       cellClass = `${sm.color} ${sm.text}`;
-                      
+
                       if (["Present", "Check-Out", "Work From Home", "Late Entry"].includes(rec.status)) pCount++;
                       else if (rec.status === "Half Day") { pCount += 0.5; aCount += 0.5; }
                       else if (["Absent", "Unchecked"].includes(rec.status)) aCount++;
                       else if (["Leave", "LOP"].includes(rec.status)) lCount++;
-                      
+
                       if (rec.workHours) totalHrs += rec.workHours;
                     } else if (weekend) {
                       cellContent = "W";

@@ -10,6 +10,7 @@
 //   - cache version for invalidation detection
 
 import { getPolicy, getRoleMeta, getCacheVersion } from "./cache.js";
+import Role from "../models/Role.js";
 import Employee from "../models/Employee.js";
 import SideBar from "../models/SideBar.js";
 import Resource from "../models/Resource.js";
@@ -109,7 +110,6 @@ export async function buildUserContext(userId, roleId) {
   let roleCapabilities = [];
   try {
     // Fetch role with capabilities populated
-    const Role = (await import('../models/Role.js')).default;
     const role = await Role.findById(roleId)
       .populate('capabilities')
       .lean();

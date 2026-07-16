@@ -47,10 +47,10 @@ const CapabilityManager = ({ formValues, onChange }) => {
   const toggleCapability = (capId) => {
     const currentCaps = formValues?.capabilities || [];
     const exists = currentCaps.includes(capId);
-    const newCaps = exists 
+    const newCaps = exists
       ? currentCaps.filter(id => id !== capId)
       : [...currentCaps, capId];
-    
+
     onChange({ capabilities: newCaps });
   };
 
@@ -68,20 +68,20 @@ const CapabilityManager = ({ formValues, onChange }) => {
         ...newCap,
         status: 'active'
       });
-      
+
       const createdCap = res.data?.data;
       if (createdCap) {
         const capId = createdCap._id?.$oid || createdCap._id;
-        
+
         // Add to form values
         const currentCaps = formValues?.capabilities || [];
         onChange({ capabilities: [...currentCaps, capId] });
-        
+
         // Add to local list
         setAllCapabilities(prev => [...prev, createdCap]);
-        
+
         toast.success(`Created "${newCap.name}"`);
-        
+
         // Reset form
         setNewCap({
           key: '',
@@ -105,9 +105,9 @@ const CapabilityManager = ({ formValues, onChange }) => {
   // Filter capabilities by search term
   const filteredCapabilities = allCapabilities.filter(cap => {
     const search = searchTerm.toLowerCase();
-    return cap.key.toLowerCase().includes(search) || 
-           cap.label.toLowerCase().includes(search) ||
-           cap.module.toLowerCase().includes(search);
+    return cap.key.toLowerCase().includes(search) ||
+      cap.label.toLowerCase().includes(search) ||
+      cap.module.toLowerCase().includes(search);
   });
 
   const selectedCapIds = formValues?.capabilities || [];
@@ -148,7 +148,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
               Cancel
             </button>
           </div>
-          
+
           <form onSubmit={handleCreateCapability} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -156,7 +156,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
                 <input
                   type="text"
                   value={newCap.key}
-                  onChange={e => setNewCap({...newCap, key: e.target.value})}
+                  onChange={e => setNewCap({ ...newCap, key: e.target.value })}
                   placeholder="e.g., dashboard:view"
                   className="tracker-input text-sm"
                   required
@@ -167,20 +167,20 @@ const CapabilityManager = ({ formValues, onChange }) => {
                 <input
                   type="text"
                   value={newCap.module}
-                  onChange={e => setNewCap({...newCap, module: e.target.value})}
+                  onChange={e => setNewCap({ ...newCap, module: e.target.value })}
                   placeholder="e.g., Dashboard"
                   className="tracker-input text-sm"
                   required
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="text-xs text-ink-muted mb-1 block">Label *</label>
               <input
                 type="text"
                 value={newCap.label}
-                onChange={e => setNewCap({...newCap, label: e.target.value})}
+                onChange={e => setNewCap({ ...newCap, label: e.target.value })}
                 placeholder="e.g., View Dashboard"
                 className="tracker-input text-sm"
                 required
@@ -192,7 +192,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
               <input
                 type="text"
                 value={newCap.description}
-                onChange={e => setNewCap({...newCap, description: e.target.value})}
+                onChange={e => setNewCap({ ...newCap, description: e.target.value })}
                 placeholder="Capability description"
                 className="tracker-input text-sm"
               />
@@ -203,7 +203,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
                 <label className="text-xs text-ink-muted mb-1 block">Type</label>
                 <select
                   value={newCap.type}
-                  onChange={e => setNewCap({...newCap, type: e.target.value})}
+                  onChange={e => setNewCap({ ...newCap, type: e.target.value })}
                   className="tracker-input text-sm"
                 >
                   <option value="ui">UI (Sidebar)</option>
@@ -216,7 +216,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
                   type="text"
                   list="inline-action-suggestions"
                   value={newCap.action}
-                  onChange={e => setNewCap({...newCap, action: e.target.value})}
+                  onChange={e => setNewCap({ ...newCap, action: e.target.value })}
                   placeholder="e.g., view"
                   className="tracker-input text-sm"
                   required
@@ -235,7 +235,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
                 <input
                   type="text"
                   value={newCap.resourceKey}
-                  onChange={e => setNewCap({...newCap, resourceKey: e.target.value})}
+                  onChange={e => setNewCap({ ...newCap, resourceKey: e.target.value })}
                   placeholder="e.g., employee"
                   className="tracker-input text-sm"
                 />
@@ -280,31 +280,28 @@ const CapabilityManager = ({ formValues, onChange }) => {
             {filteredCapabilities.map(cap => {
               const isSelected = selectedCapIds.includes(cap._id?.$oid || cap._id);
               const capId = cap._id?.$oid || cap._id;
-              
+
               return (
                 <div
                   key={capId}
                   onClick={() => toggleCapability(capId)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-tracker-md border cursor-pointer transition-colors ${
-                    isSelected 
-                      ? 'bg-accent/10 border-accent/30' 
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-tracker-md border cursor-pointer transition-colors ${isSelected
+                      ? 'bg-accent/10 border-accent/30'
                       : 'bg-canvas-muted/50 border-hairline-soft hover:border-accent/20'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                      isSelected ? 'bg-accent border-accent text-white' : 'border-hairline bg-canvas'
-                    }`}>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-accent border-accent text-white' : 'border-hairline bg-canvas'
+                      }`}>
                       {isSelected && <div className="w-2 h-2 bg-white rounded-sm" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <code className="text-xs font-mono text-accent truncate">{cap.key}</code>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                          cap.type === 'ui' 
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' 
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${cap.type === 'ui'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                             : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
-                        }`}>
+                          }`}>
                           {cap.type}
                         </span>
                       </div>
@@ -322,7 +319,7 @@ const CapabilityManager = ({ formValues, onChange }) => {
       {/* Info */}
       <div className="tracker-card p-4">
         <p className="text-xs text-ink-muted">
-          <strong>Tip:</strong> Select the capabilities required to view this menu item. 
+          <strong>Tip:</strong> Select the capabilities required to view this menu item.
           Users must have at least one of these capabilities in their role to see this menu.
           Click "Create New" to add capabilities inline.
         </p>
@@ -372,10 +369,10 @@ const MenuFormPage = () => {
         });
         const item = res.data?.data;
         if (item?._id?.$oid) item._id = item._id.$oid;
-        
+
         // Convert capabilities to array of IDs
         const capIds = item?.capabilities?.map(c => c._id?.$oid || c._id) || [];
-        
+
         setRecord(item);
         setFormValues({ ...item, capabilities: capIds });
         setInitialDataForTab({ ...item, capabilities: capIds });
@@ -421,7 +418,7 @@ const MenuFormPage = () => {
         await axiosInstance.post("populate/create/sidebars", payload);
         toast.success("Menu item created");
       }
-      navigate("/Settings/Menu");
+      navigate("/settings/menu");
     } catch (err) {
       console.error("Menu save error:", err);
       toast.error(err.response?.data?.message || "Save failed");
@@ -444,7 +441,7 @@ const MenuFormPage = () => {
       {/* Header */}
       <div>
         <button
-          onClick={() => navigate("/Settings/Menu")}
+          onClick={() => navigate("/settings/menu")}
           className="text-sm text-accent hover:underline mb-2 flex items-center gap-1"
         >
           ← Back
@@ -461,11 +458,10 @@ const MenuFormPage = () => {
               key={tab.id}
               type="button"
               onClick={() => handleTabChange(tab.id)}
-              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === tab.id
+              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
                   ? "text-accent border-accent"
                   : "text-ink-muted border-transparent hover:text-ink hover:border-hairline"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -477,7 +473,7 @@ const MenuFormPage = () => {
             <EntityFormPage
               title="Menu item"
               subtitle="Sidebar navigation entry"
-              backTo="/Settings/Menu"
+              backTo="/settings/menu"
               fields={SidebarForm.filter(f => MENU_FORM_TABS[0].fieldNames.includes(f.name))}
               submitButton={{ text: id ? "Update menu item" : "Create menu item", color: "blue" }}
               onSubmit={handleSubmit}

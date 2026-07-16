@@ -12,7 +12,7 @@ const Menu = () => {
   const { hasCapability } = usePermission();
   const [sidebarData, setSidebarData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const basePath = "/Settings/Menu";
+  const basePath = "/settings/menu";
 
   const fetchSidebar = async () => {
     try {
@@ -79,9 +79,8 @@ const Menu = () => {
     },
     isActive: (row) => (
       <span
-        className={`px-2 py-1 rounded text-xs ${
-          row.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-        }`}
+        className={`px-2 py-1 rounded text-xs ${row.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`}
       >
         {row.isActive ? "Active" : "Inactive"}
       </span>

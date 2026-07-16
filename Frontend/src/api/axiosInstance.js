@@ -28,7 +28,8 @@ export const setMaintenanceHandler = (fn) => {
   maintenanceHandler = fn;
 };
 
-const baseUrl = import.meta.env.VITE_APP_URL || "http://localhost:3000"
+const isDev = import.meta.env.DEV;
+const baseUrl = isDev ? "" : (import.meta.env.VITE_APP_URL || "http://localhost:3000");
 
 export const setAuthLogout = (logoutFn) => {
   authContextLogout = logoutFn;
@@ -79,7 +80,7 @@ const forceLogout = async () => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: `${baseUrl}/api`,
+  baseURL: isDev ? '/api' : `${baseUrl}/api`,
   timeout: 100000,
   withCredentials: true,
 });

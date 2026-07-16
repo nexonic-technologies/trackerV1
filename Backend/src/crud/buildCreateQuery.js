@@ -5,6 +5,7 @@ import { getPolicy } from "../utils/cache.js";
 import { pathToFileURL } from "url";
 import sanitizeWrite from "../utils/sanitizeWrite.js";
 import runRegistry from "../utils/registryExecutor.js";
+import { cachedImport } from "../utils/importCache.js";
 
 export default async function buildCreateQuery(ctx) {
   let {
@@ -62,7 +63,7 @@ export default async function buildCreateQuery(ctx) {
 
   if (modelService) {
     const fileUrl = pathToFileURL(modelService).href;
-    const serviceModule = await import(fileUrl);
+    const serviceModule = await cachedImport(fileUrl);
     serviceInstance = serviceModule.default?.();
   }
 
@@ -111,7 +112,7 @@ export default async function buildCreateQuery(ctx) {
 
   // Safe background domain event emission
   try {
-    const { default: domainEventService } = await import("../services/domainEventService.js");
+    const { default: domainEventService } = await cachedImport("../services/domainEventService.js");
     const docsToEmit = Array.isArray(createdDocument) ? createdDocument : [createdDocument];
     for (const doc of docsToEmit) {
       if (doc && doc._id) {

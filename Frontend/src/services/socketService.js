@@ -12,7 +12,10 @@ class SocketService {
   connect(userId, token) {
     if (this.socket?.connected) return;
 
-    this.socket = io(import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || '/', {
+    const isDev = import.meta.env.DEV;
+    const socketUrl = isDev ? window.location.origin : (import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || '/');
+
+    this.socket = io(socketUrl, {
       auth: { token },
       reconnection: true,
       reconnectionDelay: this.reconnectDelay,

@@ -5,6 +5,7 @@ import { pathToFileURL } from "url";
 import sanitizeUpdate from "../utils/sanitizeUpdate.js";
 import runRegistry from "../utils/registryExecutor.js";
 import { saveAuditLog } from "../utils/auditLogger.js";
+import { cachedImport } from "../utils/importCache.js";
 
 export default async function buildUpdateQuery(ctx) {
   let {
@@ -59,7 +60,7 @@ export default async function buildUpdateQuery(ctx) {
 
   if (modelService) {
     const fileUrl = pathToFileURL(modelService).href;
-    const serviceModule = await import(fileUrl);
+    const serviceModule = await cachedImport(fileUrl);
     serviceInstance = serviceModule.default?.();
   }
 
@@ -141,7 +142,7 @@ export default async function buildUpdateQuery(ctx) {
 
   // Safe background domain event emission
   try {
-    const { default: domainEventService } = await import("../services/domainEventService.js");
+    const { default: domainEventService } = await cachedImport("../services/domainEventService.js");
 
     // Extract a minimal diff snapshot of fields that changed
     const beforeSnapshot = {};

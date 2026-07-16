@@ -3,7 +3,7 @@ import axiosInstance from "../../api/axiosInstance";
 import TableGenerator from "../../components/Common/TableGenerator";
 import toast from "react-hot-toast";
 import { StatusBadge } from "../../components/StatusBadge";
-import * as MD from "react-icons/md";
+import { MdAdd, MdClose } from "react-icons/md";
 import SearchableDropdown from "../../components/Common/SearchableDropdown";
 
 
@@ -185,7 +185,7 @@ const Invoices = () => {
           className="tracker-btn-accent flex items-center gap-1.5 px-4 py-2"
           disabled={purchaseOrders.length === 0}
         >
-          <MD.MdAdd className="text-lg" />
+          <MdAdd className="text-lg" />
           Record Invoice
         </button>
       </div>
@@ -255,7 +255,7 @@ const Invoices = () => {
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-hairline">
               <h3 className="text-base font-bold text-ink">Record Vendor Invoice Bill</h3>
               <button onClick={() => setModalOpen(false)} className="text-ink-subtle hover:text-ink">
-                <MD.MdClose className="text-xl" />
+                <MdClose className="text-xl" />
               </button>
             </div>
 

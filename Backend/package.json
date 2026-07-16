@@ -11,8 +11,8 @@
     "backup": "node -e \"import('./src/services/backupService.js').then(s => s.default.createFullBackup())\"",
     "cron:stats": "node -e \"import('./src/cron/AttendanceCron.js').then(m => // console.log(m.monitor.getStats()))\"",
     "queue:health": "node -e \"import('./src/services/attendanceService.js').then(s => // console.log(s.default.getQueueStats()))\"",
-    "db:analyze": "node -e \"import('./src/services/databaseIndexer.js').then(s => s.default.analyzeQueryPerformance())\"",
-    "db:reindex": "node -e \"import('./src/services/databaseIndexer.js').then(s => s.default.createOptimalIndexes())\"",
+    "db:analyze": "node -e \"import('dotenv').then(d => d.config()); import('./src/Config/ConnectDB.js').then(c => c.default()).then(() => import('./src/services/databaseIndexer.js')).then(s => s.default.analyzeQueryPerformance()).then(() => process.exit(0))\"",
+    "db:reindex": "node -e \"import('dotenv').then(d => d.config()); import('./src/Config/ConnectDB.js').then(c => c.default()).then(() => import('./src/services/databaseIndexer.js')).then(s => s.default.createOptimalIndexes()).then(() => process.exit(0))\"",
     "test:security": "node testSecurity.js"
   },
   "keywords": [],
@@ -42,6 +42,7 @@
     "nodemailer": "^9.0.3",
     "pdfkit": "^0.19.1",
     "redis": "^4.6.0",
+    "sharp": "^0.35.3",
     "socket.io": "^4.8.1",
     "ua-parser-js": "^2.0.7",
     "uuid": "^13.0.0"

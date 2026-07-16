@@ -4,6 +4,8 @@ import { getAllServices } from "../utils/servicesCache.js";
 import { getPolicy } from "../utils/cache.js";
 import { pathToFileURL } from "url";
 import { buildMongoFilter } from "../utils/mongoFilterCompiler.js";
+import queryOptimizer from "../utils/queryOptimizer.js";
+import { cachedImport } from "../utils/importCache.js";
 
 import runRegistry from "../utils/registryExecutor.js";
 import sanitizeRead from "../utils/sanitizeRead.js";
@@ -27,6 +29,12 @@ export default async function buildReadQuery(ctx) {
 
   const Model = getModel(modelName);
   if (!Model) throw new Error(`Model "${modelName}" not found`);
+
+  const cacheKey = queryOptimizer.getCacheKey(modelName, { docId, filter, role, userId }, { fields, populateFields });
+  const cachedData = queryOptimizer.getCache(cacheKey);
+  if (cachedData !== null) {
+    return cachedData;
+  }
 
   /** -----------------------------------------------
    * 1) CRUD READ PERMISSION
@@ -69,7 +77,7 @@ export default async function buildReadQuery(ctx) {
 
   if (modelService) {
     const fileUrl = pathToFileURL(modelService).href;
-    const serviceModule = await import(fileUrl);
+    const serviceModule = await cachedImport(fileUrl);
     serviceInstance = serviceModule.default?.();
 
     if (typeof serviceInstance?.beforeRead === "function") {
@@ -126,6 +134,7 @@ export default async function buildReadQuery(ctx) {
       result = await serviceInstance.afterRead(ctx);
     }
 
+    queryOptimizer.setCache(cacheKey, result);
     return result;
   }
 
@@ -277,5 +286,7 @@ export default async function buildReadQuery(ctx) {
     result = await serviceInstance.afterRead(ctx);
   }
 
-  return docId ? result?.[0] : result;
+  const finalResult = docId ? result?.[0] : result;
+  queryOptimizer.setCache(cacheKey, finalResult);
+  return finalResult;
 }

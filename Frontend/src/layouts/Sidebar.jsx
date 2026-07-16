@@ -1,8 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import * as MD from "react-icons/md";
+import { Icon } from "@iconify/react";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { usePermission } from "../context/permissionProvider";
+
+const getIconifyName = (iconName) => {
+  if (!iconName) return "ic:baseline-help-outline";
+  if (iconName.includes(":")) return iconName;
+  
+  if (iconName.startsWith("Md")) {
+    const kebabCase = iconName.substring(2)
+      .replace(/([A-Z])/g, "-$1")
+      .toLowerCase()
+      .replace(/^-/, "");
+    return `ic:baseline-${kebabCase}`;
+  }
+  return "ic:baseline-help-outline";
+};
 
 const Sidebar = ({ isOpen, onClose, onOpen }) => {
   const navigate = useNavigate();
@@ -47,7 +61,7 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
   };
 
   const renderNavItem = (item, isChild = false) => {
-    const Icon = MD[item.icon?.iconName] || MD.MdHelpOutline;
+    const iconName = getIconifyName(item.icon?.iconName);
     const isActive = location.pathname === item.mainRoute;
     const isExpanded = expandedItems.has(item._id);
     const hasChildren = item.children && item.children.length > 0;
@@ -64,6 +78,7 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
     const InnerContent = (
       <>
         <Icon
+          icon={iconName}
           className={`flex-shrink-0 ${isChild ? "text-sm" : "text-lg"}`}
           style={{ color: isActive ? "var(--module-accent)" : "var(--tracker-ink-subtle)" }}
         />
@@ -72,7 +87,8 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
         <div className={`flex items-center flex-1 overflow-hidden transition-all duration-300 ${isExpandedView ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
           <span className="flex-1 truncate whitespace-nowrap">{item.title}</span>
           {hasChildren && (
-            <MD.MdExpandMore
+            <Icon
+              icon="ic:baseline-expand-more"
               className={`text-base flex-shrink-0 transition-transform duration-200 text-ink-subtle ${isExpanded ? "rotate-180" : ""}`}
             />
           )}
@@ -155,7 +171,7 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
             className="tracker-btn-ghost p-1 lg:hidden flex-shrink-0"
             aria-label="Close sidebar"
           >
-            <MD.MdClose className="text-lg" />
+            <Icon icon="ic:baseline-close" className="text-lg" />
           </button>
         )}
       </div>

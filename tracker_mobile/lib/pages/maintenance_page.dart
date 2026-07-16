@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import '../services/api.dart';
 
 class MaintenancePage extends StatefulWidget {

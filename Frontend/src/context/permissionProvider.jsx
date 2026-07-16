@@ -178,7 +178,7 @@ export const PermissionProvider = ({ children }) => {
       } catch {
         // Silently ignore poll errors to avoid spamming the console
       }
-    }, 30000); // 30 second interval
+    }, 5 * 60 * 1000); // 5 minute fallback interval (300000ms)
 
     return () => clearInterval(poll);
   }, [user]);

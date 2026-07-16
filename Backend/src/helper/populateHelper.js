@@ -5,6 +5,7 @@ import { DEFAULT_POPULATE_FIELDS } from "../Config/defaultPopulateFields.js";
 import { requestQueue } from "../services/requestQueue.js";
 import { raceConditionHandler } from "../services/raceConditionHandler.js";
 import { getFingerprint } from "../utils/deviceFingerprint.js";
+import { cachedImport } from "../utils/importCache.js";
 
 // Unified context helper with backward compatibility getters
 function makeCtx({ action, modelName, docId, fields, filter, populateFields, body, user }) {
@@ -49,8 +50,8 @@ export async function populateHelper(req, res, next) {
     // Ensure user has a role — fallback: fetch from DB if missing from JWT (e.g. old tokens)
     if (!user?.role) {
       try {
-        const { default: Employee } = await import('../models/Employee.js');
-        const { default: Role } = await import('../models/Role.js');
+        const { default: Employee } = await cachedImport('../models/Employee.js');
+        const { default: Role } = await cachedImport('../models/Role.js');
         const emp = await Employee.findById(user?.id).select('professionalInfo.role').lean();
         if (emp?.professionalInfo?.role) {
           user.role = emp.professionalInfo.role;
@@ -421,6 +422,12 @@ export async function populateHelper(req, res, next) {
 
     const statusCode = action === "create" ? 201 : 200;
 
+    // Invalidate cache on successful mutations
+    const isMutation = ['create', 'update', 'delete', 'bulk-upsert', 'bulk-create', 'bulk-update', 'bulk-delete'].includes(action);
+    if (isMutation) {
+      queryOptimizer.clearCache(model);
+    }
+
     // Build response with rate limit and lock info
     const response = {
       success: true,
@@ -605,7 +612,7 @@ export default populateHelper;
 // Handle agent client products request
 async function handleAgentClientProducts(req, res, agentId) {
   try {
-    const { buildQuery } = await import("../utils/policy/policyEngine.js");
+    const { buildQuery } = await cachedImport("../utils/policy/policyEngine.js");
 
     // Get agent with populated client
     const agent = await buildQuery(makeCtx({
@@ -642,8 +649,8 @@ async function handleAgentClientProducts(req, res, agentId) {
 // Handle statistics aggregation for models
 async function handleStatistics(req, res, modelName, user, filter) {
   try {
-    const { buildQuery } = await import("../utils/policy/policyEngine.js");
-    const { default: models } = await import("../models/Collection.js");
+    const { buildQuery } = await cachedImport("../utils/policy/policyEngine.js");
+    const { default: models } = await cachedImport("../models/Collection.js");
 
     // First ensure the user has access by using the policy engine to get a scoped filter
     const scopedFilter = await buildQuery(makeCtx({

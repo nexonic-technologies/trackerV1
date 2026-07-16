@@ -3,7 +3,7 @@ import axiosInstance from "../../api/axiosInstance";
 import TableGenerator from "../../components/Common/TableGenerator";
 import toast from "react-hot-toast";
 import { StatusBadge } from "../../components/StatusBadge";
-import * as MD from "react-icons/md";
+import { MdClose } from "react-icons/md";
 import SearchableDropdown from "../../components/Common/SearchableDropdown";
 
 
@@ -189,7 +189,7 @@ const Repairs = () => {
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-hairline">
               <h3 className="text-sm font-bold text-ink">Complete Repair Action</h3>
               <button onClick={() => setCompleteModalOpen(false)} className="text-ink-subtle hover:text-ink">
-                <MD.MdClose className="text-lg" />
+                <MdClose className="text-lg" />
               </button>
             </div>
 

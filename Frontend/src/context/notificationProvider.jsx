@@ -24,7 +24,10 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
 
-    const socketInstance = io(window.location.origin, {
+    const isDev = import.meta.env.DEV;
+    const socketUrl = isDev ? window.location.origin : (import.meta.env.VITE_API_BASE_URL || window.location.origin);
+
+    const socketInstance = io(socketUrl, {
       withCredentials: true,
       transports: ["websocket", "polling"],
       reconnection: true,
