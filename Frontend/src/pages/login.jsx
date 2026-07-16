@@ -119,7 +119,7 @@ const Login = () => {
       let deviceUuid = localStorage.getItem("device_uuid");
       if (!deviceUuid) {
         deviceUuid =
-          "web_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+          "web_" + Date.now() + "_" + Math.random().toString(36).substring(2, 11);
         localStorage.setItem("device_uuid", deviceUuid);
       }
       const response = await axiosInstance.post("/auth/login", {
@@ -268,7 +268,7 @@ const Login = () => {
             </div>
 
             {/* Feature rows */}
-            <div className="flex flex-col gap-2.5 w-80%">
+            <div className="flex flex-col gap-2.5 w-[80%]">
               {FEATURES.map((feat) => (
                 <div
                   key={feat.title}
@@ -328,7 +328,13 @@ const Login = () => {
             </div>
 
             {/* Form */}
-            <div className="flex flex-col gap-4">
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin();
+              }}
+            >
               {/* Work email */}
               <div>
                 <label
@@ -418,7 +424,7 @@ const Login = () => {
               {/* Sign in button */}
               <button
                 id="login-submit"
-                type="button"
+                type="submit"
                 onClick={handleLogin}
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
@@ -436,7 +442,7 @@ const Login = () => {
                   "Sign in"
                 )}
               </button>
-            </div>
+            </form>
 
             {/* OR divider */}
             <div className="lmx-login-divider">OR CONTINUE WITH</div>
