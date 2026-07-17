@@ -96,6 +96,17 @@ export function buildEmployeeFormFields({ designations = [], departments = [], r
 
     { name: "authInfo.workEmail", label: "Work Email", type: "email", required: true },
     { name: "authInfo.password", label: "Password", type: "password" },
+    { name: "authInfo.googleEmail", label: "Google Email (SSO)", type: "email" },
+    {
+      name: "authInfo.googleLoginEnabled",
+      label: "Google Sign-In Enabled",
+      type: "select",
+      options: [
+        { value: true, label: "Enabled" },
+        { value: false, label: "Disabled" },
+      ],
+      defaultValue: false,
+    },
 
     { name: "accountDetails.accountName", label: "Account Name", type: "text" },
     { name: "accountDetails.accountNo", label: "Account Number", type: "text" },

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
 import Employee from "../models/Employee.js";
 import Agent from "../models/Agent.js";
 import session from "../models/Session.js";
@@ -135,6 +136,128 @@ export const login = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+/* ----------------------------- GOOGLE LOGIN ----------------------------- */
+
+export const googleLogin = async (req, res, next) => {
+  try {
+    const { idToken, platform = "web" } = req.body;
+    const deviceUUID = req.headers['x-device-uuid'] || req.headers['deviceuuid'];
+
+    if (!idToken) {
+      return res.status(400).json({ message: "ID Token is required" });
+    }
+
+    if (!deviceUUID) {
+      return res.status(400).json({ message: "Device UUID header is required" });
+    }
+
+    // 1. Verify Google ID token
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.email_verified) {
+      return res.status(400).json({ message: "Google account is not verified" });
+    }
+
+    const email = payload.email.toLowerCase();
+
+    // 2. Find Employee by authInfo.googleEmail == email
+    const user = await Employee.findOne({
+      "authInfo.googleEmail": email,
+    });
+
+    if (!user) {
+      return res.status(403).json({ message: "No employee account is linked to this Google email" });
+    }
+
+    if (!user.authInfo.googleLoginEnabled) {
+      return res.status(403).json({ message: "Google login is disabled for this account" });
+    }
+
+    const userType = "employee";
+
+    // 3. Build payload (same as password login)
+    let tokenPayload = {
+      id: user._id,
+      platform,
+      userType,
+      role: user.professionalInfo.role,
+      department: user.professionalInfo.department,
+      designation: user.professionalInfo.designation,
+      name: user.basicInfo.firstName,
+      managerId: user.professionalInfo.reportingManager,
+    };
+
+    // 4. Generate secrets + jti
+    const accessSecret = generateSecret();
+    const refreshSecret = generateSecret();
+    const jti = generateJti();
+
+    // 5. Create tokens
+    const accessToken = jwt.sign(tokenPayload, accessSecret, {
+      expiresIn: platform === "mobile" ? "36500d" : "1h",
+    });
+
+    const refreshToken = jwt.sign(
+      { id: tokenPayload.id, platform, jti },
+      refreshSecret,
+      { expiresIn: platform === "mobile" ? "36500d" : "7d" }
+    );
+
+    // 6. Create session with authMethod: "google"
+    const userSession = await session.create({
+      userId: tokenPayload.id,
+      userModel: "employees",
+      platform,
+      deviceUUID,
+      authMethod: "google",
+      generatedToken: {
+        token: accessToken,
+        secret: accessSecret,
+        expiry: platform === "mobile" ? "36500d" : "1h",
+      },
+      refreshToken: {
+        token: refreshToken,
+        secret: refreshSecret,
+        jti,
+        expiry: platform === "mobile" ? "36500d" : "7d",
+      },
+      deviceInfo: getDeviceInfo(req, platform),
+      status: "Active",
+    });
+
+    // 7. Set cookies (web)
+    if (platform === "web") {
+      res.cookie("auth_token", accessToken, {
+        httpOnly: false,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000,
+      });
+
+      res.cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    }
+
+    return res.json({
+      message: "Login successful",
+      accessToken,
+      refreshToken,
+      sessionId: userSession._id,
+      platform,
+    });
+  } catch (err) {
+    console.error("Google SSO verification failed:", err);
+    return res.status(401).json({ message: "Google authentication failed or expired" });
   }
 };
 

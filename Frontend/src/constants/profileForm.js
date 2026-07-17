@@ -169,6 +169,27 @@ export const profileFormFields = (userData) => [
     orderKey: 22,
     gridClass: "col-span-1",
   },
+
+  // Security & SSO Linkage Info
+  {
+    name: "authInfo.googleEmail",
+    label: "Google Email (SSO)",
+    type: "email",
+    placeholder: "Enter your Google/Gmail address",
+    orderKey: 23,
+    gridClass: "col-span-1",
+  },
+  {
+    name: "authInfo.googleLoginEnabled",
+    label: "Google Sign-In",
+    type: "select",
+    options: [
+      { value: true, label: "Enabled" },
+      { value: false, label: "Disabled" },
+    ],
+    orderKey: 24,
+    gridClass: "col-span-1",
+  },
 ];
 
 export const profileSubmitButton = {
@@ -179,12 +200,14 @@ export const profileSubmitButton = {
 /** Tab config for profile edit — keeps one FormRenderer across tab switches */
 export const PROFILE_FORM_TABS = [
   { id: "personal", label: "Personal", fieldPrefixes: ["basicInfo"] },
+  { id: "security", label: "Security", fieldPrefixes: ["authInfo"] },
   { id: "financial", label: "Financial", fieldPrefixes: ["accountDetails"] },
   { id: "documents", label: "Documents", fieldPrefixes: ["personalDocuments"] },
 ];
 
 export const PROFILE_SUBMIT_LABELS = {
   personal: "Update Personal Info",
+  security: "Update Security Settings",
   financial: "Update Financial Info",
   documents: "Update Documents",
 };

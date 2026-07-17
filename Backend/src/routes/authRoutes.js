@@ -2,7 +2,7 @@
 import express from "express";
 import {
   login, logout, refresh, authMiddleware, storePushToken, sendManualTestNotification,
-  forgotPassword, resetPassword, getMe, getContext, changePassword
+  forgotPassword, resetPassword, getMe, getContext, changePassword, googleLogin
 } from "../Controller/AuthController.js"
 
 const router = express.Router();
@@ -19,6 +19,9 @@ router.get("/me/context", authMiddleware, getContext);
 router.post("/login", (req, res, next) => {
   next();
 }, login);
+
+// Google OAuth Login
+router.post("/google", googleLogin);
 
 // Refresh access token
 router.post("/refresh", refresh);

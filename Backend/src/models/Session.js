@@ -42,6 +42,12 @@ const sessionsSchema = new Schema({
     default: "Active",
     index: true
   },
+  authMethod: {
+    type: String,
+    enum: ["password", "google", "microsoft", "totp"],
+    default: "password",
+    index: true
+  },
   fcmToken: {
     type: String,
     default: null
