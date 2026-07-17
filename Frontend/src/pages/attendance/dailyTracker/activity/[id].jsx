@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useGenericAPI from "../../../../components/useGenericAPI";
-import Activity from "../Activity";
+import Activity from "../activity";
 import FormPageLayout from "../../../../components/Forms/FormPageLayout";
 
 const ActivityDetailPage = () => {
@@ -17,10 +17,10 @@ const ActivityDetailPage = () => {
         const res = await read("dailyactivities", {
           id,
           populateFields: {
-            projectType:  "name",
+            projectType: "name",
             activityType: "name",
-            client:       "name",
-            user:         "basicInfo.firstName,basicInfo.lastName",
+            client: "name",
+            user: "basicInfo.firstName,basicInfo.lastName",
           },
         });
         setActivity(res?.data ?? null);
