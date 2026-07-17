@@ -376,7 +376,7 @@ export default function FeedComposer({
                       {emp.basicInfo?.firstName} {emp.basicInfo?.lastName}
                     </p>
                     <p className="text-[11px] text-ink-subtle truncate">
-                      {emp.professionalInfo?.designation || 'Member'}
+                      {emp.professionalInfo?.designation?.title || emp.professionalInfo?.designation?.name || (typeof emp.professionalInfo?.designation === 'string' ? emp.professionalInfo?.designation : '') || 'Member'}
                     </p>
                   </div>
                 </button>
