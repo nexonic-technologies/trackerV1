@@ -410,7 +410,13 @@ export default function PostCard({ post, onRefresh, onEditDraft }) {
                 {isAuthor && (
                   <>
                     <div className="border-t my-1" />
-                    <button className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-ink hover:bg-surface-1 transition-colors">
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        if (onEditDraft) onEditDraft(localPost);
+                      }}
+                      className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-ink hover:bg-surface-1 transition-colors"
+                    >
                       <FiEdit2 /> Edit post
                     </button>
                     <button onClick={handleDeletePost} className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
