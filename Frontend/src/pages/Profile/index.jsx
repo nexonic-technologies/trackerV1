@@ -263,6 +263,7 @@ const Profile = () => {
         <div className={`lmx-tab-bar mb-6`}>
           <Tab active={tab === 'personal'} onClick={() => setTab('personal')} icon={icons.user} label="Personal" />
           <Tab active={tab === 'professional'} onClick={() => setTab('professional')} icon={icons.case} label="Professional" />
+          <Tab active={tab === 'security'} onClick={() => setTab('security')} icon={icons.shield} label="Security" />
           <Tab active={tab === 'financial'} onClick={() => setTab('financial')} icon={icons.bank} label="Financial" />
           <Tab active={tab === 'documents'} onClick={() => setTab('documents')} icon={icons.doc} label="Documents" />
           <Tab active={tab === 'assets'} onClick={() => setTab('assets')} icon={icons.device} label="My Assets" />
@@ -332,6 +333,15 @@ const Profile = () => {
               <Row icon={icons.cal} label="Joined" value={fmtDate(employee.professionalInfo?.doj)} />
               <Row icon={icons.cal} label="Probation" value={employee.professionalInfo?.probationPeriod} />
               <Row icon={icons.cal} label="Confirmed" value={fmtDate(employee.professionalInfo?.confirmDate)} />
+            </Card>
+          </div>
+        )}
+
+        {tab === 'security' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <Card icon={icons.shield} title="Security & SSO Linkage" color="indigo">
+              <Row icon={icons.mail} label="Google Email" value={employee.authInfo?.googleEmail} />
+              <Row icon={icons.shield} label="Google Sign-In" value={employee.authInfo?.googleLoginEnabled ? "Enabled" : "Disabled"} />
             </Card>
           </div>
         )}

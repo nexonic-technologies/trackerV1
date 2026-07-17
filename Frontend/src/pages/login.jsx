@@ -26,7 +26,7 @@ const FEATURES = [
   {
     icon: Users,
     title: "HR Operations",
-    desc: "People, payroll & attendance",
+    desc: "Manage Employee Management",
     iconBg: "bg-[#ede9fe]",
     iconColor: "text-[#7c3aed]",
   },
@@ -40,14 +40,14 @@ const FEATURES = [
   {
     icon: TicketCheck,
     title: "Tickets",
-    desc: "Resolve issues faster",
+    desc: "Track the customers pain areas",
     iconBg: "bg-[#ffe4ec]",
     iconColor: "text-[#e11d48]",
   },
   {
     icon: BarChart2,
     title: "Analytics",
-    desc: "Data that drives decisions",
+    desc: "Track growth and productivity",
     iconBg: "bg-[#d1fae5]",
     iconColor: "text-[#059669]",
   },
@@ -108,6 +108,83 @@ const Login = () => {
     }
   }, []);
 
+  // ── Google SSO Integration ─────────────────────────────────────────
+  const handleGoogleCallback = async (response) => {
+    setLoading(true);
+    try {
+      let deviceUuid = localStorage.getItem("device_uuid");
+      if (!deviceUuid) {
+        deviceUuid =
+          "web_" + Date.now() + "_" + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem("device_uuid", deviceUuid);
+      }
+      
+      const res = await axiosInstance.post("/auth/google", {
+        idToken: response.credential,
+        platform: "web",
+      });
+      
+      if (res.status === 200 && res.data.accessToken) {
+        const decoded = jwtDecode(res.data.accessToken);
+        localStorage.setItem("auth_token", res.data.accessToken);
+        localStorage.setItem("refresh_token", res.data.refreshToken);
+        setUser(decoded);
+        
+        try {
+          const fcmToken = await requestFirebaseToken();
+          if (fcmToken) {
+            await axiosInstance.post("/auth/store-push-token", {
+              sessionId: res.data.sessionId,
+              fcmToken,
+            });
+          }
+        } catch (fcmError) {
+          console.error("FCM Token registration failed:", fcmError);
+        }
+        
+        toast.success("Welcome back!");
+        navigate("/dashboard");
+      } else {
+        toast.error("Google login failed");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Google authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const renderGoogleBtn = () => {
+      const btnEl = document.getElementById("google-sso-button");
+      if (window.google?.accounts?.id && btnEl) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleCallback,
+        });
+        window.google.accounts.id.renderButton(btnEl, {
+          theme: theme === "dark" ? "filled_black" : "outline",
+          size: "large",
+          width: btnEl.offsetWidth || 180,
+          shape: "rectangular",
+        });
+      }
+    };
+
+    if (!document.getElementById("google-gsi-script")) {
+      const script = document.createElement("script");
+      script.id = "google-gsi-script";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = renderGoogleBtn;
+      document.body.appendChild(script);
+    } else {
+      const timer = setTimeout(renderGoogleBtn, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [theme]);
+
   /* ── Login (unchanged business logic) ──────────────────────────────── */
   const handleLogin = async () => {
     if (!workEmail || !password) {
@@ -159,10 +236,9 @@ const Login = () => {
 
   /* ── Focus-ring wrapper ─────────────────────────────────────────────── */
   const inputWrap = (field) =>
-    `flex items-center border rounded-[12px] transition-all bg-white dark:bg-[var(--tracker-surface-1)] ${
-      focusedField === field
-        ? "border-[var(--tracker-border-focus)] ring-[3px] ring-violet-500/15"
-        : "border-[var(--tracker-border)] hover:border-[var(--tracker-ink-subtle)]"
+    `flex items-center border rounded-[12px] transition-all bg-white dark:bg-[var(--tracker-surface-1)] ${focusedField === field
+      ? "border-[var(--tracker-border-focus)] ring-[3px] ring-violet-500/15"
+      : "border-[var(--tracker-border)] hover:border-[var(--tracker-ink-subtle)]"
     }`;
 
   /* ════════════════════════════════════════════════════════════════════ */
@@ -225,8 +301,8 @@ const Login = () => {
       </div>
 
       {/* Top Brand Logo */}
-      <div className="absolute top-6 left-6 lg:top-10 lg:left-40 z-20 flex items-center gap-3.5 select-none">
-        <div className="h-12 w-12 rounded-xl bg-white/85 dark:bg-[#7c3aed]/20 backdrop-blur-md shadow-sm border border-white/50 dark:border-white/10 flex items-center justify-center transition-transform hover:scale-105">
+      <div className="absolute top-6 left-6 lg:top-10 lg:left-10 z-20 flex items-center gap-3.5 select-none">
+        <div className="h-6 w-6 rounded-xl bg-white/85 dark:bg-[#7c3aed]/20 backdrop-blur-md shadow-sm border border-white/50 dark:border-white/10 flex items-center justify-center transition-transform hover:scale-105">
           <Shield
             className="h-7 w-7 text-[#7c3aed] dark:text-[#a78bfa]"
             strokeWidth={2.25}
@@ -241,7 +317,7 @@ const Login = () => {
       <button
         type="button"
         onClick={toggleTheme}
-        className="absolute top-6 right-6 lg:top-10 lg:right-40 z-20 p-3 rounded-xl bg-white/80 dark:bg-white/10 backdrop-blur border border-white/40 dark:border-white/10 text-[var(--tracker-ink)] hover:scale-105 active:scale-95 transition-transform"
+        className="absolute top-3 right-3 lg:top-10 lg:right-10 z-20 p-2 rounded-xl bg-white/80 dark:bg-white/10 backdrop-blur border border-white/40 dark:border-white/10 text-[var(--tracker-ink)] hover:scale-105 active:scale-95 transition-transform"
         aria-label="Toggle theme"
       >
         <span key={theme} className="inline-flex" aria-hidden>
@@ -255,229 +331,219 @@ const Login = () => {
 
       {/* ── Two cards — left features + right login card ── */}
       <div className="relative z-10 w-full flex flex-row items-center min-h-screen px-6 lg:px-40 py-10">
-          {/* ── LEFT CARD — Feature list ──────────────────────────────── */}
-          <div className="lmx-login-feature-card hidden lg:flex flex-col w-[440px] flex-shrink-0 py-6 pr-8 pl-0 gap-5">
-            {/* Heading */}
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--tracker-ink)] leading-snug">
-                Welcome back! 👋
-              </h1>
-              <p className="text-sm text-[var(--tracker-ink-muted)] mt-1">
-                Sign in to continue to your workspace
-              </p>
-            </div>
-
-            {/* Feature rows */}
-            <div className="flex flex-col gap-2.5 w-[80%]">
-              {FEATURES.map((feat) => (
-                <div
-                  key={feat.title}
-                  className="lmx-login-inner-row flex items-center gap-3 px-4 py-3"
-                >
-                  <div
-                    className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${feat.iconBg}`}
-                  >
-                    <feat.icon className={`h-5 w-5 ${feat.iconColor}`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--tracker-ink)]">
-                      {feat.title}
-                    </p>
-                    <p className="text-xs text-[var(--tracker-ink-subtle)] mt-0.5">
-                      {feat.desc}
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-[var(--tracker-ink-subtle)] flex-shrink-0" />
-                </div>
-              ))}
-            </div>
-
-            {/* Security strip */}
-            <div className="border-t border-[var(--tracker-border)] pt-4 flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5 text-[var(--tracker-ink-subtle)] flex-shrink-0" />
-              <div className="flex-1">
-                <p className="text-xs font-medium text-[var(--tracker-ink-muted)]">
-                  Secure enterprise access
-                </p>
-                <p className="text-[11px] text-[var(--tracker-ink-subtle)]">
-                  Your data is safe with us
-                </p>
-              </div>
-              <Shield className="h-5 w-5 text-[#7c3aed] flex-shrink-0" />
-            </div>
-          </div>
-
-          {/* ── RIGHT CARD — Login form ──────────────────────────────────── */}
-          <div className="lmx-login-card w-full lg:w-[450px] flex-shrink-0 p-8 sm:p-10 flex flex-col gap-5 lg:ml-auto">
-            {/* Card header (shows on mobile viewport only) */}
-            <div className="lg:hidden">
-              <p className="lmx-login-eyebrow mb-1 justify-end">
-                Account Sign-In
-              </p>
-              <h2 className="text-2xl font-bold text-[var(--tracker-ink)] tracking-tight">
-                Sign in
-              </h2>
-              <p className="text-sm text-[var(--tracker-ink-muted)] mt-1">
-                Use your corporate email to continue
-              </p>
-            </div>
-
-            {/* Account Sign-In eyebrow for desktop view */}
-            <div className="hidden lg:block">
-              <p className="lmx-login-eyebrow">Account Sign-In</p>
-            </div>
-
-            {/* Form */}
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleLogin();
-              }}
-            >
-              {/* Work email */}
-              <div>
-                <label
-                  htmlFor="login-email"
-                  className="block text-sm font-medium text-[var(--tracker-ink)] mb-1.5"
-                >
-                  Work email
-                </label>
-                <div className={inputWrap("email")}>
-                  <Mail className="h-4 w-4 text-[var(--tracker-ink-subtle)] ml-3.5 flex-shrink-0" />
-                  <input
-                    id="login-email"
-                    type="email"
-                    value={workEmail}
-                    onChange={(e) => setWorkEmail(e.target.value)}
-                    onFocus={() => setFocusedField("email")}
-                    onBlur={() => setFocusedField(null)}
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                    className="lmx-input !border-0 !shadow-none !ring-0 !bg-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label
-                  htmlFor="login-password"
-                  className="block text-sm font-medium text-[var(--tracker-ink)] mb-1.5"
-                >
-                  Password
-                </label>
-                <div className={inputWrap("password")}>
-                  <Lock className="h-4 w-4 text-[var(--tracker-ink-subtle)] ml-3.5 flex-shrink-0" />
-                  <input
-                    id="login-password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField("password")}
-                    onBlur={() => setFocusedField(null)}
-                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                    placeholder="••••••••••"
-                    autoComplete="current-password"
-                    className="lmx-input !border-0 !shadow-none !ring-0 !bg-transparent"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="mr-3 p-1.5 text-[var(--tracker-ink-subtle)] hover:text-[var(--tracker-ink)] transition-colors"
-                    tabIndex={-1}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Remember me + Forgot */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    id="login-remember"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-[var(--tracker-border)] accent-[var(--brand-solid)] cursor-pointer"
-                  />
-                  <span className="text-sm text-[var(--tracker-ink-muted)]">
-                    Remember me
-                  </span>
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-sm font-semibold text-[#3b5bdb] hover:text-[#6c3de8] transition-colors dark:text-[#a5b4fc]"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-
-              {/* Sign in button */}
-              <button
-                id="login-submit"
-                type="submit"
-                onClick={handleLogin}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #3b5bdb 0%, #6c3de8 100%)",
-                }}
-              >
-                {loading ? (
-                  <>
-                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign in"
-                )}
-              </button>
-            </form>
-
-            {/* OR divider */}
-            <div className="lmx-login-divider">OR CONTINUE WITH</div>
-
-            {/* Social buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="lmx-login-social-btn"
-                aria-label="Sign in with Microsoft"
-                onClick={() => toast("Microsoft SSO coming soon")}
-              >
-                <MicrosoftIcon />
-                <span className="text-sm font-medium text-[var(--tracker-ink)]">
-                  Microsoft
-                </span>
-              </button>
-              <button
-                type="button"
-                className="lmx-login-social-btn"
-                aria-label="Sign in with Google"
-                onClick={() => toast("Google SSO coming soon")}
-              >
-                <GoogleIcon />
-                <span className="text-sm font-medium text-[var(--tracker-ink)]">
-                  Google
-                </span>
-              </button>
-            </div>
-
-            {/* Footer */}
-            <p className="text-center text-[11px] font-semibold tracking-widest uppercase text-[var(--tracker-ink-subtle)]">
-              🔒 Authorized personnel only
+        {/* ── LEFT CARD — Feature list ──────────────────────────────── */}
+        <div className="lmx-login-feature-card hidden lg:flex flex-col w-[440px] flex-shrink-0 py-6 pr-8 pl-0 gap-5">
+          {/* Heading */}
+          <div>
+            <h1 className="text-[28px] font-bold text-[var(--tracker-ink)] leading-snug tracking-tight">
+              Your complete<br />enterprise workspace
+            </h1>
+            <p className="text-sm text-[var(--tracker-ink-muted)] mt-1.5 leading-relaxed">
+              Manage your entire workforce in one connected platform.
             </p>
           </div>
+
+          {/* Feature rows */}
+          <div className="flex flex-col gap-2.5 w-[80%]">
+            {FEATURES.map((feat) => (
+              <div
+                key={feat.title}
+                className="lmx-login-inner-row flex items-center gap-3 px-4 py-3"
+              >
+                <div
+                  className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${feat.iconBg}`}
+                >
+                  <feat.icon className={`h-5 w-5 ${feat.iconColor}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[var(--tracker-ink)]">
+                    {feat.title}
+                  </p>
+                  <p className="text-xs text-[var(--tracker-ink-subtle)] mt-0.5">
+                    {feat.desc}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-[var(--tracker-ink-subtle)] flex-shrink-0" />
+              </div>
+            ))}
+          </div>
+
+          {/* Security strip */}
+          <div className="border-t border-[var(--tracker-border)] pt-4 flex items-center gap-2">
+            <Lock className="h-3.5 w-3.5 text-[var(--tracker-ink-subtle)] flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs font-medium text-[var(--tracker-ink-muted)]">
+                Secure enterprise access
+              </p>
+              <p className="text-[11px] text-[var(--tracker-ink-subtle)]">
+                Your data is safe with us
+              </p>
+            </div>
+            <Shield className="h-5 w-5 text-[#7c3aed] flex-shrink-0" />
+          </div>
+        </div>
+
+        {/* ── RIGHT CARD — Login form ──────────────────────────────────── */}
+        <div className="lmx-login-card w-full lg:w-[450px] flex-shrink-0 p-8 sm:p-10 flex flex-col gap-5 lg:ml-auto">
+          {/* Card header (shows on mobile viewport only) */}
+          <div className="lg:hidden">
+            <p className="lmx-login-eyebrow mb-1 justify-end">
+              Account Sign-In
+            </p>
+            <h2 className="text-2xl font-bold text-[var(--tracker-ink)] tracking-tight">
+              Sign in
+            </h2>
+            <p className="text-sm text-[var(--tracker-ink-muted)] mt-1">
+              Use your corporate email to continue
+            </p>
+          </div>
+
+          {/* Account Sign-In eyebrow for desktop view */}
+          <div className="hidden lg:block">
+            <p className="lmx-login-eyebrow">Account Sign-In</p>
+          </div>
+
+          {/* Form */}
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+          >
+            {/* Work email */}
+            <div>
+              <label
+                htmlFor="login-email"
+                className="block text-sm font-medium text-[var(--tracker-ink)] mb-1.5"
+              >
+                Work email
+              </label>
+              <div className={inputWrap("email")}>
+                <Mail className="h-4 w-4 text-[var(--tracker-ink-subtle)] ml-3.5 flex-shrink-0" />
+                <input
+                  id="login-email"
+                  type="email"
+                  value={workEmail}
+                  onChange={(e) => setWorkEmail(e.target.value)}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  className="lmx-input !border-0 !shadow-none !ring-0 !bg-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="login-password"
+                className="block text-sm font-medium text-[var(--tracker-ink)] mb-1.5"
+              >
+                Password
+              </label>
+              <div className={inputWrap("password")}>
+                <Lock className="h-4 w-4 text-[var(--tracker-ink-subtle)] ml-3.5 flex-shrink-0" />
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  placeholder="••••••••••"
+                  autoComplete="current-password"
+                  className="lmx-input !border-0 !shadow-none !ring-0 !bg-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="mr-3 p-1.5 text-[var(--tracker-ink-subtle)] hover:text-[var(--tracker-ink)] transition-colors"
+                  tabIndex={-1}
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember me + Forgot */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  id="login-remember"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--tracker-border)] accent-[var(--brand-solid)] cursor-pointer"
+                />
+                <span className="text-sm text-[var(--tracker-ink-muted)]">
+                  Remember me
+                </span>
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-sm font-semibold text-[#3b5bdb] hover:text-[#6c3de8] transition-colors dark:text-[#a5b4fc]"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Sign in button */}
+            <button
+              id="login-submit"
+              type="submit"
+              onClick={handleLogin}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+              style={{
+                background:
+                  "linear-gradient(135deg, #3b5bdb 0%, #6c3de8 100%)",
+              }}
+            >
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+
+          {/* OR divider */}
+          <div className="lmx-login-divider">OR CONTINUE WITH</div>
+
+          {/* Social buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              className="lmx-login-social-btn"
+              aria-label="Sign in with Microsoft"
+              onClick={() => toast("Microsoft SSO coming soon")}
+            >
+              <MicrosoftIcon />
+              <span className="text-sm font-medium text-[var(--tracker-ink)]">
+                Microsoft
+              </span>
+            </button>
+            <div id="google-sso-button" className="min-h-[42px] w-full flex items-center justify-center"></div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-[11px] font-semibold tracking-widest uppercase text-[var(--tracker-ink-subtle)]">
+            🔒 Authorized personnel only
+          </p>
+        </div>
       </div>
     </div>
   );
