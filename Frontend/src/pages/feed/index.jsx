@@ -298,6 +298,9 @@ export default function Feeds() {
     setPostSubject(draftPost.subject || '');
     setPostContent(draftPost.content || '');
     setPostType(draftPost.postType || 'Update');
+    if (draftPost.postType === 'Poll' && draftPost.pollOptions) {
+      setPollOptions(draftPost.pollOptions.map(opt => opt.optionText || opt));
+    }
     if (draftPost.group) {
       setTargetType('Group');
       setTargetId(draftPost.group._id || draftPost.group);
@@ -311,7 +314,7 @@ export default function Feeds() {
     setPostMentions(draftPost.mentions || []);
     setIsComposerExpanded(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast.success('Draft loaded into composer!');
+    toast.success(draftPost.isDraft ? 'Draft loaded into composer!' : 'Post loaded into composer!');
   };
 
   const handleCreatePost = async () => {

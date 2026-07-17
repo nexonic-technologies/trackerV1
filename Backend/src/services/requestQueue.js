@@ -310,16 +310,28 @@ export const queueMiddleware = (options = {}) => {
     }
   } = options;
 
-  return (req, res, next) => {
+  return async (req, res, next) => {
     if (!enabled || !shouldQueue(req)) {
       return next();
     }
 
     const fingerprint = keyGenerator(req);
-    const status = requestQueue.enqueue(fingerprint, () => {
-      // This will be called when request is at front of queue
+
+    // Check server-wide concurrency ceiling before even queuing
+    if (requestQueue._serverProcessing >= requestQueue.config.maxServerConcurrent) {
+      return onQueueFull(req, res);
+    }
+
+    // Check per-device queue size ceiling
+    const deviceQueue = requestQueue.queues.get(fingerprint) || [];
+    if (deviceQueue.length >= requestQueue.config.maxQueueSize) {
+      return onQueueFull(req, res);
+    }
+
+    // Enqueue is async — must be awaited to get the actual result object
+    const status = await requestQueue.enqueue(fingerprint, () => {
+      // This runs when the request reaches the front of the queue
       return new Promise((resolve, reject) => {
-        // We'll wrap the response to capture it
         const originalJson = res.json.bind(res);
         const originalSend = res.send.bind(res);
 
@@ -333,30 +345,29 @@ export const queueMiddleware = (options = {}) => {
           return originalSend(data);
         };
 
-        // Continue with normal request processing
+        // Hand off to the next middleware / route handler
         next();
       });
-    }, { 
+    }, {
       metadata: {
         route: req.originalUrl,
         method: req.method,
-        action: req.params.action,
-        model: req.params.model
+        action: req.params?.action,
+        model: req.params?.model
       }
     });
 
-    if (!status.success) {
+    if (!status || !status.success) {
       return onQueueFull(req, res);
     }
 
-    // Attach queue info to request
+    // Attach queue info to request for downstream inspection
     req.queue = {
       queueId: status.queueId,
       position: status.position,
       queueLength: status.queueLength
     };
 
-    // Add response headers
     res.set('X-Queue-Position', String(status.position));
     res.set('X-Queue-Length', String(status.queueLength));
   };
