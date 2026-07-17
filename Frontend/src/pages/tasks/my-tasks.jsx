@@ -3,22 +3,22 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/authProvider";
 import { useNavigate } from "react-router-dom";
 import KanbanBoard from "../../components/Common/KambanBoard";
-import GanttView from "./GanttView";
+import GanttView from "./gantt-view";
 import TaskSkeleton from "../../components/Common/TaskSkeleton";
 import { User, Plus, Search, X, ChevronDown, SlidersHorizontal, LayoutGrid, CalendarDays, Download } from "lucide-react";
 
 const STATUS_COLS = [
-  { id: "Backlogs",    title: "Backlogs" },
-  { id: "To Do",       title: "To Do" },
+  { id: "Backlogs", title: "Backlogs" },
+  { id: "To Do", title: "To Do" },
   { id: "In Progress", title: "In Progress" },
-  { id: "In Review",   title: "In Review" },
-  { id: "Approved",    title: "Approved" },
-  { id: "Completed",   title: "Completed" },
+  { id: "In Review", title: "In Review" },
+  { id: "Approved", title: "Approved" },
+  { id: "Completed", title: "Completed" },
 ];
 const PRIORITY_COLS = [
-  { id: "Low",             title: "Low" },
-  { id: "Medium",          title: "Medium" },
-  { id: "High",            title: "High" },
+  { id: "Low", title: "Low" },
+  { id: "Medium", title: "Medium" },
+  { id: "High", title: "High" },
   { id: "Weekly Priority", title: "Weekly Priority" },
 ];
 
@@ -42,27 +42,27 @@ const FilterSelect = ({ label, value, onChange, options }) => (
 );
 
 const PRIORITIES = ["Low", "Medium", "High", "Weekly Priority"];
-const STATUSES   = ["Backlogs", "To Do", "In Progress", "In Review", "Approved", "Completed"];
+const STATUSES = ["Backlogs", "To Do", "In Progress", "In Review", "Approved", "Completed"];
 
 const MyTasks = () => {
-  const { user }  = useAuth();
-  const navigate  = useNavigate();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const [allTasks, setAllTasks]         = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [groupBy, setGroupBy]           = useState("status");
-  const [viewMode, setViewMode]         = useState("board");
-  const [employees, setEmployees]       = useState([]);
-  const [taskTypes, setTaskTypes]       = useState([]);
-  const [showFilters, setShowFilters]   = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [groupBy, setGroupBy] = useState("status");
+  const [viewMode, setViewMode] = useState("board");
+  const [employees, setEmployees] = useState([]);
+  const [taskTypes, setTaskTypes] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const [search,    setSearch]    = useState("");
-  const [fStatus,   setFStatus]   = useState(null);
+  const [search, setSearch] = useState("");
+  const [fStatus, setFStatus] = useState(null);
   const [fPriority, setFPriority] = useState(null);
   const [fAssignee, setFAssignee] = useState(null);
   const [fDateFrom, setFDateFrom] = useState("");
-  const [fDateTo,   setFDateTo]   = useState("");
+  const [fDateTo, setFDateTo] = useState("");
 
   useEffect(() => { fetchMyTasks(); fetchMeta(); }, []);
 
@@ -72,11 +72,11 @@ const MyTasks = () => {
       const res = await axiosInstance.post("/populate/read/tasks", {
         filter: { assignedTo: user.id, metaStatus: { $ne: 'archived' } },
         populateFields: {
-          clientId:      "name",
+          clientId: "name",
           projectTypeId: "name",
-          taskTypeId:    "name",
-          createdBy:     "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
-          assignedTo:    "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
+          taskTypeId: "name",
+          createdBy: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
+          assignedTo: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
         },
         limit: 500,
       });
@@ -114,8 +114,8 @@ const MyTasks = () => {
     try {
       setAllTasks(prev => prev.map(t => t._id === task._id ? { ...t, [field]: value } : t));
       await axiosInstance.put(`/populate/update/tasks/${task._id}`, { [field]: value });
-    } catch (e) { 
-      console.error(e); 
+    } catch (e) {
+      console.error(e);
       setAllTasks(prev => prev.map(t => t._id === task._id ? { ...t, [field]: task[field] } : t));
     }
   };
@@ -147,11 +147,11 @@ const MyTasks = () => {
         (t.userStory || "").toLowerCase().includes(q)
       );
     }
-    if (fStatus)   d = d.filter(t => t.status === fStatus);
+    if (fStatus) d = d.filter(t => t.status === fStatus);
     if (fPriority) d = d.filter(t => t.priorityLevel === fPriority);
     if (fAssignee) d = d.filter(t => t.assignedTo?.some(a => String(a._id || a) === fAssignee));
     if (fDateFrom) d = d.filter(t => t.createdAt && new Date(t.createdAt) >= new Date(fDateFrom));
-    if (fDateTo)   d = d.filter(t => t.createdAt && new Date(t.createdAt) <= new Date(fDateTo + "T23:59:59"));
+    if (fDateTo) d = d.filter(t => t.createdAt && new Date(t.createdAt) <= new Date(fDateTo + "T23:59:59"));
     return d;
   }, [allTasks, search, fStatus, fPriority, fAssignee, fDateFrom, fDateTo]);
 
@@ -238,11 +238,10 @@ const MyTasks = () => {
 
           <button
             onClick={() => setShowFilters(v => !v)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-tracker-md text-[12px] font-semibold border transition-colors ${
-              showFilters || activeFilters > 0
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-tracker-md text-[12px] font-semibold border transition-colors ${showFilters || activeFilters > 0
                 ? "border-[var(--module-project)] bg-[var(--module-project-light)] text-[var(--module-project)]"
                 : "border-hairline bg-surface text-ink-muted hover:text-ink"
-            }`}
+              }`}
           >
             <SlidersHorizontal size={13} />
             Filters {activeFilters > 0 && (
@@ -269,7 +268,7 @@ const MyTasks = () => {
         {showFilters && (
           <div className="flex flex-wrap gap-2 pt-1 border-t border-hairline-soft">
             <FilterSelect
-              label="All Statuses"   value={fStatus}   onChange={setFStatus}
+              label="All Statuses" value={fStatus} onChange={setFStatus}
               options={STATUSES.map(s => ({ value: s, label: s }))}
             />
             <FilterSelect
@@ -277,7 +276,7 @@ const MyTasks = () => {
               options={PRIORITIES.map(p => ({ value: p, label: p }))}
             />
             <FilterSelect
-              label="All Assignees"  value={fAssignee} onChange={setFAssignee}
+              label="All Assignees" value={fAssignee} onChange={setFAssignee}
               options={assigneeOptions}
             />
             <div className="flex items-center gap-1.5">
@@ -316,9 +315,9 @@ const MyTasks = () => {
             onNewTask={() => navigate("/tasks/form")}
           />
         ) : (
-          <GanttView 
-            data={filteredTasks} 
-            onTaskClick={handleTaskClick} 
+          <GanttView
+            data={filteredTasks}
+            onTaskClick={handleTaskClick}
           />
         )}
       </div>

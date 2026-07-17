@@ -3,23 +3,23 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
 import { useAuth } from "../../../context/authProvider";
 import KanbanBoard from "../../../components/Common/KambanBoard";
-import GanttView from "../GanttView";
+import GanttView from "../gantt-view";
 import TaskSkeleton from "../../../components/Common/TaskSkeleton";
 import StatCard from "../../../components/Common/StatCard";
 import { ArrowLeft, Building2, LayoutGrid, Clock, CheckCircle2, Plus, CalendarDays, Download } from "lucide-react";
 
 const STATUS_COLS = [
-  { id: "Backlogs",    title: "Backlogs" },
-  { id: "To Do",       title: "To Do" },
+  { id: "Backlogs", title: "Backlogs" },
+  { id: "To Do", title: "To Do" },
   { id: "In Progress", title: "In Progress" },
-  { id: "In Review",   title: "In Review" },
-  { id: "Approved",    title: "Approved" },
-  { id: "Completed",   title: "Completed" },
+  { id: "In Review", title: "In Review" },
+  { id: "Approved", title: "Approved" },
+  { id: "Completed", title: "Completed" },
 ];
 const PRIORITY_COLS = [
-  { id: "Low",             title: "Low" },
-  { id: "Medium",          title: "Medium" },
-  { id: "High",            title: "High" },
+  { id: "Low", title: "Low" },
+  { id: "Medium", title: "Medium" },
+  { id: "High", title: "High" },
   { id: "Weekly Priority", title: "Weekly Priority" },
 ];
 
@@ -30,17 +30,17 @@ const buildCategoryColumns = (tasks) => {
 };
 
 const ClientKanbanPage = () => {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
-  const { user }  = useAuth();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [client, setClient]             = useState(null);
-  const [tasks, setTasks]               = useState([]);
-  const [employees, setEmployees]       = useState([]);
-  const [taskTypes, setTaskTypes]       = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [groupBy, setGroupBy]           = useState("projectTypeId.name");
-  const [viewMode, setViewMode]         = useState("board");
+  const [client, setClient] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [taskTypes, setTaskTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [groupBy, setGroupBy] = useState("projectTypeId.name");
+  const [viewMode, setViewMode] = useState("board");
   const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => { fetchData(); }, [id]);
@@ -53,11 +53,11 @@ const ClientKanbanPage = () => {
         axiosInstance.post("/populate/read/tasks", {
           filter: { clientId: id },
           populateFields: {
-            clientId:      "name",
+            clientId: "name",
             projectTypeId: "name",
-            taskTypeId:    "name",
-            createdBy:     "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
-            assignedTo:    "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
+            taskTypeId: "name",
+            createdBy: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
+            assignedTo: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage",
           },
         }),
         axiosInstance.post("/populate/read/employees"),
@@ -87,8 +87,8 @@ const ClientKanbanPage = () => {
     try {
       setTasks(prev => prev.map(t => t._id === task._id ? { ...t, [field]: value } : t));
       await axiosInstance.put(`/populate/update/tasks/${task._id}`, { [field]: value });
-    } catch (e) { 
-      console.error(e); 
+    } catch (e) {
+      console.error(e);
       setTasks(prev => prev.map(t => t._id === task._id ? { ...t, [field]: task[field] } : t));
     }
   };
@@ -117,13 +117,13 @@ const ClientKanbanPage = () => {
 
   const columnsMap = {
     "projectTypeId.name": buildCategoryColumns(tasks),
-    "status":             STATUS_COLS,
-    "priorityLevel":      PRIORITY_COLS,
+    "status": STATUS_COLS,
+    "priorityLevel": PRIORITY_COLS,
   };
 
-  const total      = tasks.length;
+  const total = tasks.length;
   const inProgress = tasks.filter((t) => t.status === "In Progress").length;
-  const completed  = tasks.filter((t) => t.status === "Completed").length;
+  const completed = tasks.filter((t) => t.status === "Completed").length;
 
   if (loading) return <TaskSkeleton />;
 
@@ -155,13 +155,12 @@ const ClientKanbanPage = () => {
             <div className="flex items-center gap-1 p-1 rounded-tracker-lg bg-surface-2">
               {[
                 { id: "projectTypeId.name", label: "Category" },
-                { id: "status",             label: "Status" },
-                { id: "priorityLevel",      label: "Priority" },
+                { id: "status", label: "Status" },
+                { id: "priorityLevel", label: "Priority" },
               ].map((g) => (
                 <button key={g.id} onClick={() => setGroupBy(g.id)}
-                  className={`px-3 py-1.5 rounded-tracker-md text-[13px] font-medium transition-all ${
-                    groupBy === g.id ? "bg-[var(--module-accent)] text-white shadow-sm" : "text-ink-muted hover:text-ink"
-                  }`}>
+                  className={`px-3 py-1.5 rounded-tracker-md text-[13px] font-medium transition-all ${groupBy === g.id ? "bg-[var(--module-accent)] text-white shadow-sm" : "text-ink-muted hover:text-ink"
+                    }`}>
                   {g.label}
                 </button>
               ))}
@@ -194,9 +193,9 @@ const ClientKanbanPage = () => {
 
         {/* ── Stats ── */}
         <div className="grid grid-cols-3 gap-3">
-          <StatCard title="Total"       value={total}      icon={LayoutGrid}   color="blue" />
-          <StatCard title="In Progress" value={inProgress} icon={Clock}        color="yellow" />
-          <StatCard title="Completed"   value={completed}  icon={CheckCircle2} color="green" />
+          <StatCard title="Total" value={total} icon={LayoutGrid} color="blue" />
+          <StatCard title="In Progress" value={inProgress} icon={Clock} color="yellow" />
+          <StatCard title="Completed" value={completed} icon={CheckCircle2} color="green" />
         </div>
       </div>
 
@@ -217,9 +216,9 @@ const ClientKanbanPage = () => {
             onNewTask={() => navigate("/tasks/form", { state: { selectedClient: client } })}
           />
         ) : (
-          <GanttView 
-            data={tasks} 
-            onTaskClick={handleTaskClick} 
+          <GanttView
+            data={tasks}
+            onTaskClick={handleTaskClick}
           />
         )}
       </div>

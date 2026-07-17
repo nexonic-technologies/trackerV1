@@ -3,9 +3,9 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/authProvider";
 import { useNavigate } from "react-router-dom";
 import KanbanBoard from "../../components/Common/KambanBoard";
-import GanttView from "./GanttView";
-import EmployeeGanttView from "./EmployeeGanttView";
-import SprintPlanningPanel from "./SprintPlanningPanel";
+import GanttView from "./gantt-view";
+import EmployeeGanttView from "./employee-gantt-view";
+import SprintPlanningPanel from "./sprint-planning-panel";
 import TaskSkeleton from "../../components/Common/TaskSkeleton";
 import FormDraftBanner from "../../components/Forms/FormDraftBanner";
 import FilterDropdown from "../../components/Common/FilterDropdown";
@@ -267,8 +267,8 @@ const TasksPage = () => {
           <button
             onClick={() => setShowFilters(v => !v)}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-bold border transition-all duration-150 cursor-pointer shadow-sm ${showFilters || activeFilters > 0
-                ? "border-[#0ea5e9] bg-[#f0f9ff] text-[#0ea5e9]"
-                : "border-[#e2e8f0] bg-white text-[#64748b] hover:text-[#334155] hover:border-[#cbd5e1] hover:bg-[#f8fafc]"
+              ? "border-[#0ea5e9] bg-[#f0f9ff] text-[#0ea5e9]"
+              : "border-[#e2e8f0] bg-white text-[#64748b] hover:text-[#334155] hover:border-[#cbd5e1] hover:bg-[#f8fafc]"
               }`}
           >
             <SlidersHorizontal size={14} />
