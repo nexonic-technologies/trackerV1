@@ -1,6 +1,8 @@
 // src/models/Workflow.js
 import { Schema, model } from "mongoose";
 
+const castEmptyToNull = v => v === "" ? null : v;
+
 const WorkflowSchema = new Schema({
   name: { type: String, required: true },
   modelName: { 
@@ -16,7 +18,7 @@ const WorkflowSchema = new Schema({
     index: true 
   },
   conditions: {
-    departmentId: { type: Schema.Types.ObjectId, ref: 'departments', index: true },
+    departmentId: { type: Schema.Types.ObjectId, ref: 'departments', index: true, set: castEmptyToNull },
     priorityLevel: { type: String, enum: ['Low', 'Medium', 'High', 'Critical', 'Weekly Priority'] }
   },
   steps: [{
@@ -27,8 +29,8 @@ const WorkflowSchema = new Schema({
       enum: ['Reporting Manager', 'Department Manager', 'HR', 'Specific Role', 'Specific User', 'Candidate'], 
       required: true 
     },
-    specificRoleId: { type: Schema.Types.ObjectId, ref: 'roles' },
-    specificUserId: { type: Schema.Types.ObjectId, ref: 'employees' },
+    specificRoleId: { type: Schema.Types.ObjectId, ref: 'roles', set: castEmptyToNull },
+    specificUserId: { type: Schema.Types.ObjectId, ref: 'employees', set: castEmptyToNull },
     actions: [{ 
       type: String, 
       enum: ['SendNotification', 'ChangeAssignee', 'AddFollower', 'UpdateStatus', 'VerifyDocument'], 
@@ -37,7 +39,8 @@ const WorkflowSchema = new Schema({
     updateStatusTo: { type: String },
     requiredDocumentType: { type: String } // Dynamic slot e.g., 'Resume', 'Photo', 'Aadhaar'
   }],
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'employees' }
 }, { timestamps: true });
 
 // Index for routing lookups

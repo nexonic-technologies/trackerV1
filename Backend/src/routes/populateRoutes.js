@@ -12,8 +12,10 @@ const router = express.Router();
 // Public endpoints that must never be queued:
 //   - create/candidates: unauthenticated career form submission (stateless write)
 //   - read/jobopenings:  public job listing (read, already excluded below)
-// The in-memory queue is incompatible with Vercel serverless — the _serverProcessing
-// counter leaks when a function invocation times out or errors before res.json() fires.
+// The queue uses a deferred gate pattern: _serverProcessing is decremented only after
+// res.json/res.send fires (via completionSignal), so the counter stays accurate even
+// under timeout or error conditions. Safe for long-lived Node.js servers; still
+// incompatible with stateless Vercel serverless (counter is per-process in-memory).
 const PUBLIC_NO_QUEUE_ROUTES = new Set(['create/candidates', 'read/jobopenings']);
 
 const populate_queue = queueMiddleware({
@@ -30,9 +32,9 @@ const populate_queue = queueMiddleware({
 });
 
 // without id
-router.all("/:action/:model", authMiddleware, populate_queue, upload.fields([{ name: 'file', maxCount: 1 }, { name: 'attachments', maxCount: 10 }]), populateHelper);
+router.all("/:action/:model", authMiddleware, upload.fields([{ name: 'file', maxCount: 1 }, { name: 'attachments', maxCount: 10 }]), populateHelper);
 
 // with id  
-router.all("/:action/:model/:id", authMiddleware, populate_queue, upload.fields([{ name: 'file', maxCount: 1 }, { name: 'attachments', maxCount: 10 }]), populateHelper);
+router.all("/:action/:model/:id", authMiddleware, upload.fields([{ name: 'file', maxCount: 1 }, { name: 'attachments', maxCount: 10 }]), populateHelper);
 
 export default router;

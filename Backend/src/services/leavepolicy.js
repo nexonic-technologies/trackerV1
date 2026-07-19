@@ -131,6 +131,13 @@ async function resolveEmployeeLeavePolicy(professionalInfo, models, evalDate = n
 
 export default function leavepolicyService() {
   return {
+    async beforeCreate(ctx) {
+      const { body, userId } = ctx;
+      if (userId) {
+        body.createdBy = userId;
+      }
+      return body;
+    },
     async beforeUpdate(ctx) {
       const { body, existingDoc } = ctx;
       const oldStatus = existingDoc?.status || 'Active';

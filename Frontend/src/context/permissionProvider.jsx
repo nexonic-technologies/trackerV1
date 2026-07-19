@@ -17,6 +17,24 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { useAuth } from "./authProvider";
 import axiosInstance from "../api/axiosInstance";
 
+/** Parses a raw context response object into the shape used by provider state */
+const parseContext = (ctx) => {
+  if (!ctx) return null;
+  const capObjects = ctx.capabilities || [];
+  const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : cap.key);
+  return {
+    permissions: ctx.permissions || {},
+    navigation: ctx.navigation || [],
+    capabilities: capObjects,
+    uiCapabilities: capNames,
+    role: ctx.user?.role || null,
+    userProfile: ctx.user || null,
+    isSuperAdmin: ctx.user?.role?.isSuperAdmin || false,
+    loading: false,
+    error: null
+  };
+};
+
 const PermissionContext = createContext({
   permissions: {},
   navigation: [],
@@ -35,7 +53,7 @@ const PermissionContext = createContext({
 });
 
 export const PermissionProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, seededContext, setSeededContext } = useAuth();
   const [state, setState] = useState({
     permissions: {},
     navigation: [],
@@ -69,22 +87,10 @@ export const PermissionProvider = ({ children }) => {
       const res = await axiosInstance.get("/auth/me/context");
       const ctx = res.data?.data;
 
-      if (ctx) {
+      const parsed = parseContext(ctx);
+      if (parsed) {
         versionRef.current = ctx._v || 0;
-        const capObjects = ctx.capabilities || [];
-        const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : cap.key);
-
-        setState({
-          permissions: ctx.permissions || {},
-          navigation: ctx.navigation || [],
-          capabilities: capObjects,
-          uiCapabilities: capNames,
-          role: ctx.user?.role || null,
-          userProfile: ctx.user || null,
-          isSuperAdmin: ctx.user?.role?.isSuperAdmin || false,
-          loading: false,
-          error: null
-        });
+        setState(parsed);
       }
     } catch (err) {
       console.error("[PermissionProvider] Failed to fetch context:", err?.message);
@@ -103,9 +109,7 @@ export const PermissionProvider = ({ children }) => {
 
   // Initial fetch when user changes (login/logout)
   useEffect(() => {
-    if (user) {
-      fetchContext();
-    } else {
+    if (!user) {
       // User logged out — clear everything
       setState({
         permissions: {},
@@ -119,8 +123,40 @@ export const PermissionProvider = ({ children }) => {
         error: null
       });
       versionRef.current = 0;
+      return;
     }
+
+    // If the splash screen is still running (splashShown not yet written to sessionStorage),
+    // DON'T fetch — App.jsx will call setSeededContext(ctx) with the validated context
+    // once the splash animation + validateToken() both complete. The seededContext useEffect
+    // below will handle seeding state from that. Fetching here would race with validateToken
+    // and waste one API call.
+    const splashAlreadyDone = sessionStorage.getItem("splashShown") === "true";
+    if (!splashAlreadyDone) {
+      // Keep loading:true — the seededContext effect will set it to false when ctx arrives.
+      // If validation fails, App.jsx calls setUser(null) which triggers this effect again
+      // with user=null and correctly clears state.
+      return;
+    }
+
+    // Normal path: splash was already shown in a previous session visit.
+    // Fetch context directly (no splash seed available).
+    fetchContext();
   }, [user, fetchContext]);
+
+  // Reactive seed: fires when App.jsx calls setSeededContext(ctx) after splash validation.
+  // This is the primary data-loading path on first page load (when splash runs).
+  useEffect(() => {
+    if (!seededContext) return;
+
+    const parsed = parseContext(seededContext);
+    if (parsed) {
+      versionRef.current = seededContext._v ?? 0;
+      setState(parsed);
+    }
+    // Consume the seed so it doesn't persist across manual refreshes
+    setSeededContext(null);
+  }, [seededContext, setSeededContext]);
 
   // Listen for real-time permission invalidation via Socket.io
   useEffect(() => {
@@ -159,21 +195,11 @@ export const PermissionProvider = ({ children }) => {
         const ctx = res.data?.data;
         if (ctx && (ctx._v || 0) > versionRef.current) {
           console.log(`[PermissionProvider] Version bumped to v${ctx._v}, refreshing context...`);
-          versionRef.current = ctx._v || 0;
-          const capObjects = ctx.capabilities || [];
-          const capNames = capObjects.map(cap => typeof cap === 'string' ? cap : cap.key);
-
-          setState({
-            permissions: ctx.permissions || {},
-            navigation: ctx.navigation || [],
-            capabilities: capObjects,
-            uiCapabilities: capNames,
-            role: ctx.user?.role || null,
-            userProfile: ctx.user || null,
-            isSuperAdmin: ctx.user?.role?.isSuperAdmin || false,
-            loading: false,
-            error: null
-          });
+          const parsed = parseContext(ctx);
+          if (parsed) {
+            versionRef.current = ctx._v || 0;
+            setState(parsed);
+          }
         }
       } catch {
         // Silently ignore poll errors to avoid spamming the console

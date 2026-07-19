@@ -16,6 +16,7 @@ const LeavePolicySchema = new Schema({
   status: { type: String, enum: ['Draft', 'Scheduled', 'Active', 'Expired'], default: 'Active', index: true },
   effectiveFrom: { type: Date, required: true, default: Date.now, index: true },
   effectiveTo: { type: Date, index: true },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'employees' },
   version: { type: Number, default: 1 },
   description: { type: String }
 }, { timestamps: true });

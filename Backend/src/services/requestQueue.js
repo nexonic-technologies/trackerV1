@@ -33,7 +33,7 @@ class RequestQueue {
   /**
    * Queue a request for processing
    */
-  async enqueue(fingerprint, handler, options = {}) {
+  enqueue(fingerprint, handler, options = {}) {
     const {
       priority = 'normal', // 'high', 'normal', 'low'
       timeout = this.config.requestTimeout,
@@ -121,7 +121,8 @@ class RequestQueue {
     entry.startedAt = Date.now();
 
     try {
-      // Execute with timeout
+      // Execute with timeout — MUST return so the caller gets the result
+      console.log(`[Queue DEBUG] [${new Date().toISOString()}] [processNext] Executing handler for entry ${entry.id}`);
       const result = await Promise.race([
         entry.handler(),
         new Promise((_, reject) =>
@@ -129,6 +130,7 @@ class RequestQueue {
         )
       ]);
 
+      console.log(`[Queue DEBUG] [${new Date().toISOString()}] [processNext] Handler completed for entry ${entry.id}`);
       entry.status = 'completed';
       entry.completedAt = Date.now();
       entry.result = result;
@@ -137,7 +139,7 @@ class RequestQueue {
       metrics.processed++;
       metrics.totalWaitTime += entry.startedAt - entry.createdAt;
 
-      return result;
+      return result; // propagate to enqueue() caller
     } catch (error) {
       entry.status = 'failed';
       entry.completedAt = Date.now();
@@ -316,38 +318,81 @@ export const queueMiddleware = (options = {}) => {
     }
 
     const fingerprint = keyGenerator(req);
-
-    // Check server-wide concurrency ceiling before even queuing
-    if (requestQueue._serverProcessing >= requestQueue.config.maxServerConcurrent) {
-      return onQueueFull(req, res);
-    }
-
-    // Check per-device queue size ceiling
     const deviceQueue = requestQueue.queues.get(fingerprint) || [];
-    if (deviceQueue.length >= requestQueue.config.maxQueueSize) {
+
+    console.log(`[Queue DEBUG] [${new Date().toISOString()}] Incoming: ${req.method} ${req.originalUrl} | Fingerprint: ${fingerprint} | Server Processing: ${requestQueue._serverProcessing}/${requestQueue.config.maxServerConcurrent} | Device Queue: ${deviceQueue.length}/${requestQueue.config.maxQueueSize}`);
+
+    // ── Ceiling checks (fast-reject before touching queue) ──────────────────
+    if (requestQueue._serverProcessing >= requestQueue.config.maxServerConcurrent) {
+      console.log(`[Queue DEBUG] Rejected: Server processing limit reached (${requestQueue._serverProcessing} >= ${requestQueue.config.maxServerConcurrent})`);
       return onQueueFull(req, res);
     }
 
-    // Enqueue is async — must be awaited to get the actual result object
-    const status = await requestQueue.enqueue(fingerprint, () => {
-      // This runs when the request reaches the front of the queue
-      return new Promise((resolve, reject) => {
-        const originalJson = res.json.bind(res);
-        const originalSend = res.send.bind(res);
+    if (deviceQueue.length >= requestQueue.config.maxQueueSize) {
+      console.log(`[Queue DEBUG] Rejected: Device queue size limit reached (${deviceQueue.length} >= ${requestQueue.config.maxQueueSize})`);
+      return onQueueFull(req, res);
+    }
 
-        res.json = function(data) {
-          resolve({ data, method: 'json' });
-          return originalJson(data);
-        };
+    // ── Deferred gate pattern ────────────────────────────────────────────────
+    //
+    // Two separate signals are needed:
+    //
+    //   gate            — resolves when it is THIS request's turn to run.
+    //                     The middleware suspends here (await gate) so next()
+    //                     is called exactly once, in queue order.
+    //
+    //   completionSignal — resolves when res.json / res.send fires, i.e. when
+    //                     the actual HTTP response has been written. The queued
+    //                     handler awaits this before returning, which keeps the
+    //                     _serverProcessing slot occupied until the DB write +
+    //                     response are truly done. Only then does processNext()
+    //                     decrement the counter and process the next entry.
+    //
+    // Why res.json patching lives HERE (not inside the queued handler):
+    //   If the patch were inside the handler, next() would have to be called
+    //   first — but next() is what triggers the route that calls res.json.
+    //   Race condition: next() fires → populateHelper calls res.json before
+    //   the patch is applied. Patching here, before await gate, guarantees the
+    //   override is in place before any downstream handler can respond.
 
-        res.send = function(data) {
-          resolve({ data, method: 'send' });
-          return originalSend(data);
-        };
+    let openGate;
+    const gate = new Promise((resolve) => { openGate = resolve; });
 
-        // Hand off to the next middleware / route handler
-        next();
-      });
+    let signalComplete;
+    const completionSignal = new Promise((resolve) => { signalComplete = resolve; });
+
+    // Setup cleanup on response completion or connection close
+    const cleanup = () => {
+      res.removeListener('finish', cleanup);
+      res.removeListener('close', cleanup);
+      signalComplete();
+    };
+    res.once('finish', cleanup);
+    res.once('close', cleanup);
+
+    // Patch res.json / res.send BEFORE the gate opens so the interception is
+    // guaranteed to be in place when populateHelper eventually fires.
+    const originalJson = res.json.bind(res);
+    const originalSend = res.send.bind(res);
+
+    res.json = function(data) {
+      cleanup(); // release the queue slot
+      return originalJson(data);
+    };
+
+    res.send = function(data) {
+      cleanup(); // release the queue slot
+      return originalSend(data);
+    };
+
+    // Enqueue: the queued handler opens the gate (unblocking next() below)
+    // and then holds the slot open until the response is sent.
+    const status = requestQueue.enqueue(fingerprint, async () => {
+      console.log(`[Queue DEBUG] [Handler] Starting. Calling openGate().`);
+      openGate();             // this request's turn — let next() fire
+      console.log(`[Queue DEBUG] [Handler] openGate() called. Awaiting completionSignal.`);
+      await completionSignal; // hold _serverProcessing slot until res is sent
+      console.log(`[Queue DEBUG] [Handler] completionSignal resolved.`);
     }, {
       metadata: {
         route: req.originalUrl,
@@ -357,11 +402,19 @@ export const queueMiddleware = (options = {}) => {
       }
     });
 
+    // enqueue() returns synchronously with the acceptance object.
+    // success:false only happens if the queue was full (already checked above,
+    // but guard again for safety in case of a race between the check and push).
     if (!status || !status.success) {
+      // Restore originals so the error response isn't accidentally intercepted
+      res.json = originalJson;
+      res.send = originalSend;
+      res.removeListener('finish', cleanup);
+      res.removeListener('close', cleanup);
       return onQueueFull(req, res);
     }
 
-    // Attach queue info to request for downstream inspection
+    // Attach queue metadata for downstream inspection / debugging headers
     req.queue = {
       queueId: status.queueId,
       position: status.position,
@@ -370,6 +423,20 @@ export const queueMiddleware = (options = {}) => {
 
     res.set('X-Queue-Position', String(status.position));
     res.set('X-Queue-Length', String(status.queueLength));
+
+    // Block until it is this request's turn, then hand off to the route.
+    // next() is called exactly once, in FIFO order per device.
+    await gate;
+
+    console.log(`[Queue DEBUG] Gate opened for: ${req.method} ${req.originalUrl} | ID: ${status.queueId} | req.destroyed=${req.destroyed}, res.destroyed=${res.destroyed}, res.writableEnded=${res.writableEnded}`);
+
+    // If the request was aborted while in queue, bypass calling next()
+    if (req.destroyed || res.destroyed || res.writableEnded) {
+      console.log(`[Queue DEBUG] Bypassing next() because connection is aborted/ended`);
+      return;
+    }
+    console.log(`[Queue DEBUG] Calling next() for: ${req.method} ${req.originalUrl} | ID: ${status.queueId}`);
+    next();
   };
 };
 
