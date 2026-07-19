@@ -1,16 +1,60 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ShieldCheck } from "lucide-react";
+import { validateToken } from "../context/authProvider";
 
+/**
+ * SplashScreen — shown once per session on first page load.
+ *
+ * During the animation window (~2.7s) we fire validateToken() to check
+ * whether the stored JWT is still accepted by the server.
+ *
+ * Outcomes:
+ *   • No token        → onFinish(null)   → BaseLayout redirects to /login normally
+ *   • Valid token     → onFinish(ctx)    → ctx seeds PermissionProvider (no 2nd API call)
+ *   • Invalid (403)   → tokens cleared   → onFinish(null) → BaseLayout redirects to /login
+ *
+ * The user NEVER enters the dashboard with a stale token.
+ * The 4-5 cascade 403s + forced logout that previously happened are eliminated.
+ */
 const SplashScreen = ({ onFinish }) => {
   const [phase, setPhase] = useState("logo");
+  // Hold the validated context so we can pass it to App when animation completes
+  const validatedCtxRef = useRef(null);
+  // Track whether animation has completed before validation finishes
+  const animDoneRef = useRef(false);
+  // Track whether validation has completed before animation finishes
+  const validationDoneRef = useRef(false);
 
+  // Fire validation immediately — races against the 2.7s animation
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("title"), 500);
-    const t2 = setTimeout(() => setPhase("dots"), 900);
+    validateToken().then((result) => {
+      validatedCtxRef.current = result.valid ? (result.context ?? null) : null;
+      validationDoneRef.current = true;
+      // If animation already finished, call onFinish now
+      if (animDoneRef.current) {
+        onFinish(validatedCtxRef.current);
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Animation sequence — unchanged timings
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase("title"),   500);
+    const t2 = setTimeout(() => setPhase("dots"),    900);
     const t3 = setTimeout(() => setPhase("fadeout"), 2200);
-    const t4 = setTimeout(() => onFinish(), 2700);
+    const t4 = setTimeout(() => {
+      animDoneRef.current = true;
+      // Only call onFinish when BOTH animation AND validation are done
+      if (validationDoneRef.current) {
+        onFinish(validatedCtxRef.current);
+      }
+      // If validation is still in-flight, the validateToken().then() above fires onFinish
+    }, 2700);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
-  }, [onFinish]);
+  // onFinish is stable (wrapped in useCallback in App.jsx)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
@@ -60,3 +104,4 @@ const SplashScreen = ({ onFinish }) => {
 };
 
 export default SplashScreen;
+
