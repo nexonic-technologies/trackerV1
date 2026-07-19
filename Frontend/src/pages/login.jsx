@@ -118,18 +118,18 @@ const Login = () => {
           "web_" + Date.now() + "_" + Math.random().toString(36).substring(2, 11);
         localStorage.setItem("device_uuid", deviceUuid);
       }
-      
+
       const res = await axiosInstance.post("/auth/google", {
         idToken: response.credential,
         platform: "web",
       });
-      
+
       if (res.status === 200 && res.data.accessToken) {
         const decoded = jwtDecode(res.data.accessToken);
         localStorage.setItem("auth_token", res.data.accessToken);
         localStorage.setItem("refresh_token", res.data.refreshToken);
         setUser(decoded);
-        
+
         try {
           const fcmToken = await requestFirebaseToken();
           if (fcmToken) {
@@ -141,7 +141,7 @@ const Login = () => {
         } catch (fcmError) {
           console.error("FCM Token registration failed:", fcmError);
         }
-        
+
         toast.success("Welcome back!");
         navigate("/dashboard");
       } else {
@@ -302,7 +302,7 @@ const Login = () => {
 
       {/* Top Brand Logo */}
       <div className="absolute top-6 left-6 lg:top-10 lg:left-10 z-20 flex items-center gap-3.5 select-none">
-        <div className="h-6 w-6 rounded-xl bg-white/85 dark:bg-[#7c3aed]/20 backdrop-blur-md shadow-sm border border-white/50 dark:border-white/10 flex items-center justify-center transition-transform hover:scale-105">
+        <div className="h-12 w-12 rounded-xl bg-white/85 dark:bg-[#7c3aed]/20 backdrop-blur-md shadow-sm border border-white/50 dark:border-white/10 flex items-center justify-center transition-transform hover:scale-105">
           <Shield
             className="h-7 w-7 text-[#7c3aed] dark:text-[#a78bfa]"
             strokeWidth={2.25}
@@ -330,7 +330,7 @@ const Login = () => {
       </button>
 
       {/* ── Two cards — left features + right login card ── */}
-      <div className="relative z-10 w-full flex flex-row items-center min-h-screen px-6 lg:px-40 py-10">
+      <div className="relative z-10 w-full flex flex-row items-center justify-center min-h-screen px-6 gap-14 py-10">
         {/* ── LEFT CARD — Feature list ──────────────────────────────── */}
         <div className="lmx-login-feature-card hidden lg:flex flex-col w-[440px] flex-shrink-0 py-6 pr-8 pl-0 gap-5">
           {/* Heading */}
@@ -369,7 +369,7 @@ const Login = () => {
           </div>
 
           {/* Security strip */}
-          <div className="border-t border-[var(--tracker-border)] pt-4 flex items-center gap-2">
+          <div className="lmx-login-inner-row flex items-center gap-3 px-4 py-3">
             <Lock className="h-3.5 w-3.5 text-[var(--tracker-ink-subtle)] flex-shrink-0" />
             <div className="flex-1">
               <p className="text-xs font-medium text-[var(--tracker-ink-muted)]">
@@ -384,7 +384,7 @@ const Login = () => {
         </div>
 
         {/* ── RIGHT CARD — Login form ──────────────────────────────────── */}
-        <div className="lmx-login-card w-full lg:w-[450px] flex-shrink-0 p-8 sm:p-10 flex flex-col gap-5 lg:ml-auto">
+        <div className="lmx-login-card w-full lg:w-[450px] flex-shrink-0 p-8 sm:p-10 flex flex-col gap-5">
           {/* Card header (shows on mobile viewport only) */}
           <div className="lg:hidden">
             <p className="lmx-login-eyebrow mb-1 justify-end">
