@@ -92,6 +92,13 @@ export default function V2EmployeeHeader({ attendance, refresh }) {
     if (busy || !user) return;
     setBusy(true);
     try {
+      const loc = await getBrowserLocation();
+      if (!loc) {
+        const actionName = isCheckedIn ? 'clock out' : 'clock in';
+        toast.error(`Location access is required to ${actionName}. Please enable location permissions in your browser to proceed.`);
+        return;
+      }
+
       // Get the correct local calendar date (YYYY-MM-DD) for the employee's current timezone
       const tzOffset = new Date().getTimezoneOffset();
       const localTime = new Date(Date.now() - (tzOffset * 60 * 1000));
@@ -107,9 +114,6 @@ export default function V2EmployeeHeader({ attendance, refresh }) {
       });
       const todayDoc = checkRes.data?.[0];
 
-      const loc = await getBrowserLocation();
-      const locationPayload = loc || { latitude: 10.9338987, longitude: 76.9839277 };
-
       if (!isCheckedIn) {
         // Clock In
         if (todayDoc?._id) {
@@ -118,7 +122,7 @@ export default function V2EmployeeHeader({ attendance, refresh }) {
             todayDoc._id,
             {
               checkIn: new Date().toISOString(),
-              location: locationPayload,
+              location: loc,
             },
             'Clocked In!'
           );
@@ -133,7 +137,7 @@ export default function V2EmployeeHeader({ attendance, refresh }) {
               status: 'Present',
               managerId: user.managerId,
               workType: 'fixed',
-              location: locationPayload,
+              location: loc,
             },
             'Clocked In!'
           );
@@ -146,7 +150,7 @@ export default function V2EmployeeHeader({ attendance, refresh }) {
             todayDoc._id,
             {
               checkOut: new Date().toISOString(),
-              location: locationPayload,
+              location: loc,
             },
             'Clocked Out!'
           );

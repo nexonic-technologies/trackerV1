@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import path from "path";
 import dns from "dns";
 
 // Force Node.js to use reliable public DNS for MongoDB SRV lookups

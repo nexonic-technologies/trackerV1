@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "../../context/authProvider.jsx";
 import { useNavigate } from "react-router-dom";
 import useGenericAPI from "../../components/useGenericAPI";
+import toast from "react-hot-toast";
 import {
   LogIn, LogOut, CheckCircle, XCircle,
   Clock, TrendingUp, Zap, ChevronLeft, ChevronRight, Plus, MapPin
@@ -235,12 +236,15 @@ const AttendancePage = () => {
     setActionBusy(true);
     try {
       const loc = await getBrowserLocation();
-      const locationPayload = loc || { latitude: 10.9338987, longitude: 76.9839277 };
+      if (!loc) {
+        toast.error("Location access is required to check in. Please enable location permissions in your browser to proceed.");
+        return;
+      }
 
       if (todayRec?._id) {
         await update('attendances', todayRec._id, {
           checkIn: new Date().toISOString(),
-          location: locationPayload,
+          location: loc,
         }, "Checked in!");
       } else {
         await create('attendances', {
@@ -248,7 +252,7 @@ const AttendancePage = () => {
           date: getLocalDateString(),
           checkIn: new Date().toISOString(), status: "Present",
           managerId: user.managerId, workType: "fixed",
-          location: locationPayload,
+          location: loc,
         }, "Checked in!");
       }
       await fetchTodayRecord();
@@ -263,11 +267,14 @@ const AttendancePage = () => {
     setActionBusy(true);
     try {
       const loc = await getBrowserLocation();
-      const locationPayload = loc || { latitude: 10.9338987, longitude: 76.9839277 };
+      if (!loc) {
+        toast.error("Location access is required to check out. Please enable location permissions in your browser to proceed.");
+        return;
+      }
 
       await update('attendances', todayRec._id, {
         checkOut: new Date().toISOString(),
-        location: locationPayload,
+        location: loc,
       }, "Checked out!");
       await fetchTodayRecord();
       await fetchAll();
