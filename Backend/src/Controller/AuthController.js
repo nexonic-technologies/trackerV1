@@ -279,8 +279,12 @@ export const authMiddleware = async (req, res, next) => {
     const isPublicCareers =
       req.path?.includes('/read/jobopenings') ||
       req.path?.includes('/create/candidates') ||
+      req.path?.includes('/read/candidates') ||
+      req.path?.includes('/update/candidates') ||
       req.originalUrl?.includes('/api/populate/read/jobopenings') ||
-      req.originalUrl?.includes('/api/populate/create/candidates');
+      req.originalUrl?.includes('/api/populate/create/candidates') ||
+      req.originalUrl?.includes('/api/populate/read/candidates') ||
+      req.originalUrl?.includes('/api/populate/update/candidates');
 
     if (isPublicCareers) {
       req.user = {

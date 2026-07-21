@@ -73,7 +73,9 @@ import crmactivities from "./CRMActivity.js";
 import jobopenings from "./JobOpening.js";
 import candidates from "./Candidate.js";
 import onboardings from "./Onboarding.js";
+import onboardingtemplates from "./OnboardingTemplate.js";
 import employeedocuments from "./EmployeeDocument.js";
+import company from "./Company.js";
 
 
 // CRM Pipeline Models
@@ -200,6 +202,8 @@ const models = {
   jobopenings,
   candidates,
   onboardings,
+  onboardingtemplates,
+  company,
   // CRM
   serviceproviders,
   contacts,

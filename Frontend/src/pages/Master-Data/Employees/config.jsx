@@ -44,19 +44,20 @@ export const employeesConfig = createModuleConfig({
       "__v",
     ],
     customRender: {
-      status: (row) => (
-        <span
-          className={`px-2 py-1 text-xs rounded-full ${
-            row.status === "Active"
-              ? "bg-green-100 text-green-800"
-              : row.status === "Inactive"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-red-100 text-red-800"
-          }`}
-        >
-          {row.status}
-        </span>
-      ),
+      status: (row) => {
+        const styles = {
+          Active: "bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-800",
+          Onboarding: "bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800",
+          ReadyToJoin: "bg-indigo-100 text-indigo-800 border border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-300 dark:border-indigo-800",
+          Inactive: "bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800",
+          Terminated: "bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-800",
+        };
+        return (
+          <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${styles[row.status] || "bg-gray-100 text-gray-800"}`}>
+            {row.status}
+          </span>
+        );
+      },
     },
   },
   loadRecord: async (id) => {

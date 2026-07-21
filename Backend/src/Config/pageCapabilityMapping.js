@@ -195,6 +195,11 @@ const PAGE_CAPABILITY_MAPPING = [
     description: "View settings"
   },
   {
+    route: "/settings/company",
+    capability: "Settings:edit",
+    description: "View and edit company profile"
+  },
+  {
     route: "/settings/edit",
     capability: "Settings:edit",
     description: "Edit settings"

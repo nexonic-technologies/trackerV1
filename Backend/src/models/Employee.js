@@ -85,7 +85,7 @@ const EmployeeSchema = new Schema({
     carriedForward: { type: Number, default: 0 },
     available: { type: Number, default: 0 }
   }],
-  status: { type: String, enum: ['Active', 'Inactive', 'Terminated'], default: 'Active', index: true },
+  status: { type: String, enum: ['Onboarding', 'ReadyToJoin', 'Active', 'Inactive', 'Terminated'], default: 'Active', index: true },
   isActive: { type: Boolean, default: true, index: true }
 }, { timestamps: true });
 

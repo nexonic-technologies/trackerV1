@@ -41,10 +41,13 @@ export const useGenericAPI = () => {
         }
       }
 
-      // Prepend /api if not starting with http or /api
+      // Prepend NEXT_PUBLIC_BACKEND_URL (http://localhost:3000) for API requests
+      const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '');
       let targetUrl = url;
-      if (!url.startsWith('http') && !url.startsWith('/api')) {
-        targetUrl = `/api/${url}`;
+      if (!url.startsWith('http')) {
+        const cleanPath = url.startsWith('/') ? url : `/${url}`;
+        const pathWithApi = cleanPath.startsWith('/api/') ? cleanPath : `/api${cleanPath}`;
+        targetUrl = `${backendBaseUrl}${pathWithApi}`;
       }
 
       const response = await fetch(targetUrl, options);

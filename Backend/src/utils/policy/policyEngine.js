@@ -53,7 +53,7 @@ export async function buildQuery(ctx) {
       allowAccess: { read: ["*"], create: ["*"], update: ["*"], delete: ["*"] },
       conditions: {}
     };
-  } else if (role === 'guest') {
+  } else if (role === 'guest' || role === 'GuestCandidate') {
     if (modelName === 'jobopenings' && action === 'read') {
       policy = {
         role,
@@ -63,13 +63,13 @@ export async function buildQuery(ctx) {
         allowAccess: { read: ["*"], create: [], update: [], delete: [] },
         conditions: {}
       };
-    } else if (modelName === 'candidates' && action === 'create') {
+    } else if (modelName === 'candidates') {
       policy = {
         role,
         modelName,
-        permissions: { read: false, create: true, update: false, delete: false },
+        permissions: { read: true, create: true, update: true, delete: false },
         forbiddenAccess: { read: [], create: [], update: [], delete: [] },
-        allowAccess: { read: [], create: ["*"], update: [], delete: [] },
+        allowAccess: { read: ["*"], create: ["*"], update: ["*"], delete: [] },
         conditions: {}
       };
     }
