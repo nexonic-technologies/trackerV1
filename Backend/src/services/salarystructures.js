@@ -1,10 +1,7 @@
-import { canDo } from '../utils/cache.js';
-
 export default function salarystructures() {
   return {
     async beforeCreate(ctx) {
       const { role, userId, body } = ctx;
-      if (!canDo(role, 'manage:salarystructures')) throw new Error('Only HR and Admins can create salary structures.');
       if (!body.employeeId) throw new Error('employeeId is required.');
       if (!body.effectiveFrom) throw new Error('effectiveFrom is required.');
 
@@ -43,7 +40,6 @@ export default function salarystructures() {
 
     async beforeUpdate(ctx) {
       const { role, userId, body } = ctx;
-      if (!canDo(role, 'manage:salarystructures')) throw new Error('Only HR and Admins can update salary structures.');
 
       const immutable = ['employeeId', 'version', 'effectiveFrom'];
       for (const f of immutable) {

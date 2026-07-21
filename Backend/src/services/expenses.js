@@ -66,15 +66,15 @@ export default function expensesService() {
       const role = user?.role;
       const userId = user?.id;
 
-      const { canDo } = await import('../utils/cache.js');
-      const privileged = canDo(role, 'manage:expenses');
+      const { getPolicy } = await import('../utils/cache.js');
+      const policy = getPolicy(role, 'expenses');
+      const hasAllAccess = policy?.allowAccess?.read?.includes('*') || (!policy?.forbiddenAccess?.read?.includes('status') && policy?.permissions?.read);
 
       // Check if viewing pending approvals tab
       if (filter.status === 'pending' && filter.viewMode === 'approvals') {
         delete filter.viewMode; // delete transient UI field
 
-        if (privileged) {
-          // HR and SuperAdmin can see all pending expenses
+        if (hasAllAccess) {
           return { filter };
         }
 
@@ -91,7 +91,7 @@ export default function expensesService() {
       }
 
       // Default: regular read request
-      if (!privileged && userId) {
+      if (!hasAllAccess && userId) {
         // Enforce reading own expenses only
         filter.employeeId = userId;
       }
@@ -173,17 +173,19 @@ export default function expensesService() {
       const { body, user, existingDoc } = ctx;
       const role   = user?.role;
       const userId = user?.id;
-      const { canDo } = await import('../utils/cache.js');
+      const { getPolicy } = await import('../utils/cache.js');
+      const policy = getPolicy(role, 'expenses');
+      const forbidden = policy?.forbiddenAccess?.update || [];
       const sensitiveFields = ['status', 'approvedBy', 'rejectedBy', 'approvedAt', 'rejectedAt'];
-      const privileged = canDo(role, 'manage:expenses');
+      const isPrivileged = policy?.permissions?.update && !forbidden.includes('status');
 
       for (const field of sensitiveFields) {
-        if (body[field] !== undefined && !privileged) {
-          throw new Error(`Only HR/Manager can update '${field}'`);
+        if (body[field] !== undefined && (forbidden.includes(field) || !policy?.permissions?.update)) {
+          throw new Error(`Forbidden: You do not have permission to update field '${field}'`);
         }
       }
 
-      if (body.status === 'approved' && privileged) {
+      if (body.status === 'approved' && isPrivileged) {
         // ── Period Lock Check on approval ─────────────────────────────────
         const date = existingDoc?.date;
         if (date) await checkExpensePeriodLock(date, 'approve');
@@ -192,7 +194,7 @@ export default function expensesService() {
         body.approvedAt = new Date();
       }
 
-      if (body.status === 'rejected' && privileged) {
+      if (body.status === 'rejected' && isPrivileged) {
         body.rejectedBy = userId;
         body.rejectedAt = new Date();
       }

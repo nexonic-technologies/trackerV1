@@ -3,7 +3,7 @@
 // RULE: Zero hardcoded role names or designation strings.
 // Layout variant is determined purely by roles.level (1-10).
 
-import { getPolicy, getRoleLevel, canDo } from '../utils/cache.js';
+import { getPolicy, getRoleLevel } from '../utils/cache.js';
 import models from '../models/Collection.js';
 import mongoose from 'mongoose';
 
@@ -27,6 +27,11 @@ export function getLayoutVariant(level) {
 function canRead(roleId, modelName) {
   const policy = getPolicy(roleId, modelName);
   return !!policy?.permissions?.read;
+}
+
+function hasFullRead(roleId, modelName) {
+  const policy = getPolicy(roleId, modelName);
+  return !!policy?.permissions?.read && (policy?.allowAccess?.read?.includes('*') || (!policy?.forbiddenAccess?.read?.length));
 }
 
 function formatDuration(checkInDate) {
@@ -107,7 +112,7 @@ async function computePulse(roleId, userId, level, today, todayEnd) {
   try {
     // Determine scope: team (if restricted) or org
     let employeeFilter = { status: 'Active' };
-    if (canDo(roleId, 'attendance:team:read') && !canDo(roleId, 'attendance:all:read')) {
+    if (!hasFullRead(roleId, 'attendances')) {
       // Team scope: direct reports of this user
       employeeFilter['professionalInfo.reportingManager'] = new mongoose.Types.ObjectId(userId);
     }
@@ -174,7 +179,7 @@ async function computeStatCards(roleId, userId, level, today, todayEnd) {
   // --- Pending Approvals (Manager scope: managerId=self, Admin scope: all) ---
   if (canRead(roleId, 'leaves') || canRead(roleId, 'regularizations')) {
     let approvalCount = 0;
-    const managerFilter = (!canDo(roleId, 'leaves:all:read') && !canDo(roleId, 'leaves:all:approve')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
+    const managerFilter = (!hasFullRead(roleId, 'leaves')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
 
     if (canRead(roleId, 'leaves')) {
       try {
@@ -210,7 +215,7 @@ async function computeStatCards(roleId, userId, level, today, todayEnd) {
           metaStatus: 'active'
         };
 
-        if (!canDo(roleId, 'tasks:all:read')) {
+        if (!hasFullRead(roleId, 'tasks')) {
           // Manager: tasks assigned to team members
           const teamMembers = await models.employees.find({
             'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
@@ -244,7 +249,7 @@ async function computeStatCards(roleId, userId, level, today, todayEnd) {
   if (canRead(roleId, 'tickets')) {
     if (canRead(roleId, 'tickets')) {
       try {
-        if (!canDo(roleId, 'tickets:all:read')) {
+        if (!hasFullRead(roleId, 'tickets')) {
           const teamMembers = await models.employees.find({
             'professionalInfo.reportingManager': new mongoose.Types.ObjectId(userId),
             status: 'Active'
@@ -299,7 +304,7 @@ async function computeStatCards(roleId, userId, level, today, todayEnd) {
           .select('status totalNet totalEmployees')
           .lean();
 
-        if (canDo(roleId, 'v2_stat_payroll_status')) {
+        if (canRead(roleId, 'payrollruns')) {
           // Admin: show status
           stats.payrollStatus = {
             value: run?.status || 'Not Started',
@@ -307,7 +312,7 @@ async function computeStatCards(roleId, userId, level, today, todayEnd) {
             year: currentYear
           };
         }
-        if (canDo(roleId, 'v2_stat_payroll_cost')) {
+        if (canRead(roleId, 'payrollruns')) {
           // Executive: show cost
           stats.payrollCost = {
             value: run?.totalNet || 0,
@@ -364,7 +369,7 @@ async function computeStatCards(roleId, userId, level, today, todayEnd) {
       stats.assetAllocatedCount = { value: await models.assets.countDocuments({ status: 'Allocated', metaStatus: 'active' }) };
       
       if (canRead(roleId, 'assetallocations')) {
-        const managerFilter = (!canDo(roleId, 'assets:all:read') && !canDo(roleId, 'assetallocations:all:read')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
+        const managerFilter = (!hasFullRead(roleId, 'assets')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
         stats.assetPendingApproval = {
           value: await models.assetallocations.countDocuments({
             ...managerFilter,
@@ -439,7 +444,7 @@ function computeUrgencyScore(baseType, createdAt, affectsCount = 1, affectsPayro
 
 async function computeActionCenter(roleId, userId, level, today, todayEnd) {
   const items = [];
-  const managerFilter = (!canDo(roleId, 'leaves:all:read') && !canDo(roleId, 'leaves:all:approve')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
+  const managerFilter = (!hasFullRead(roleId, 'leaves')) ? { managerId: new mongoose.Types.ObjectId(userId) } : {};
  
   // Pending leaves, regularizations, WFH, comp-off
   if (canRead(roleId, 'leaves') || canRead(roleId, 'regularizations')) {
@@ -558,7 +563,7 @@ async function computeActionCenter(roleId, userId, level, today, todayEnd) {
   }
 
   // Manager: Overdue tasks (team), Critical tickets (team)
-  if (canRead(roleId, 'tasks') && !canDo(roleId, 'tasks:all:read')) {
+  if (canRead(roleId, 'tasks') && !hasFullRead(roleId, 'tasks')) {
     if (canRead(roleId, 'tasks')) {
       try {
         const teamMembers = await models.employees.find({
@@ -593,7 +598,7 @@ async function computeActionCenter(roleId, userId, level, today, todayEnd) {
   }
 
   // Executive: Critical tickets (unassigned), overdue tasks (>2 days, all)
-  if (canDo(roleId, 'v2_action_center') && canDo(roleId, 'tickets:all:read')) {
+  if (canRead(roleId, 'tickets') && hasFullRead(roleId, 'tickets')) {
     if (canRead(roleId, 'tickets')) {
       try {
         const critical = await models.tickets.find({
@@ -626,7 +631,7 @@ async function computeActionCenter(roleId, userId, level, today, todayEnd) {
   }
 
   // MD: Aggregated items, max 3
-  if (canDo(roleId, 'v2_action_center') && canRead(roleId, 'tickets')) {
+  if (canRead(roleId, 'tickets')) {
     // Critical tickets aggregated
     if (canRead(roleId, 'tickets')) {
       try {
@@ -657,7 +662,7 @@ async function computeActionCenter(roleId, userId, level, today, todayEnd) {
   items.sort((a, b) => b.urgencyScore - a.urgencyScore);
 
   // MD gets max 3 items
-  if (canDo(roleId, 'v2_action_center') && canRead(roleId, 'tickets') && !canDo(roleId, 'tickets:team:read')) return items.slice(0, 3);
+  if (canRead(roleId, 'tickets') && !hasFullRead(roleId, 'tickets')) return items.slice(0, 3);
 
   return items;
 }
@@ -744,7 +749,7 @@ async function computeTeamGrid(roleId, userId, level, today, todayEnd) {
   if (!canRead(roleId, 'attendances') || !canRead(roleId, 'employees')) return null;
  
   try {
-    const isAdminScope = canDo(roleId, 'attendance:all:read');
+    const isAdminScope = hasFullRead(roleId, 'attendances');
 
     const employeeQuery = isAdminScope
       ? { status: 'Active', isActive: true }

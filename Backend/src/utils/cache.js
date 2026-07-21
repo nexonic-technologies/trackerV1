@@ -6,7 +6,6 @@ import "../models/Capability.js";
 import mongoose from "mongoose";
 
 const cache = new Map();
-const roleCapabilityCache = new Map(); // roleId -> Set<capability>
 const roleLevelCache = new Map(); // roleId -> level (1-10)
 const roleMetaCache = new Map(); // roleId -> { name, isSuperAdmin, level }
 const resourceKeyMap = new Map(); // businessKey -> modelName
@@ -69,7 +68,6 @@ export async function setCache() {
             }
         });
 
-        roleCapabilityCache.clear();
         roleLevelCache.clear();
         roleMetaCache.clear();
         roles.forEach((r) => {
@@ -77,7 +75,6 @@ export async function setCache() {
             const capKeys = (r.capabilities || [])
                 .filter(cap => cap && cap.key && cap.status === 'active')
                 .map(cap => cap.key);
-            roleCapabilityCache.set(id, new Set(capKeys));
             roleLevelCache.set(id, r.level || 1);
             roleMetaCache.set(id, {
                 name: r.name,
@@ -99,7 +96,8 @@ export async function setCache() {
 export function getPolicy(role, modelName) {
     try {
         if (!cacheInitialized) return null;
-        let roleStr = role.toString();
+        let roleStr = role ? role.toString() : "";
+        if (!roleStr) return null;
         if (roleStr === 'agent') {
             roleStr = '6a25cbc1cd36294f5e578696';
         }
@@ -108,20 +106,6 @@ export function getPolicy(role, modelName) {
         if (!modelName) return roleCache;
         return roleCache[modelName] || null;
     } catch { return null; }
-}
-
-/**
- * Check if a role (by ObjectId string) has a given capability.
- * @param {string} roleId  - req.user.role (ObjectId as string)
- * @param {string} capability - e.g. 'manage:salarystructures'
- */
-export function canDo(roleId, capability) {
-    if (!cacheInitialized || !roleId) return false;
-    let roleStr = roleId.toString();
-    if (roleStr === 'agent') {
-        roleStr = '6a25cbc1cd36294f5e578696';
-    }
-    return roleCapabilityCache.get(roleStr)?.has(capability) ?? false;
 }
 
 /**

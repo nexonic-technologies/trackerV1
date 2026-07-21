@@ -1,5 +1,4 @@
 import * as payrollEngine from './payrollEngine.js';
-import { canDo } from '../utils/cache.js';
 
 const STATE_MACHINE = { Processing: [], Computed: ['Approved'], Approved: ['Paid'] };
 
@@ -7,7 +6,6 @@ export default function payrollruns() {
   return {
     async beforeCreate(ctx) {
       const { body, role } = ctx;
-      if (!canDo(role, 'manage:payroll')) throw new Error('Only HR Admins can create payroll runs.');
 
       const { default: PayrollRun } = await import('../models/PayrollRun.js');
       const existing = await PayrollRun.findOne({
@@ -93,7 +91,6 @@ export default function payrollruns() {
 
     async beforeUpdate(ctx) {
       const { role, userId, docId, body, existingDoc } = ctx;
-      if (!canDo(role, 'manage:payroll')) throw new Error('Only HR Admins can update payroll runs.');
 
       if (!existingDoc) {
         const { default: PayrollRun } = await import('../models/PayrollRun.js');

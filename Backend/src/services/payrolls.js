@@ -1,5 +1,4 @@
 import * as payrollEngine from './payrollEngine.js';
-import { canDo } from '../utils/cache.js';
 
 const FROZEN_FIELDS = [
   'grossSalary', 'netSalary', 'earnedBreakdown', 'deductionBreakdown',
@@ -42,7 +41,6 @@ export default function payrolls() {
   return {
     async beforeCreate(ctx) {
       const { role, userId, body } = ctx;
-      if (!canDo(role, 'manage:payroll')) throw new Error('Only HR and Admins can create payroll records.');
 
       const { employeeId, month, year } = body;
       if (!employeeId || !month || !year) throw new Error('employeeId, month, and year are required.');
@@ -70,7 +68,6 @@ export default function payrolls() {
 
     async beforeUpdate(ctx) {
       const { role, userId, docId, body, existingDoc } = ctx;
-      if (!canDo(role, 'manage:payroll')) throw new Error('Only HR and Admins can update payroll records.');
 
       if (!existingDoc) {
         const { default: Payroll } = await import('../models/Payroll.js');

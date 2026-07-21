@@ -105,7 +105,7 @@ export function bodyValidator({ policy, action, modelName, body }) {
     "updatedAt",
   ];
 
-  if (modelName !== "accesspolicies" && modelName !== "candidates" && modelName !== "dashboardwidgets") {
+  if (action === "update" && !["accesspolicies", "candidates", "dashboardwidgets", "roles"].includes(modelName)) {
     globalLockedFields.push("role", "permissions");
   }
 
