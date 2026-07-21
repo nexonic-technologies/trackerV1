@@ -1,11 +1,9 @@
 import AgentInviteService from '../services/AgentInviteService.js';
-import { canDo } from '../utils/cache.js';
 
 export default function agentService() {
   return {
     async beforeCreate(ctx) {
-      const { role, body } = ctx;
-      if (!canDo(role, 'manage:agents')) throw new Error('Only HR and Admins can create agents.');
+      // Authorization for agents creation is handled strictly by AccessPolicies on the 'agents' model.
     },
 
     // After create hook - automatically send invite for new agents
