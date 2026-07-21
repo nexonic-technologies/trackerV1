@@ -130,6 +130,8 @@ export function buildEmployeeFormFields({ designations = [], departments = [], r
       label: "Status",
       type: "select",
       options: [
+        { value: "Onboarding", label: "Onboarding" },
+        { value: "ReadyToJoin", label: "Ready To Join" },
         { value: "Active", label: "Active" },
         { value: "Inactive", label: "Inactive" },
         { value: "Terminated", label: "Terminated" },

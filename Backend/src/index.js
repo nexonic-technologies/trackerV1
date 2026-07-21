@@ -271,7 +271,8 @@ export async function initApp() {
             { jobName: "AttendanceCron", enabled: true, cronExpression: "22 01 * * *", timezone: "Asia/Kolkata" },
             { jobName: "LeaveAccrualCron", enabled: true, cronExpression: "0 0 1 * *", timezone: "Asia/Kolkata" },
             { jobName: "EscalationCron", enabled: true, cronExpression: "0 * * * *", timezone: "Asia/Kolkata" },
-            { jobName: "PolicyTransitionCron", enabled: true, cronExpression: "5 0 * * *", timezone: "Asia/Kolkata" }
+            { jobName: "PolicyTransitionCron", enabled: true, cronExpression: "5 0 * * *", timezone: "Asia/Kolkata" },
+            { jobName: "OnboardingCron", enabled: true, cronExpression: "30 01 * * *", timezone: "Asia/Kolkata" }
           ]
         });
         console.log("Seeding default GeneralSettings completed successfully.");
@@ -286,12 +287,14 @@ export async function initApp() {
       const { jobs: leaveAccrualJobs } = await import("./cron/LeaveAccrualCron.js");
       const { jobs: escalationJobs } = await import("./cron/EscalationCron.js");
       const { jobs: policyTransitionJobs } = await import("./cron/PolicyTransitionCron.js");
+      const { jobs: onboardingJobs } = await import("./cron/OnboardingCron.js");
 
       const allCronJobs = [
         ...attendanceJobs,
         ...leaveAccrualJobs,
         ...escalationJobs,
-        ...policyTransitionJobs
+        ...policyTransitionJobs,
+        ...onboardingJobs
       ];
 
       for (const job of allCronJobs) {

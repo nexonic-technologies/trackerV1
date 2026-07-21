@@ -28,6 +28,7 @@ const candidateSchema = new mongoose.Schema({
   },
 
   // Application context
+  applicationId: { type: String, unique: true, sparse: true, trim: true, index: true },
   jobOpeningId: { type: mongoose.Schema.Types.ObjectId, ref: 'jobopenings', required: true, index: true },
   source: { type: String, enum: ['Career Page', 'Referral', 'LinkedIn', 'Job Portal', 'Direct', 'Other'], default: 'Direct' },
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'employees' },

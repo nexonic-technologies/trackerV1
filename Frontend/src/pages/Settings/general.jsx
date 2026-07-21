@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Shield, Settings2, CalendarRange, Globe, Landmark, Clock, RefreshCw,
   Bell, Plus, Trash2, Edit2, AlertCircle, Save, CheckCircle, ShieldAlert
@@ -369,12 +370,20 @@ export default function GeneralSettingsPage() {
                 <div className="space-y-6">
                   {/* Organization Details */}
                   <div className="tracker-card-plain p-6 space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-hairline-soft">
-                      <Globe className="h-5 w-5 text-accent" />
-                      <div>
-                        <p className="text-sm font-semibold text-ink">Organization & Localization</p>
-                        <p className="text-xs text-ink-muted">Configure branding rules and regional defaults</p>
+                    <div className="flex items-center justify-between pb-3 border-b border-hairline-soft">
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-5 w-5 text-accent" />
+                        <div>
+                          <p className="text-sm font-semibold text-ink">Organization & Localization</p>
+                          <p className="text-xs text-ink-muted">Configure branding rules and regional defaults</p>
+                        </div>
                       </div>
+                      <Link
+                        to="/settings/company"
+                        className="tracker-btn-brand text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
+                      >
+                        Company Profile Settings &rarr;
+                      </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>

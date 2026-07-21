@@ -46,14 +46,22 @@ export async function populateHelper(req, res, next) {
     const { action, model, id } = req.params;
     const user = req.user;
 
-    // Ensure user has a role — fallback: fetch from DB if missing from JWT (e.g. old tokens)
-    if (!user?.role) {
+    // Guest / External portal bypass for candidates and job openings
+    const isPublicExternal = !req.user?.role && (
+      req.headers['x-source'] === 'external' ||
+      model === 'candidates' ||
+      model === 'jobopenings'
+    );
+
+    if (isPublicExternal) {
+      req.user = { id: 'guest-candidate', role: 'guest', isGuest: true };
+    } else if (!req.user?.role) {
       try {
         const { default: Employee } = await cachedImport('../models/Employee.js');
         const { default: Role } = await cachedImport('../models/Role.js');
-        const emp = await Employee.findById(user?.id).select('professionalInfo.role').lean();
+        const emp = await Employee.findById(req.user?.id).select('professionalInfo.role').lean();
         if (emp?.professionalInfo?.role) {
-          user.role = emp.professionalInfo.role;
+          req.user.role = emp.professionalInfo.role;
         } else {
           return res.status(403).json({ success: false, message: 'User has no role assigned' });
         }
@@ -310,13 +318,18 @@ export async function populateHelper(req, res, next) {
       const today = new Date();
       const datePath = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}`;
 
-      const singleFile = req.file || (req.files && req.files.file && req.files.file[0]) || (req.files && req.files.profileImage && req.files.profileImage[0]);
+      const singleFile = req.file || (req.files && req.files.file && req.files.file[0]) || (req.files && req.files.profileImage && req.files.profileImage[0]) || (req.files && req.files.logo && req.files.logo[0]) || (req.files && req.files.logoUrl && req.files.logoUrl[0]);
       const folder = req.route.path.includes('profile') || (singleFile && singleFile.fieldname === 'profileImage') || (singleFile && singleFile.fieldname === 'file' && req.params?.model === 'employees') ? 'profile' : 'documents';
 
       if (singleFile) {
-        const filePath = `serve/${folder}/${datePath}/${singleFile.filename}`;
+        const filePath = `/api/files/serve/${folder}/${datePath}/${singleFile.filename}`;
 
-        if (singleFile.fieldname === 'profileImage' || singleFile.fieldname === 'file') {
+        if (req.params?.model === 'company' || singleFile.fieldname === 'logo' || singleFile.fieldname === 'logoUrl') {
+          requestBody = {
+            ...req.body,
+            logoUrl: filePath
+          };
+        } else if (singleFile.fieldname === 'profileImage' || (singleFile.fieldname === 'file' && req.params?.model === 'employees')) {
           requestBody = {
             ...req.body,
             'basicInfo.profileImage': filePath

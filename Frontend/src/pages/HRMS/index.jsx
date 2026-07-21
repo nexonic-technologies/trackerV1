@@ -6,7 +6,8 @@ import {
   Users, Briefcase, UserCheck, Play, CheckCircle,
   Clock, AlertCircle, Plus, RefreshCw, Kanban,
   ListTodo, UserCheck2, ClipboardList, Send, Calendar,
-  ArrowRight, Search, CheckCircle2, ChevronRight, X
+  ArrowRight, Search, CheckCircle2, ChevronRight, X,
+  ShieldCheck, FileText, AlertTriangle, XCircle
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -31,6 +32,8 @@ export default function HRMSDashboard() {
   const [onboardings, setOnboardings] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Drag states
@@ -51,9 +54,16 @@ export default function HRMSDashboard() {
   const [workEmail, setWorkEmail] = useState("");
   const [hirePassword, setHirePassword] = useState("");
   const [hireRole, setHireRole] = useState("");
-  const [roles, setRoles] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [reportingManager, setReportingManager] = useState("");
+
+  // Onboarding Filter & Modal States
+  const [onboardingFilter, setOnboardingFilter] = useState("All");
+  const [documentModalItem, setDocumentModalItem] = useState(null); // { onboardingId, taskIndex, task }
+  const [documentFileUrlInput, setDocumentFileUrlInput] = useState("");
+  const [rejectionReasonInput, setRejectionReasonInput] = useState("");
+  const [exceptionModalOnboarding, setExceptionModalOnboarding] = useState(null); // { onboardingId, action }
+  const [postponeDateInput, setPostponeDateInput] = useState("");
+  const [cancellationReasonInput, setCancellationReasonInput] = useState("");
 
   useEffect(() => {
     setIsMakingOffer(false);
@@ -197,6 +207,77 @@ export default function HRMSDashboard() {
       toast.error("Failed to update checklist item");
     }
   };
+
+  // Update Document URL / Upload for Checklist Item
+  const handleUpdateChecklistDocUrl = async (onboardingId, taskIndex, fileUrl) => {
+    const onboarding = onboardings.find(o => o._id === onboardingId);
+    if (!onboarding) return;
+
+    try {
+      const updatedChecklist = [...onboarding.checklist];
+      updatedChecklist[taskIndex] = {
+        ...updatedChecklist[taskIndex],
+        fileUrl,
+        isCompleted: true,
+        completedAt: new Date()
+      };
+      await update("onboardings", onboardingId, { checklist: updatedChecklist }, "Document attached!");
+      setDocumentModalItem(null);
+      setDocumentFileUrlInput("");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to update document URL");
+    }
+  };
+
+  // Verify / Reject Document Item
+  const handleVerifyChecklistDoc = async (onboardingId, taskIndex, verified, rejectionReason = "") => {
+    const onboarding = onboardings.find(o => o._id === onboardingId);
+    if (!onboarding) return;
+
+    try {
+      const updatedChecklist = [...onboarding.checklist];
+      updatedChecklist[taskIndex] = {
+        ...updatedChecklist[taskIndex],
+        verified,
+        verifiedAt: verified ? new Date() : null,
+        rejectionReason: verified ? "" : rejectionReason
+      };
+      await update("onboardings", onboardingId, { checklist: updatedChecklist }, verified ? "Document verified!" : "Document rejected!");
+      setDocumentModalItem(null);
+      setRejectionReasonInput("");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to update verification status");
+    }
+  };
+
+  // Handle Onboarding Exception Actions (Postpone, Cancel, No Show)
+  const handleOnboardingAction = async (onboardingId, action, payload = {}) => {
+    try {
+      const updatePayload = { status: action, ...payload };
+      if (action === 'Postponed' && payload.postponedToDate) {
+        updatePayload.joiningDate = payload.postponedToDate;
+      }
+      await update("onboardings", onboardingId, updatePayload, `Onboarding updated to ${action}`);
+      setExceptionModalOnboarding(null);
+      setCancellationReasonInput("");
+      setPostponeDateInput("");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to update onboarding status");
+    }
+  };
+
+  const filteredOnboardings = useMemo(() => {
+    if (onboardingFilter === "All") return onboardings;
+    if (onboardingFilter === "In Progress") return onboardings.filter(o => ['Pending', 'In Progress'].includes(o.status));
+    if (onboardingFilter === "Verification Pending") return onboardings.filter(o => ['Documents Pending', 'Verification Pending'].includes(o.status));
+    if (onboardingFilter === "Ready To Join") return onboardings.filter(o => o.status === 'Ready To Join');
+    if (onboardingFilter === "Completed") return onboardings.filter(o => ['Joined', 'Completed'].includes(o.status));
+    if (onboardingFilter === "Exceptions") return onboardings.filter(o => ['Cancelled', 'Postponed', 'No Show'].includes(o.status));
+    return onboardings;
+  }, [onboardings, onboardingFilter]);
 
   if (loading) return <PageLoader />;
 
@@ -437,29 +518,85 @@ export default function HRMSDashboard() {
       {
         activeTab === "onboarding" && (
           <div className="flex-1 overflow-y-auto space-y-4">
-            {onboardings.map(o => {
+            {/* Status Filter Bar */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-hairline-soft text-[12px]">
+              {["All", "In Progress", "Verification Pending", "Ready To Join", "Completed", "Exceptions"].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setOnboardingFilter(tab)}
+                  className={`px-3 py-1.5 rounded-full font-medium transition cursor-pointer flex-shrink-0 ${onboardingFilter === tab
+                    ? 'bg-indigo-600 text-white font-semibold'
+                    : 'bg-surface-1 border border-hairline text-ink-subtle hover:text-ink'
+                    }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {filteredOnboardings.map(o => {
               const empName = o.employeeId?.basicInfo
                 ? `${o.employeeId.basicInfo.firstName || ""} ${o.employeeId.basicInfo.lastName || ""}`
                 : "Employee";
+              
+              const isReadyToJoin = o.status === 'Ready To Join';
+              const isCompleted = ['Joined', 'Completed'].includes(o.status);
+              const isException = ['Cancelled', 'Postponed', 'No Show'].includes(o.status);
+
               return (
                 <div key={o._id} className="bg-surface rounded-tracker-card border border-hairline p-5 shadow-sm space-y-4">
                   {/* Employee card header */}
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline-soft pb-3">
                     <div>
-                      <h3 className="text-[14px] font-bold text-ink">{empName}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-[14px] font-bold text-ink">{empName}</h3>
+                        {o.slaBreached && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 flex items-center gap-1">
+                            <AlertTriangle className="h-3 w-3" /> SLA Breached
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[11px] text-ink-subtle mt-0.5">
-                        Designation: {o.designation?.title || '—'} | Dept: {o.department?.name || '—'} | Joining Date: {new Date(o.joiningDate).toLocaleDateString()}
+                        Designation: {o.designation?.title || '—'} | Dept: {o.department?.name || '—'} | Target Joining: {new Date(o.joiningDate).toLocaleDateString()}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3.5">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${o.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                        o.status === 'In Progress' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                          'bg-slate-50 text-slate-600 border border-slate-100'
+                    <div className="flex items-center gap-3">
+                      {/* State Badge */}
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 ${isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                        isReadyToJoin ? 'bg-amber-50 text-amber-800 border border-amber-300 animate-pulse' :
+                          o.status === 'Verification Pending' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                            isException ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                              'bg-indigo-50 text-indigo-700 border border-indigo-200'
                         }`}>
+                        {isReadyToJoin && <ShieldCheck className="h-3 w-3 text-amber-600" />}
                         Onboarding: {o.status}
                       </span>
-                      <span className="text-[13px] font-bold text-indigo-600 dark:text-indigo-400">{o.completionPercent}% Complete</span>
+
+                      <div className="text-right">
+                        <span className="text-[12px] font-bold text-indigo-600 dark:text-indigo-400">{o.completionPercent}% Tasks</span>
+                        <span className="text-[10px] text-ink-tertiary block">{o.verifiedPercent}% Verified</span>
+                      </div>
+
+                      {/* Exception Actions Menu */}
+                      {!isCompleted && !isException && (
+                        <div className="flex items-center gap-1.5 pl-2 border-l border-hairline-soft">
+                          <button
+                            title="Postpone Joining Date"
+                            onClick={() => setExceptionModalOnboarding({ onboardingId: o._id, action: 'Postponed' })}
+                            className="p-1.5 bg-surface-1 border border-hairline rounded-[6px] hover:bg-surface-2 text-[10px] font-semibold cursor-pointer text-ink-subtle"
+                          >
+                            Postpone
+                          </button>
+                          <button
+                            title="Mark No Show"
+                            onClick={() => setExceptionModalOnboarding({ onboardingId: o._id, action: 'No Show' })}
+                            className="p-1.5 bg-rose-50 border border-rose-200 rounded-[6px] hover:bg-rose-100 text-[10px] font-semibold cursor-pointer text-rose-700"
+                          >
+                            No Show
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -468,20 +605,70 @@ export default function HRMSDashboard() {
                     {o.checklist?.map((task, idx) => (
                       <div
                         key={task._id || idx}
-                        onClick={() => handleToggleChecklistTask(o._id, idx)}
-                        className={`p-3 rounded-[8px] border flex items-center justify-between gap-3 cursor-pointer transition ${task.isCompleted
-                          ? 'bg-emerald-50/20 border-emerald-200 text-emerald-800 dark:text-emerald-300 dark:border-emerald-900/50'
-                          : 'bg-surface-1 border-hairline text-ink hover:bg-surface-2'
+                        className={`p-3 rounded-[8px] border flex flex-col justify-between gap-2 transition ${task.isCompleted
+                          ? task.verified
+                            ? 'bg-emerald-50/20 border-emerald-200 text-emerald-900 dark:border-emerald-900/50'
+                            : 'bg-indigo-50/20 border-indigo-200 text-indigo-900'
+                          : 'bg-surface-1 border-hairline text-ink'
                           }`}
                       >
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-semibold truncate leading-tight">{task.task}</p>
-                          <p className="text-[9px] text-ink-tertiary mt-0.5">{task.category}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[12px] font-semibold truncate leading-tight">{task.task}</p>
+                            <p className="text-[9px] text-ink-tertiary mt-0.5">{task.category} {task.documentType ? `• ${task.documentType}` : ''}</p>
+                          </div>
+                          <button
+                            onClick={() => handleToggleChecklistTask(o._id, idx)}
+                            className={`h-5 w-5 rounded-full border flex items-center justify-center flex-shrink-0 cursor-pointer ${task.isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-hairline bg-surface'
+                              }`}
+                          >
+                            {task.isCompleted && <CheckCircle2 className="h-3.5 w-3.5" />}
+                          </button>
                         </div>
-                        <div className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center flex-shrink-0 ${task.isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-hairline bg-surface'
-                          }`}>
-                          {task.isCompleted && <CheckCircle2 className="h-3 w-3" />}
-                        </div>
+
+                        {/* Document Verification & File Link section */}
+                        {(task.documentType || task.category === 'Documents') && (
+                          <div className="pt-2 border-t border-hairline-soft/60 flex items-center justify-between text-[10px]">
+                            {task.fileUrl ? (
+                              <a
+                                href={task.fileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-indigo-600 font-semibold hover:underline flex items-center gap-1 truncate max-w-[130px]"
+                              >
+                                <FileText className="h-3 w-3" /> Document Link 🔗
+                              </a>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setDocumentModalItem({ onboardingId: o._id, taskIndex: idx, task: task.task });
+                                  setDocumentFileUrlInput('');
+                                }}
+                                className="text-indigo-600 hover:underline font-medium"
+                              >
+                                + Attach Document URL
+                              </button>
+                            )}
+
+                            {/* HR Document Verification Controls */}
+                            {task.fileUrl && (
+                              <div className="flex items-center gap-1">
+                                {task.verified ? (
+                                  <span className="text-emerald-600 font-bold flex items-center gap-0.5 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                    <ShieldCheck className="h-3 w-3" /> Verified
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleVerifyChecklistDoc(o._id, idx, true)}
+                                    className="px-2 py-0.5 bg-indigo-600 text-white rounded font-bold hover:bg-indigo-700 cursor-pointer"
+                                  >
+                                    Verify HR
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -489,15 +676,132 @@ export default function HRMSDashboard() {
               );
             })}
 
-            {onboardings.length === 0 && (
+            {filteredOnboardings.length === 0 && (
               <div className="text-center py-20 text-ink-tertiary">
                 <ListTodo className="h-10 w-10 mx-auto opacity-40 mb-2" />
-                <p className="text-xs">No onboardings in progress.</p>
+                <p className="text-xs">No onboardings matching filter "{onboardingFilter}".</p>
               </div>
             )}
           </div>
         )
       }
+
+      {/* ─── DOCUMENT ATTACHMENT MODAL ─── */}
+      {documentModalItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45"
+          onClick={(e) => e.target === e.currentTarget && setDocumentModalItem(null)}>
+          <div className="bg-surface rounded-tracker-card border border-hairline w-full max-w-md p-5 shadow-2xl space-y-4 text-[12px]">
+            <div className="flex items-center justify-between border-b border-hairline-soft pb-2">
+              <h3 className="font-bold text-ink text-[14px]">Attach Document URL</h3>
+              <button onClick={() => setDocumentModalItem(null)} className="cursor-pointer text-ink-subtle">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-ink-subtle">Target Task: <strong className="text-ink">{documentModalItem.task}</strong></p>
+            <div className="space-y-1">
+              <label className="font-semibold text-ink-subtle">Document URL / Storage Link *</label>
+              <input
+                type="text"
+                value={documentFileUrlInput}
+                onChange={(e) => setDocumentFileUrlInput(e.target.value)}
+                placeholder="https://storage.provider.com/doc-file.pdf"
+                className="w-full p-2 bg-surface border border-hairline rounded-[8px] text-ink outline-none"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!documentFileUrlInput.trim()) {
+                    toast.error("Please enter a valid document URL");
+                    return;
+                  }
+                  handleUpdateChecklistDocUrl(documentModalItem.onboardingId, documentModalItem.taskIndex, documentFileUrlInput.trim());
+                }}
+                className="flex-1 py-2 bg-indigo-600 text-white font-semibold rounded-[6px] hover:bg-indigo-700 cursor-pointer"
+              >
+                Save Document URL
+              </button>
+              <button
+                type="button"
+                onClick={() => setDocumentModalItem(null)}
+                className="px-4 py-2 border border-hairline rounded-[6px] text-ink-subtle hover:bg-surface-2 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── EXCEPTION ACTIONS MODAL (POSTPONE / NO SHOW) ─── */}
+      {exceptionModalOnboarding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45"
+          onClick={(e) => e.target === e.currentTarget && setExceptionModalOnboarding(null)}>
+          <div className="bg-surface rounded-tracker-card border border-hairline w-full max-w-md p-5 shadow-2xl space-y-4 text-[12px]">
+            <div className="flex items-center justify-between border-b border-hairline-soft pb-2">
+              <h3 className="font-bold text-ink text-[14px]">Update Status: {exceptionModalOnboarding.action}</h3>
+              <button onClick={() => setExceptionModalOnboarding(null)} className="cursor-pointer text-ink-subtle">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {exceptionModalOnboarding.action === 'Postponed' && (
+              <div className="space-y-1">
+                <label className="font-semibold text-ink-subtle">New Target Joining Date *</label>
+                <input
+                  type="date"
+                  value={postponeDateInput}
+                  onChange={(e) => setPostponeDateInput(e.target.value)}
+                  className="w-full p-2 bg-surface border border-hairline rounded-[8px] text-ink outline-none"
+                />
+              </div>
+            )}
+
+            {exceptionModalOnboarding.action === 'No Show' && (
+              <div className="space-y-1">
+                <label className="font-semibold text-ink-subtle">No-Show Remarks / Notes *</label>
+                <textarea
+                  value={cancellationReasonInput}
+                  onChange={(e) => setCancellationReasonInput(e.target.value)}
+                  placeholder="e.g. Candidate failed to join on expected date and unreachable"
+                  rows={3}
+                  className="w-full p-2 bg-surface border border-hairline rounded-[8px] text-ink outline-none resize-none"
+                />
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (exceptionModalOnboarding.action === 'Postponed' && !postponeDateInput) {
+                    toast.error("Please enter a new joining date");
+                    return;
+                  }
+                  handleOnboardingAction(
+                    exceptionModalOnboarding.onboardingId,
+                    exceptionModalOnboarding.action,
+                    exceptionModalOnboarding.action === 'Postponed'
+                      ? { postponedToDate: new Date(postponeDateInput) }
+                      : { cancellationReason: cancellationReasonInput }
+                  );
+                }}
+                className="flex-1 py-2 bg-rose-600 text-white font-semibold rounded-[6px] hover:bg-rose-700 cursor-pointer"
+              >
+                Confirm {exceptionModalOnboarding.action}
+              </button>
+              <button
+                type="button"
+                onClick={() => setExceptionModalOnboarding(null)}
+                className="px-4 py-2 border border-hairline rounded-[6px] text-ink-subtle hover:bg-surface-2 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── SLIDING CANDIDATE DETAILS SHEET ─── */}
       {
@@ -527,6 +831,12 @@ export default function HRMSDashboard() {
                 <div className="space-y-2">
                   <h4 className="text-[11px] font-bold text-ink-subtle uppercase tracking-wider">Contact details</h4>
                   <div className="bg-surface-1 p-3 rounded-[8px] space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-ink-subtle">Application ID</span>
+                      <span className="font-mono font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded text-[11px]">
+                        {selectedCandidate.applicationId || `APP-2026-${selectedCandidate._id?.slice(-4).toUpperCase()}`}
+                      </span>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-ink-subtle">Email</span>
                       <a href={`mailto:${selectedCandidate.email}`} className="font-semibold text-indigo-600 hover:underline">{selectedCandidate.email}</a>
@@ -548,6 +858,26 @@ export default function HRMSDashboard() {
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* External Pre-Joining Portal Action */}
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-[8px] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">External Candidate Access</span>
+                    <span className="text-[10px] font-semibold bg-emerald-600 text-white px-1.5 py-0.5 rounded">Active</span>
+                  </div>
+                  <p className="text-[11px] text-ink-subtle">Direct external candidate portal link for offer review & pre-joining confirmation.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const externalUrl = import.meta.env.VITE_EXTERNAL_PORTAL_URL || 'http://localhost:3001';
+                      const appId = selectedCandidate.applicationId || `APP-2026-${selectedCandidate._id?.slice(-4).toUpperCase()}`;
+                      window.open(`${externalUrl}/pre-joining?applicationId=${appId}`, '_blank');
+                    }}
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-[8px] text-[12px] transition cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span>→ Pre - Joining Confirmation</span>
+                  </button>
                 </div>
 
                 {/* Status transition actions */}
@@ -609,7 +939,7 @@ export default function HRMSDashboard() {
                                 className="w-full p-2 bg-surface border border-hairline rounded-[8px] text-ink cursor-pointer outline-none text-[12px]"
                               >
                                 <option value="">-- Select Reporting Manager --</option>
-                                {employees.map(emp => (
+                                {employees?.map(emp => (
                                   <option key={emp._id} value={emp._id}>
                                     {emp.basicInfo?.firstName} {emp.basicInfo?.lastName || ''} ({emp.authInfo?.workEmail || emp.basicInfo?.email})
                                   </option>
@@ -696,7 +1026,7 @@ export default function HRMSDashboard() {
                                 className="w-full p-2 bg-surface border border-hairline rounded-[8px] text-ink outline-none text-[12px]"
                               >
                                 <option value="">-- Select Access Role --</option>
-                                {roles.map(r => (
+                                {roles?.map(r => (
                                   <option key={r._id} value={r._id}>{r.name} (L{r.level || 1})</option>
                                 ))}
                               </select>
@@ -709,7 +1039,7 @@ export default function HRMSDashboard() {
                                 className="w-full p-2 bg-surface border border-hairline rounded-[8px] text-ink cursor-pointer outline-none text-[12px]"
                               >
                                 <option value="">-- Select Reporting Manager --</option>
-                                {employees.map(emp => (
+                                {employees?.map(emp => (
                                   <option key={emp._id} value={emp._id}>
                                     {emp.basicInfo?.firstName} {emp.basicInfo?.lastName || ''} ({emp.authInfo?.workEmail || emp.basicInfo?.email})
                                   </option>
