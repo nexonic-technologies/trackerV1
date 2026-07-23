@@ -1,4 +1,4 @@
-import ProductivityDashboard from "../dashboard/productivity";
+import ProductivityDashboard from "../Dashboard/productivity";
 
 export default function AccountsProductivityPage() {
   return <ProductivityDashboard />;
