@@ -210,13 +210,16 @@ async function seed() {
         const childFiles = subEntries.filter(
           e => e.isFile() && (e.name.endsWith('.jsx') || e.name.endsWith('.js')) && isPageFile(e.name)
         );
+        const childDirs = subEntries.filter(
+          e => e.isDirectory() && !e.name.startsWith('[') && !e.name.startsWith('_')
+        );
 
-        if (childFiles.length === 0) continue;
+        if (childFiles.length === 0 && childDirs.length === 0) continue;
 
         const hasIndex = childFiles.some(f => f.name.replace(/\.jsx$/, '').replace(/\.js$/, '').toLowerCase() === 'index');
         const otherFiles = childFiles.filter(f => f.name.replace(/\.jsx$/, '').replace(/\.js$/, '').toLowerCase() !== 'index');
 
-        if (otherFiles.length === 0 && hasIndex) {
+        if (otherFiles.length === 0 && childDirs.length === 0 && hasIndex) {
           await models.sidebars.create({
             title: cleanTitle(folder.name),
             icon: {
@@ -278,6 +281,62 @@ async function seed() {
               isDeleted: false
             });
             console.log(`  Created child menu item: ${childRoute}`);
+          }
+
+          for (const subDir of childDirs) {
+            const subDirNameLower = subDir.name.toLowerCase();
+            const currentSubDirPath = path.join(subDirPath, subDir.name);
+            const nestedEntries = await fs.readdir(currentSubDirPath, { withFileTypes: true });
+            const nestedFiles = nestedEntries.filter(
+              e => e.isFile() && (e.name.endsWith('.jsx') || e.name.endsWith('.js')) && isPageFile(e.name)
+            );
+
+            const subParentId = new mongoose.Types.ObjectId();
+            const subRoute = `/${folderNameLower}/${subDirNameLower}`;
+            await models.sidebars.create({
+              _id: subParentId,
+              title: cleanTitle(subDir.name),
+              icon: {
+                iconName: 'MdFolder',
+                iconPackage: 'react-icons/md'
+              },
+              mainRoute: subRoute,
+              visibility: 'protected',
+              capabilities: getSidebarCapabilities(subRoute),
+              routes: [],
+              parentId: parentId,
+              isParent: false,
+              hasChildren: nestedFiles.length > 0,
+              order: childOrder++,
+              isActive: true,
+              isDeleted: false
+            });
+            console.log(`  Created sub-parent menu item: ${subRoute}`);
+
+            let nestedOrder = 1;
+            for (const nFile of nestedFiles) {
+              const nNameLower = nFile.name.replace(/\.jsx$/, '').replace(/\.js$/, '').toLowerCase();
+              if (nNameLower === 'index') continue;
+              const nRoute = `/${folderNameLower}/${subDirNameLower}/${nNameLower}`;
+              await models.sidebars.create({
+                title: cleanTitle(nFile.name),
+                icon: {
+                  iconName: 'MdInsertDriveFile',
+                  iconPackage: 'react-icons/md'
+                },
+                mainRoute: nRoute,
+                visibility: 'protected',
+                capabilities: getSidebarCapabilities(nRoute),
+                routes: [],
+                parentId: subParentId,
+                isParent: false,
+                hasChildren: false,
+                order: nestedOrder++,
+                isActive: true,
+                isDeleted: false
+              });
+              console.log(`    Created sub-child menu item: ${nRoute}`);
+            }
           }
           console.log(`Created parent menu "${cleanTitle(folder.name)}" with its submenus.`);
         }

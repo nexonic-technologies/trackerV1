@@ -9,6 +9,7 @@ import ResetPassword from "../pages/resetPassword.jsx";
 import AcademyLayout from "../pages/academy/index.jsx"
 import { useState, useEffect, useCallback, memo, useRef } from "react";
 import ModernLoader from "../components/Common/ModernLoader.jsx";
+import { ErrorBoundary } from "../components/ErrorBoundary.jsx";
 
 // Memoized static layout components — only re-render when their own props change,
 // NOT when location changes in the parent BaseLayout.
@@ -111,7 +112,11 @@ const BaseLayout = () => {
       >
         <MemoTopNavBar onToggleSidebar={handleToggleSidebar} sidebarOpen={sidebarOpen} />
         <main className="flex-1 overflow-y-auto bg-canvas relative">
-          <div className="lmx-content">{element}</div>
+          <div className="lmx-content">
+            <ErrorBoundary key={location.pathname}>
+              {element}
+            </ErrorBoundary>
+          </div>
         </main>
       </div>
     </div>

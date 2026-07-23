@@ -113,14 +113,6 @@ export async function filterMenuItems(menuItems, user, roleMeta) {
  */
 export async function buildMenuTree(menuItems, user, roleMeta) {
   const visibleItems = await filterMenuItems(menuItems, user, roleMeta);
-  // return visibleItems;
-
-  // Separate parents and children
-  const parents = visibleItems
-    .filter(item => item.isParent || !item.parentId)
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-  const children = visibleItems.filter(item => item.parentId);
 
   // Helper to map and clean a menu item's fields to keep only the minimum UI fields
   const cleanMenuItem = (item) => ({
@@ -135,20 +127,37 @@ export async function buildMenuTree(menuItems, user, roleMeta) {
     order: item.order || 0
   });
 
-  // Build tree
-  const tree = parents.map(parent => {
-    const parentIdStr = parent._id.toString();
-    const parentChildren = children
+  // Recursive function to build children hierarchy
+  const buildSubTree = (parentIdStr, parentRoute) => {
+    return visibleItems
       .filter(child => {
         const childParentIdStr = child.parentId?.toString();
-        return childParentIdStr === parentIdStr || child.parentId === parent.mainRoute?.replace('/', '');
+        return childParentIdStr === parentIdStr || child.parentId === parentRoute?.replace(/^\//, '');
       })
       .sort((a, b) => (a.order || 0) - (b.order || 0))
-      .map(cleanMenuItem);
+      .map(child => {
+        const childIdStr = child._id?.toString() || child._id;
+        const subChildren = buildSubTree(childIdStr, child.mainRoute);
+        return {
+          ...cleanMenuItem(child),
+          children: subChildren,
+          hasChildren: subChildren.length > 0 || !!child.hasChildren
+        };
+      });
+  };
 
+  // Top-level parents have isParent=true and no parentId
+  const parents = visibleItems
+    .filter(item => (item.isParent && !item.parentId) || !item.parentId)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const tree = parents.map(parent => {
+    const parentIdStr = parent._id?.toString() || parent._id;
+    const parentChildren = buildSubTree(parentIdStr, parent.mainRoute);
     return {
       ...cleanMenuItem(parent),
-      children: parentChildren
+      children: parentChildren,
+      hasChildren: parentChildren.length > 0 || !!parent.hasChildren
     };
   });
 

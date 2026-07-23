@@ -33,6 +33,39 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
   // No separate API call needed — permissions are already applied.
   const navItems = navigation;
 
+  // Auto-expand parent items when location changes to a child route
+  useEffect(() => {
+    if (!navItems || navItems.length === 0) return;
+
+    const currentPath = location.pathname;
+    const idsToExpand = new Set();
+
+    const checkNode = (node) => {
+      let isMatch = node.mainRoute === currentPath;
+      if (node.children && node.children.length > 0) {
+        for (const child of node.children) {
+          if (checkNode(child)) {
+            isMatch = true;
+          }
+        }
+      }
+      if (isMatch && node._id) {
+        idsToExpand.add(node._id);
+      }
+      return isMatch;
+    };
+
+    navItems.forEach(item => checkNode(item));
+
+    if (idsToExpand.size > 0) {
+      setExpandedItems(prev => {
+        const updated = new Set(prev);
+        idsToExpand.forEach(id => updated.add(id));
+        return updated;
+      });
+    }
+  }, [location.pathname, navItems]);
+
   const toggleExpanded = (itemId) => {
     // Only allow toggling if sidebar is expanded
     if (!isExpandedView) return;
@@ -41,7 +74,6 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
     if (newExpanded.has(itemId)) {
       newExpanded.delete(itemId);
     } else {
-      newExpanded.clear();
       newExpanded.add(itemId);
     }
     setExpandedItems(newExpanded);
@@ -60,7 +92,8 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
     }
   };
 
-  const renderNavItem = (item, isChild = false) => {
+  const renderNavItem = (item, level = 0) => {
+    const isChild = level > 0;
     const iconName = getIconifyName(item.icon?.iconName);
     const isActive = location.pathname === item.mainRoute;
     const isExpanded = expandedItems.has(item._id);
@@ -69,7 +102,7 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
     const contentClass = `
       flex items-center gap-2.5 px-2.5 py-2 rounded-tracker-md cursor-pointer
       transition-colors duration-150 mx-2
-      ${isChild ? "ml-7 text-xs" : "text-sm"}
+      ${level === 1 ? "ml-6 text-xs" : level > 1 ? "ml-9 text-xs" : "text-sm"}
       ${isActive ? "font-semibold text-[var(--module-accent)]" : "text-ink-muted hover:text-ink"}
     `;
 
@@ -126,7 +159,7 @@ const Sidebar = ({ isOpen, onClose, onOpen }) => {
           `}
         >
           <div className="space-y-0.5 pb-1">
-            {item.children?.map(child => renderNavItem(child, true))}
+            {item.children?.map(child => renderNavItem(child, level + 1))}
           </div>
         </div>
       </div>

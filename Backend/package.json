@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --max-old-space-size=4096 --expose-gc --watch server.js",
+    "dev": "nodemon server.js",
     "start": "node --max-old-space-size=4096 server.js",
-    "dev:monitor": "node --max-old-space-size=4096 --expose-gc --watch server.js",
+    "dev:monitor": "nodemon server.js",
     "backup": "node -e \"import('./src/services/backupService.js').then(s => s.default.createFullBackup())\"",
     "cron:stats": "node -e \"import('./src/cron/AttendanceCron.js').then(m => // console.log(m.monitor.getStats()))\"",
     "queue:health": "node -e \"import('./src/services/attendanceService.js').then(s => // console.log(s.default.getQueueStats()))\"",
