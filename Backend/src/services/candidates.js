@@ -294,6 +294,23 @@ export default function candidates() {
 
           await Candidate.findByIdAndUpdate(docId, { employeeId: emp._id }, session ? { session } : {});
 
+          // Create Initial SalaryStructure via salaryRevisionService inside transaction session
+          try {
+            const { default: salaryRevisionService } = await import('./salaryRevisionService.js');
+            const annualCTC = Number(candidate.offeredSalary) || 150024;
+            await salaryRevisionService.createOrReviseStructure({
+              employeeId: emp._id,
+              ctc: annualCTC,
+              effectiveFrom: candidate.joiningDate || new Date(),
+              createdBy: userId,
+              reason: 'Initial Hire Package',
+              changeType: 'InitialBaseline',
+              session
+            });
+          } catch (sErr) {
+            console.warn('[CandidatesHook] SalaryStructure initialization warning:', sErr.message);
+          }
+
           // ── 3-Tier Checklist Template Lookup ──
           let checklist = [];
 

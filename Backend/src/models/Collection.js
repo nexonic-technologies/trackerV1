@@ -75,6 +75,7 @@ import candidates from "./Candidate.js";
 import onboardings from "./Onboarding.js";
 import onboardingtemplates from "./OnboardingTemplate.js";
 import employeedocuments from "./EmployeeDocument.js";
+import employeelifecyclehistories from "./EmployeeLifecycleHistory.js";
 import company from "./Company.js";
 
 
@@ -218,6 +219,7 @@ const models = {
   employeetaskqueuerequests,
   operationalevents,
   employeedocuments,
+  employeelifecyclehistories,
 };
 
 export default models;

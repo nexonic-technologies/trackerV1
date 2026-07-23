@@ -16,6 +16,7 @@ import exportRoutes from "./routes/exportRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import searchRoutes from "./routes/searchRoutes.js";
 import ganttRoutes from "./routes/ganttRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 import { apiHitLogger } from "./middlewares/apiHitLogger.js";
 import { authMiddleware } from "./Controller/AuthController.js";
@@ -96,6 +97,7 @@ app.use("/api", bankRoutes);
 app.use("/api/config", configRoutes);
 app.use("/api/admin", adminSystemRoutes);
 app.use("/api/export", exportRoutes);
+app.use("/api/reports", reportRoutes);
 app.use("/api/dashboard", authMiddleware, dashboardRoutes);
 app.use("/api/search", authMiddleware, searchRoutes);
 app.use("/api", ganttRoutes); // Gantt queue + ETA recalculation

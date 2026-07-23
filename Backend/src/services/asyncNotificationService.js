@@ -29,6 +29,30 @@ class AsyncNotificationService {
     });
   }
 
+  // Queue email (non-blocking)
+  async queueEmail(to, subject, body, template = null, options = {}) {
+    try {
+      const job = await this.emailQueue.add('send-email', {
+        to,
+        subject,
+        body,
+        template,
+        timestamp: Date.now()
+      }, {
+        delay: options.delay || 0,
+        attempts: 3,
+        backoff: { type: 'fixed', delay: 1800000 }, // 30 minutes between retries
+        removeOnComplete: 20,
+        removeOnFail: 50
+      });
+
+      return { success: true, jobId: job.id };
+    } catch (error) {
+      console.error('Error queuing email:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   setupEventHandlers() {
     this.pushQueue.on('error', (err) => {
       console.warn('⚠️ Push Queue Redis error:', err.message);
@@ -50,75 +74,29 @@ class AsyncNotificationService {
       // console.log(`Email job ${job.id} completed`);
     });
 
-    this.emailQueue.on('failed', (job, err) => {
-      console.error(`Email job ${job.id} failed:`, err);
-    });
-  }
+    this.emailQueue.on('failed', async (job, err) => {
+      console.error(`Email job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}):`, err.message);
 
-  // Queue push notification (non-blocking)
-  async queuePushNotification(userId, title, body, data = {}, options = {}) {
-    try {
-      // Check notification preferences
-      try {
-        const { default: models } = await import('../models/Collection.js');
-        const prefs = await models.notificationpreferences.findOne({ employeeId: userId }).lean();
-        if (prefs) {
-          if (data.type === 'task_status' && prefs.muteTaskStatusChanges) return { success: true, ignored: true };
-          if (data.type === 'task_assignment' && prefs.muteTaskAssignments) return { success: true, ignored: true };
-          if (data.type === 'task_comment') {
-            if (prefs.muteTaskComments) return { success: true, ignored: true };
-            if (prefs.onlyMentions && (!data.mentions || !data.mentions.includes(userId.toString()))) {
-              return { success: true, ignored: true };
+      // On final failed attempt (3 tries exhausted), log to ErrorLog for persistent operational visibility
+      if (job.attemptsMade >= (job.opts.attempts || 3)) {
+        try {
+          const { default: ErrorLog } = await import('../models/ErrorLog.js');
+          await ErrorLog.create({
+            message: `[EmailQueuePermanentFailure] Failed to deliver email to ${job.data?.to}: ${err.message}`,
+            stack: err.stack || err.message,
+            level: 'ERROR',
+            metadata: {
+              jobId: job.id,
+              recipient: job.data?.to,
+              subject: job.data?.subject,
+              attemptsMade: job.attemptsMade
             }
-          }
+          });
+        } catch (eErr) {
+          console.error('[AsyncNotificationService] Failed to write ErrorLog on permanent email failure:', eErr.message);
         }
-      } catch (err) {
-        console.error('Error fetching notification preferences:', err);
       }
-
-      const job = await this.pushQueue.add('send-push', {
-        userId,
-        title,
-        body,
-        data,
-        timestamp: Date.now()
-      }, {
-        delay: options.delay || 0,
-        attempts: 3,
-        backoff: 'exponential',
-        removeOnComplete: 10,
-        removeOnFail: 5
-      });
-
-      return { success: true, jobId: job.id };
-    } catch (error) {
-      console.error('Error queuing push notification:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Queue email (non-blocking)
-  async queueEmail(to, subject, body, template = null, options = {}) {
-    try {
-      const job = await this.emailQueue.add('send-email', {
-        to,
-        subject,
-        body,
-        template,
-        timestamp: Date.now()
-      }, {
-        delay: options.delay || 0,
-        attempts: 3,
-        backoff: 'exponential',
-        removeOnComplete: 10,
-        removeOnFail: 5
-      });
-
-      return { success: true, jobId: job.id };
-    } catch (error) {
-      console.error('Error queuing email:', error);
-      return { success: false, error: error.message };
-    }
+    });
   }
 
   // Queue batch notifications
@@ -228,26 +206,43 @@ class AsyncNotificationService {
     }
   }
 
-  // Process email
+  // Process email via real SMTP
   async processEmail(to, subject, body, template) {
     try {
-      // Mock email service call
-      await new Promise(resolve => setTimeout(resolve, 200));
+      const { default: EmailConfig } = await import('../models/EmailConfig.js');
+      const nodemailer = (await import('nodemailer')).default;
 
-      // Mock success (95% success rate)
-      if (Math.random() < 0.95) {
-        return {
-          success: true,
-          messageId: `email_${Date.now()}`,
-          to,
-          subject
-        };
-      } else {
-        throw new Error('Email service unavailable');
+      const emailConfig = await EmailConfig.findOne().lean();
+      if (!emailConfig || !emailConfig.enabled) {
+        throw new Error('SMTP email service is disabled or not configured in GeneralSettings/EmailConfig.');
       }
 
+      const transporter = nodemailer.createTransport({
+        host: emailConfig.host,
+        port: emailConfig.port,
+        secure: emailConfig.port === 465,
+        auth: {
+          user: emailConfig.username,
+          pass: emailConfig.password
+        },
+        tls: { rejectUnauthorized: false }
+      });
+
+      const info = await transporter.sendMail({
+        from: emailConfig.fromEmail || emailConfig.username,
+        to,
+        subject,
+        html: body
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        to,
+        subject
+      };
     } catch (error) {
-      console.error('Error processing email:', error);
+      console.error('[AsyncNotificationService] SMTP email delivery error:', error.message);
       throw error;
     }
   }

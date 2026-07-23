@@ -92,7 +92,7 @@ POST /populate/read/payrolls (employee)
 
 ## TODO / Extension Points
 
-- `TODO: statutory-compliance-engine` in `resolveStatutory()` — ESI regime, TDS projection, 80C/80D
+- `statutory-compliance-engine` in `resolveStatutory()` — PF ECR export, ESI Return export, TDS projection implemented in `reportService.js` (`/api/reports/...`).
 - `payslipUrl` / `generatedAt` fields on Payroll — Phase 2 PDF generation
 - Professional Tax: add as `statutory` deduction in SalaryStructure.deductions[]
 - Arrears: `isProratable: false` earning with type `variable`

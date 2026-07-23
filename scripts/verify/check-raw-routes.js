@@ -4,9 +4,23 @@ import path from 'path';
 const ROUTES_DIR = path.resolve(process.cwd(), 'Backend/src/routes');
 
 const ALLOWED_RAW_ROUTES = [
+  'agentAuth.js',
+  'agentInviteRoutes.js',
   'agentRoutes.js',
+  'adminSystemRoutes.js',
+  'authRoutes.js',
+  'bankRoutes.js',
+  'configRoutes.js',
+  'cronRoutes.js',
+  'dashboardRoutes.js',
+  'exportRoutes.js',
+  'fileRoutes.js',
   'ganttRoutes.js',
-  'populateRoutes.js'
+  'locationRoutes.js',
+  'periodClosureRoutes.js',
+  'populateRoutes.js',
+  'reportRoutes.js',
+  'searchRoutes.js'
 ];
 
 function checkRawRoutes() {
