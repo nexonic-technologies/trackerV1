@@ -48,7 +48,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 const allowedOrigins = [
-  "https://tracker-v1-rose.vercel.app/",
+  "https://tracker-v1-rose.vercel.app",
   "https://tracker-v1-chi.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
