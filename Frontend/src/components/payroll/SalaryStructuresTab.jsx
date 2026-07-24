@@ -1,19 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import { PayrollService, EmployeeService } from "@services";
 import toast from "react-hot-toast";
 import { Plus, X, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
-import ProfileImage from "../../components/Common/ProfileImage";
+import ProfileImage from "@components/Common/ProfileImage";
 
 const EARNING_TYPES   = ["fixed", "variable", "percentage_of_basic"];
 const DEDUCTION_TYPES = ["fixed", "percentage_of_basic", "percentage_of_gross", "statutory"];
-const STATUTORY_NAMES = ["PF Employee", "ESI Employee", "TDS"];
 
 const blankEarning   = () => ({ name: "", type: "fixed", amount: 0, taxable: true, isProratable: true });
 const blankDeduction = () => ({ name: "", type: "fixed", amount: 0, ceiling: "" });
 
 function fmt(n) { return (n || 0).toLocaleString("en-IN"); }
-
-// ── Live preview ───────────────────────────────────────────────────────────────
 
 function computePreview(form) {
   const grossPerMonth = form.earnings.reduce((s, e) => {
@@ -56,24 +53,23 @@ export default function SalaryStructuresTab() {
     try {
       setLoading(true);
       const [sRes, eRes] = await Promise.all([
-        axiosInstance.post("/populate/read/salarystructures", {
+        PayrollService.getStructures({
           sort: { employeeId: 1, version: -1 }, limit: 500,
           populateFields: { employeeId: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage,professionalInfo.empId" }
         }),
-        axiosInstance.post("/populate/read/employees", {
+        EmployeeService.getEmployees({
           filter: { status: "Active" },
           fields: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage,professionalInfo.empId"
         })
       ]);
-      setStructures(sRes.data.data || []);
-      setEmployees(eRes.data.data || []);
+      setStructures(sRes.data || []);
+      setEmployees(eRes.data || []);
     } catch { toast.error("Failed to load salary structures"); }
     finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Group by employee
   const grouped = structures.reduce((acc, s) => {
     const key = s.employeeId?._id || s.employeeId;
     if (!acc[key]) acc[key] = [];
@@ -135,7 +131,6 @@ export default function SalaryStructuresTab() {
 
               {isOpen && (
                 <div className="border-t border-hairline-soft px-4 pb-4 pt-3 space-y-3">
-                  {/* Current structure breakdown */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-subtle mb-2">Earnings</p>
@@ -161,7 +156,6 @@ export default function SalaryStructuresTab() {
                     </div>
                   </div>
 
-                  {/* Version history */}
                   {versions.length > 1 && (
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-subtle mb-2">Version History</p>
@@ -205,8 +199,6 @@ export default function SalaryStructuresTab() {
   );
 }
 
-// ── SalaryStructureForm ────────────────────────────────────────────────────────
-
 function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) {
   const [form, setForm] = useState({
     employeeId:        preselectedEmpId || "",
@@ -245,7 +237,7 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
     if (!form.ctc)        return toast.error("CTC is required");
     try {
       setSubmitting(true);
-      await axiosInstance.post("/populate/create/salarystructures", {
+      await PayrollService.createStructure({
         ...form,
         ctc:               parseFloat(form.ctc),
         pfEmployeePercent: parseFloat(form.pfEmployeePercent),
@@ -265,7 +257,6 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
     <div className="fixed inset-0 tracker-overlay z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="bg-surface rounded-tracker-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
         style={{ boxShadow: "var(--tracker-shadow-overlay)" }}>
-        {/* Header */}
         <div className="pay-gradient-hero px-6 py-5 text-white flex items-center justify-between rounded-t-[16px]">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">SALARY STRUCTURE</p>
@@ -277,7 +268,6 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
         </div>
 
         <div className="overflow-y-auto flex-1 p-5 space-y-5">
-          {/* Employee + period */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-1">
               <label className="block text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-muted mb-1.5">Employee *</label>
@@ -301,7 +291,6 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
             </div>
           </div>
 
-          {/* Earnings */}
           <div className="pay-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-[13px] font-semibold text-ink">Earnings</p>
@@ -342,7 +331,6 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
             ))}
           </div>
 
-          {/* Deductions */}
           <div className="pay-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-[13px] font-semibold text-ink">Deductions</p>
@@ -376,7 +364,6 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
             ))}
           </div>
 
-          {/* PF / ESI / OT config */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "PF Employee %", key: "pfEmployeePercent", type: "number" },
@@ -400,7 +387,6 @@ function SalaryStructureForm({ employees, preselectedEmpId, onClose, onSaved }) 
             </div>
           </div>
 
-          {/* Live preview */}
           <div className="pay-summary-band flex items-center justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.4px] mb-0.5" style={{ color: "var(--pay-ink-label)" }}>Est. Monthly Gross</p>

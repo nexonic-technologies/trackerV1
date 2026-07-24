@@ -3,7 +3,7 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/authProvider";
 import { useNavigate } from "react-router-dom";
 import KanbanBoard from "../../components/Common/KambanBoard";
-import GanttView from "./gantt-view";
+import GanttView from "@components/Tasks/GanttView";
 import TaskSkeleton from "../../components/Common/TaskSkeleton";
 import { User, Plus, Search, X, ChevronDown, SlidersHorizontal, LayoutGrid, CalendarDays, Download } from "lucide-react";
 

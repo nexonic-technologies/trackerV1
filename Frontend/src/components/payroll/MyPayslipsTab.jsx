@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
+import { PayrollService } from "@services";
+import { useAuth } from "@providers/AuthProvider";
 import toast from "react-hot-toast";
 import { BadgeDollarSign, Loader2 } from "lucide-react";
-import { PayslipModal } from "./index";
+import { PayslipModal } from "@pages/payroll/index";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -28,12 +28,12 @@ export default function MyPayslipsTab() {
     if (!userId) { setLoading(false); return; }
     try {
       setLoading(true);
-      const res = await axiosInstance.post("/populate/read/payrolls", {
+      const res = await PayrollService.getPayrolls({
         filter: { employeeId: userId, year },
         sort:   { month: -1 },
         limit:  12
       });
-      setPayrolls(res.data.data || []);
+      setPayrolls(res.data || []);
     } catch { toast.error("Failed to load payslips"); }
     finally { setLoading(false); }
   }, [user?.id, user?._id, year]);
@@ -44,7 +44,6 @@ export default function MyPayslipsTab() {
 
   return (
     <div className="space-y-5">
-      {/* Year selector */}
       <div className="flex items-center gap-3">
         <p className="text-[13px] text-ink-muted">Year</p>
         <div className="flex gap-1.5">

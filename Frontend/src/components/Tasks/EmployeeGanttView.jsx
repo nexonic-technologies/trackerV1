@@ -1,24 +1,11 @@
-/**
- * EmployeeGanttView.jsx
- *
- * Queue-projected Gantt view for a single employee.
- * Data source: GET /api/employees/:id/gantt-queue
- *
- * Design rules (frontend-ui-tokens):
- *  - data-module="project"  → sky blue accent (#0EA5E9)
- *  - All colors via CSS variables — no raw hex except for chart bars
- *  - Light + dark aware via tokens
- *  - Stable projectedStart/End anchor (from backend — today 09:00 or activeTask.startedAt)
- */
 import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance from "@api/axiosInstance";
 import { Users, RefreshCw, Clock, Zap, AlertTriangle, CheckCircle2, ChevronDown, GripVertical } from "lucide-react";
 import { DndContext, useDraggable, useDroppable, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import toast from "react-hot-toast";
-import { ErrorBoundary } from "../../components/ErrorBoundary";
+import { ErrorBoundary } from "@components/ErrorBoundary";
 
-// ── Utilization badge ────────────────────────────────────────────────────────
 const UtilizationBadge = ({ percent }) => {
   if (percent == null) return null;
   const isHealthy = percent < 80;
@@ -46,7 +33,6 @@ const UtilizationBadge = ({ percent }) => {
   );
 };
 
-// ── Priority dot ─────────────────────────────────────────────────────────────
 const PRIORITY_COLORS = {
   "Weekly Priority": "var(--module-hr)",
   "High": "var(--tracker-danger)",
@@ -54,7 +40,6 @@ const PRIORITY_COLORS = {
   "Low": "var(--tracker-success)",
 };
 
-// ── Gantt bar ─────────────────────────────────────────────────────────────────
 const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
   if (!entry.projectedStart || !entry.projectedEnd) return null;
 
@@ -86,7 +71,6 @@ const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
           {entry.title}
         </span>
       )}
-      {/* Tooltip on hover */}
       <div className="pointer-events-none absolute left-0 top-7 z-50 hidden group-hover:flex flex-col gap-0.5 min-w-[180px] rounded-tracker-md border border-hairline bg-surface shadow-[var(--tracker-shadow-overlay)] p-2.5 text-xs">
         <span className="font-semibold text-ink">{entry.title}</span>
         <span className="text-ink-muted">{entry.estimatedHours}h estimated</span>
@@ -100,7 +84,6 @@ const GanttBar = ({ entry, totalSpanMs, startEpoch }) => {
   );
 };
 
-// ── Draggable/Droppable Row Wrappers ──────────────────────────────────────────
 const TaskRowDraggable = ({ entry, children }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: entry.taskId,
@@ -151,7 +134,6 @@ const TaskRowDroppable = ({ entry, children }) => {
   );
 };
 
-// ── Day axis header ───────────────────────────────────────────────────────────
 const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
   const days = Array.from({ length: dayCount + 1 }, (_, i) => {
     const d = new Date(startEpoch + i * 86400000);
@@ -174,12 +156,13 @@ const DayAxis = ({ startEpoch, totalSpanMs, dayCount }) => {
   );
 };
 
-// ── Main component ───────────────────────────────────────────────────────────
 const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, onEmployeeChange, onTaskClick }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [queueDoc, setQueueDoc] = useState(null);
+
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const fetchQueue = useCallback(async (empId) => {
     if (!empId) return;
@@ -216,11 +199,9 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
 
     if (activeIndex === -1 || overIndex === -1) return;
 
-    // Check if moving active task (which is locked at index 0)
     const activeItem = queueDoc.queue[activeIndex];
     const overItem = queueDoc.queue[overIndex];
 
-    // Check if task is active in data entries
     const isTaskActive = (taskId) => {
       const entry = data.entries.find(e => e.taskId.toString() === taskId.toString());
       return entry?.isActive === true;
@@ -231,24 +212,20 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
       return;
     }
 
-    // Reorder queueDoc list
     const reorderedQueue = [...queueDoc.queue];
     const [removed] = reorderedQueue.splice(activeIndex, 1);
     reorderedQueue.splice(overIndex, 0, removed);
 
-    // Update orders sequentially
     const updatedQueue = reorderedQueue.map((item, index) => ({
       ...item,
       order: index
     }));
 
-    // Update locally
     setQueueDoc(prev => ({
       ...prev,
       queue: updatedQueue
     }));
 
-    // Optimistically update visual Gantt entries list
     const updatedEntries = [...data.entries];
     const idOrderMap = new Map(updatedQueue.map((item, idx) => [item.taskId.toString(), idx]));
     updatedEntries.sort((a, b) => {
@@ -266,15 +243,14 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
         queue: updatedQueue
       });
       toast.success("Queue order updated successfully!");
-      fetchQueue(selectedEmployeeId); // refresh ETAs & projections
+      fetchQueue(selectedEmployeeId);
     } catch (err) {
       console.error("Failed to update queue order:", err);
       toast.error("Failed to update queue order");
-      fetchQueue(selectedEmployeeId); // revert on error
+      fetchQueue(selectedEmployeeId);
     }
   };
 
-  // ── Compute Gantt span ────────────────────────────────────────────────────
   const ganttBounds = (() => {
     if (!data?.entries?.length) return null;
     const starts = data.entries.map(e => new Date(e.projectedStart).getTime()).filter(Boolean);
@@ -287,19 +263,14 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
     return { startEpoch: minEpoch, totalSpanMs: spanMs, dayCount };
   })();
 
-  // ── Employee select options ───────────────────────────────────────────────
   const empOptions = employees.map(e => ({
     id: e._id,
     name: [e.basicInfo?.firstName, e.basicInfo?.lastName].filter(Boolean).join(" ") || "Employee",
   }));
 
-  const selectedEmpName = empOptions.find(e => e.id === selectedEmployeeId)?.name || "Select Employee";
-
   return (
     <div className="flex flex-col h-full overflow-hidden" data-module="project">
-      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-1 py-3 border-b border-hairline-soft flex-shrink-0">
-        {/* Employee selector */}
         <div className="relative">
           <select
             id="employee-gantt-select"
@@ -315,10 +286,8 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
           <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
         </div>
 
-        {/* Utilization badge */}
         {data && <UtilizationBadge percent={data.utilizationPercent} />}
 
-        {/* Stats */}
         {data && (
           <div className="flex items-center gap-3 ml-auto text-xs text-ink-muted">
             <span className="flex items-center gap-1">
@@ -332,7 +301,6 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
           </div>
         )}
 
-        {/* Refresh */}
         <button
           onClick={() => fetchQueue(selectedEmployeeId)}
           disabled={loading}
@@ -343,9 +311,7 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
         </button>
       </div>
 
-      {/* ── Body ── */}
       <div className="flex-1 overflow-auto">
-        {/* Loading */}
         {loading && (
           <div className="flex flex-col gap-3 p-4">
             {[1, 2, 3, 4].map(i => (
@@ -357,7 +323,6 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
           </div>
         )}
 
-        {/* Error */}
         {!loading && error && (
           <div className="flex flex-col items-center justify-center h-64 gap-3 text-sm text-ink-muted">
             <AlertTriangle size={28} className="text-[var(--tracker-warning)]" />
@@ -368,7 +333,6 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
           </div>
         )}
 
-        {/* Empty */}
         {!loading && !error && data && data.entries.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-3 text-sm text-ink-muted">
             <Users size={32} className="text-ink-tertiary" />
@@ -377,12 +341,9 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
           </div>
         )}
 
-        {/* Gantt chart */}
         {!loading && !error && data && data.entries.length > 0 && ganttBounds && (
           <div className="p-4 min-w-[700px]">
-            {/* Day axis */}
             <div className="flex">
-              {/* Label column spacer */}
               <div className="w-44 flex-shrink-0" />
               <div className="flex-1 relative">
                 <DayAxis {...ganttBounds} />
@@ -390,7 +351,6 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
             </div>
 
             <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-              {/* Rows */}
               <div className="flex flex-col gap-1.5 mt-1">
                 {data.entries.map((entry, idx) => (
                   <TaskRowDroppable key={entry.taskId} entry={entry}>
@@ -398,10 +358,8 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
                       className="flex items-center gap-0 group/row hover:bg-surface-1 rounded-tracker-md transition-colors"
                       onClick={() => onTaskClick?.({ ...entry, _id: entry._id || entry.taskId })}
                     >
-                      {/* Row label */}
                       <TaskRowDraggable entry={entry}>
                         <div className="w-44 flex-shrink-0 flex items-center gap-2 px-2 py-2 cursor-pointer">
-                          {/* Order badge */}
                           <span
                             className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
                             style={{
@@ -412,27 +370,22 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
                             {entry.isActive ? "▶" : idx + 1}
                           </span>
 
-                          {/* Priority dot */}
                           <span
                             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                             style={{ background: PRIORITY_COLORS[entry.priorityLevel] || "var(--tracker-border)" }}
                           />
 
-                          {/* Title */}
                           <span className="text-[11.5px] font-semibold text-ink truncate leading-tight">
                             {entry.title}
                           </span>
                         </div>
                       </TaskRowDraggable>
 
-                      {/* Bar track */}
                       <div className="flex-1 relative h-9">
-                        {/* Track line */}
                         <div className="absolute top-1/2 left-0 right-0 h-px bg-hairline-soft -translate-y-1/2" />
                         <GanttBar entry={entry} {...ganttBounds} />
                       </div>
 
-                      {/* ETA label */}
                       <div className="w-20 flex-shrink-0 text-right pr-2">
                         <span className="text-[10px] font-medium text-ink-muted">
                           {entry.projectedEnd
@@ -446,15 +399,14 @@ const EmployeeGanttView = ({ employees = [], currentUserId, selectedEmployeeId, 
               </div>
             </DndContext>
 
-            {/* Computed at footer */}
-        <p className="mt-4 text-[10px] text-ink-tertiary text-right pr-2">
-          Projected {new Date(data.computedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          {" · Anchor: today 09:00 (stable)"}
-        </p>
-      </div>
+            <p className="mt-4 text-[10px] text-ink-tertiary text-right pr-2">
+              Projected {new Date(data.computedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {" · Anchor: today 09:00 (stable)"}
+            </p>
+          </div>
         )}
+      </div>
     </div>
-    </div >
   );
 };
 

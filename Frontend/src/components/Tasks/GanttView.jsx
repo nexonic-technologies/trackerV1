@@ -4,7 +4,6 @@ import { format, differenceInDays, addDays, startOfWeek, endOfWeek, isToday, isW
 export default function GanttView({ data, onTaskClick }) {
   const containerRef = useRef(null);
 
-  // Calculate the timeline boundaries based on tasks
   const { minDate, maxDate, totalDays } = useMemo(() => {
     let min = new Date();
     let max = new Date();
@@ -24,7 +23,6 @@ export default function GanttView({ data, onTaskClick }) {
       }
     }
 
-    // Add padding to dates (1 week before, 2 weeks after)
     min = startOfWeek(addDays(min, -7));
     max = endOfWeek(addDays(max, 14));
 
@@ -35,7 +33,6 @@ export default function GanttView({ data, onTaskClick }) {
     };
   }, [data]);
 
-  // Generate days array for the header
   const days = useMemo(() => {
     const arr = [];
     for (let i = 0; i < totalDays; i++) {
@@ -44,9 +41,8 @@ export default function GanttView({ data, onTaskClick }) {
     return arr;
   }, [minDate, totalDays]);
 
-  const DAY_WIDTH = 40; // pixels per day
+  const DAY_WIDTH = 40;
 
-  // Scroll to today on mount
   useEffect(() => {
     if (containerRef.current) {
       const todayIndex = days.findIndex(d => isToday(d));
@@ -58,8 +54,6 @@ export default function GanttView({ data, onTaskClick }) {
 
   return (
     <div className="flex flex-col h-full bg-surface border border-hairline rounded-tracker-card overflow-hidden">
-      
-      {/* ── Toolbar ── */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-hairline bg-surface-1">
         <h2 className="text-[13px] font-semibold text-ink">Timeline View</h2>
         <div className="flex items-center gap-4 text-[11px] font-medium text-ink-muted">
@@ -71,15 +65,11 @@ export default function GanttView({ data, onTaskClick }) {
 
       <div className="flex-1 overflow-auto" ref={containerRef}>
         <div style={{ minWidth: `${totalDays * DAY_WIDTH + 250}px` }} className="pb-8">
-          
-          {/* ── Header Row ── */}
           <div className="flex sticky top-0 z-20 bg-surface border-b border-hairline shadow-sm">
-            {/* Task Title Column */}
             <div className="w-[250px] flex-shrink-0 sticky left-0 z-30 bg-surface border-r border-hairline px-4 py-2 flex items-end">
               <span className="text-[11px] font-bold text-ink-muted uppercase tracking-widest">Tasks</span>
             </div>
             
-            {/* Days Columns */}
             <div className="flex flex-1">
               {days.map((day, i) => (
                 <div 
@@ -97,9 +87,7 @@ export default function GanttView({ data, onTaskClick }) {
             </div>
           </div>
 
-          {/* ── Task Rows ── */}
           <div className="relative">
-            {/* Today marker line */}
             {days.findIndex(d => isToday(d)) > -1 && (
               <div 
                 className="absolute top-0 bottom-0 w-px bg-[var(--module-project)] z-10 opacity-50 pointer-events-none"
@@ -107,26 +95,24 @@ export default function GanttView({ data, onTaskClick }) {
               />
             )}
 
-            {data.map((task, rowIndex) => {
+            {data.map((task) => {
               const start = new Date(task.startDate || task.createdAt);
               const end = new Date(task.endDate || task.dueDate || new Date());
               
               const startOffsetDays = differenceInDays(start, minDate);
               let durationDays = differenceInDays(end, start) + 1;
-              if (durationDays < 1) durationDays = 1; // min 1 day
+              if (durationDays < 1) durationDays = 1;
 
               const leftPos = Math.max(0, startOffsetDays * DAY_WIDTH);
               const width = durationDays * DAY_WIDTH;
 
-              // Determine bar color
-              let barColor = "var(--tracker-ink-subtle)"; // default
+              let barColor = "var(--tracker-ink-subtle)";
               if (task.status === "Completed" || task.status === "Approved") barColor = "var(--tracker-success)";
               else if (task.status === "In Progress" || task.status === "In Review") barColor = "var(--module-project)";
-              else if (new Date(end) < new Date()) barColor = "var(--tracker-danger)"; // overdue
+              else if (new Date(end) < new Date()) barColor = "var(--tracker-danger)";
 
               return (
                 <div key={task._id} className="flex border-b border-hairline-soft group hover:bg-surface-1/50 transition-colors">
-                  {/* Task Name Sidebar */}
                   <div className="w-[250px] flex-shrink-0 sticky left-0 z-20 bg-surface group-hover:bg-surface-1/50 border-r border-hairline px-4 py-3 flex flex-col justify-center transition-colors">
                     <p 
                       className="text-[12px] font-semibold text-ink line-clamp-1 cursor-pointer hover:text-[var(--module-accent)] transition-colors"
@@ -139,9 +125,7 @@ export default function GanttView({ data, onTaskClick }) {
                     </p>
                   </div>
                   
-                  {/* Gantt Bar Area */}
                   <div className="flex-1 relative h-14 bg-stripes">
-                    {/* Render weekend backgrounds */}
                     <div className="absolute inset-0 flex pointer-events-none">
                       {days.map((day, i) => (
                         <div key={i} className={`h-full border-r border-hairline-soft/30 ${isWeekend(day) ? "bg-surface-1/50" : ""}`} style={{ width: DAY_WIDTH, minWidth: DAY_WIDTH }} />
