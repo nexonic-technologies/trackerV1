@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useAuth } from "../../context/authProvider.jsx";
+import { useAuth } from "@providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import useGenericAPI from "../../components/useGenericAPI";
+import { useGenericAPI } from "@hooks/useGenericAPI";
 import toast from "react-hot-toast";
 import {
   LogIn, LogOut, CheckCircle, XCircle,

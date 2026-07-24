@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import FloatingCard from "../../../components/Common/FloatingCard.jsx";
-import GenericDetailPage from "./model.jsx";
+import LeaveDetailModal from "@components/Attendance/LeaveDetailModal";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function DetailModalRoute() {
@@ -26,7 +26,7 @@ export default function DetailModalRoute() {
     <>
       <Toaster position="top-right" />
       <FloatingCard onClose={handleClose}>
-        <GenericDetailPage
+        <LeaveDetailModal
           onApprove={onApprove}
           onReject={onReject}
           id={id}

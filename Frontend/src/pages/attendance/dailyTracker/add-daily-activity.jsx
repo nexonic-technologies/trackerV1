@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/authProvider";
-import useGenericAPI from "../../../components/useGenericAPI";
+import { useAuth } from "@providers/AuthProvider";
+import { useGenericAPI } from "@hooks/useGenericAPI";
 import FormPageLayout from "../../../components/Forms/FormPageLayout";
 import FormRenderer from "../../../components/Common/FormRenderer";
 import ActivityEntryFrom from "../../../constants/ActivityEntryFrom";

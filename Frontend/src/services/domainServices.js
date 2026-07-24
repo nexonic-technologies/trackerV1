@@ -145,3 +145,70 @@ export class MasterDataService {
     }
   }
 }
+
+export class AttendanceService {
+  static async getAttendances(options = {}) {
+    const req = PopulateApi.READ('attendances', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async getAttendanceById(id, options = {}) {
+    const req = PopulateApi.READ('attendances', id, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async createAttendance(data) {
+    const req = PopulateApi.CREATE('attendances', data);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async updateAttendance(id, data) {
+    const req = PopulateApi.UPDATE('attendances', id, data);
+    const response = await axiosInstance.put(req.url, req.payload);
+    return response.data;
+  }
+}
+
+export class LeaveService {
+  static async getLeaves(options = {}) {
+    const req = PopulateApi.READ('leaves', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async getLeaveById(id, options = {}) {
+    const req = PopulateApi.READ('leaves', id, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async createLeave(data) {
+    const req = PopulateApi.CREATE('leaves', data);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async updateLeave(id, data) {
+    const req = PopulateApi.UPDATE('leaves', id, data);
+    const response = await axiosInstance.put(req.url, req.payload);
+    return response.data;
+  }
+  static async deleteLeave(id) {
+    const req = PopulateApi.DELETE('leaves', id);
+    const response = await axiosInstance.delete(req.url);
+    return response.data;
+  }
+  static async getRegularizations(options = {}) {
+    const req = PopulateApi.READ('leaveregularizations', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async createRegularization(data) {
+    const req = PopulateApi.CREATE('leaveregularizations', data);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async updateRegularization(id, data) {
+    const req = PopulateApi.UPDATE('leaveregularizations', id, data);
+    const response = await axiosInstance.put(req.url, req.payload);
+    return response.data;
+  }
+}
+
