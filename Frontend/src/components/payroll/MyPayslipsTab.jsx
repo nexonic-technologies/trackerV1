@@ -5,22 +5,22 @@ import toast from "react-hot-toast";
 import { BadgeDollarSign, Loader2 } from "lucide-react";
 import { PayslipModal } from "@pages/payroll/index";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const STATUS_CHIP = {
-  Draft:      "pay-status-chip pay-status-chip--draft",
+  Draft: "pay-status-chip pay-status-chip--draft",
   Processing: "pay-status-chip pay-status-chip--processing",
-  Processed:  "pay-status-chip pay-status-chip--processed",
-  Approved:   "pay-status-chip pay-status-chip--approved",
-  Paid:       "pay-status-chip pay-status-chip--paid",
+  Processed: "pay-status-chip pay-status-chip--processed",
+  Approved: "pay-status-chip pay-status-chip--approved",
+  Paid: "pay-status-chip pay-status-chip--paid",
 };
 
 export default function MyPayslipsTab() {
-  const { user }    = useAuth();
-  const thisYear    = new Date().getFullYear();
-  const [year, setYear]       = useState(thisYear);
+  const { user } = useAuth();
+  const thisYear = new Date().getFullYear();
+  const [year, setYear] = useState(thisYear);
   const [payrolls, setPayrolls] = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
 
   const fetch = useCallback(async () => {
@@ -30,8 +30,8 @@ export default function MyPayslipsTab() {
       setLoading(true);
       const res = await PayrollService.getPayrolls({
         filter: { employeeId: userId, year },
-        sort:   { month: -1 },
-        limit:  12
+        sort: { month: -1 },
+        limit: 12
       });
       setPayrolls(res.data || []);
     } catch { toast.error("Failed to load payslips"); }
@@ -49,11 +49,10 @@ export default function MyPayslipsTab() {
         <div className="flex gap-1.5">
           {years.map(y => (
             <button key={y} onClick={() => setYear(y)}
-              className={`px-3 py-1.5 rounded-tracker-md text-[12px] font-semibold transition-colors ${
-                y === year
+              className={`px-3 py-1.5 rounded-tracker-md text-[12px] font-semibold transition-colors ${y === year
                   ? "pay-status-chip pay-status-chip--approved"
                   : "tracker-btn-ghost py-1"
-              }`}>
+                }`}>
               {y}
             </button>
           ))}
