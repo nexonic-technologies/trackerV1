@@ -159,17 +159,24 @@ export default function quotations() {
 
       // Revision save when moving to Revision Requested
       if (body.status === 'Revision Requested' && quote.status !== 'Revision Requested') {
-        await models.quotationrevisions.create({
+        ctx.createRevisionPayload = {
           quotationId: quote._id,
           revisionNumber: quote.revisionNumber,
           snapshot: quote.toObject(),
           changedBy: userId,
           changeReason: body.statusRemarks || 'Revision Requested'
-        });
+        };
         body.revisionNumber = (quote.revisionNumber || 1) + 1;
       }
 
       return body;
+    },
+
+    async afterUpdate(ctx) {
+      if (ctx.createRevisionPayload) {
+        const { default: models } = await import('../models/Collection.js');
+        await models.quotationrevisions.create(ctx.createRevisionPayload);
+      }
     },
 
     async beforeDelete(ctx) {

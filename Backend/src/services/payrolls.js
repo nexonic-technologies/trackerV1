@@ -55,8 +55,8 @@ export default function payrolls() {
         if (['Approved', 'Paid'].includes(existing.status)) {
           throw new Error(`Payroll for employee ${employeeId} ${month}/${year} is already ${existing.status} — cannot recompute.`);
         }
-        // Safely remove unapproved record to allow clean regeneration via insert
-        await Payroll.deleteOne({ _id: existing._id });
+        // Store existing draft ID to safely remove post-commit after new insertion
+        ctx.pendingDeleteExistingId = existing._id;
       }
 
       const payload = await payrollEngine.computePayrollPayload(
@@ -64,6 +64,15 @@ export default function payrolls() {
       );
 
       return payload;
+    },
+
+    async afterCreate(ctx) {
+      if (ctx.pendingDeleteExistingId && ctx.docId) {
+        const { default: Payroll } = await import('../models/Payroll.js');
+        if (ctx.pendingDeleteExistingId.toString() !== ctx.docId.toString()) {
+          await Payroll.deleteOne({ _id: ctx.pendingDeleteExistingId });
+        }
+      }
     },
 
     async beforeUpdate(ctx) {

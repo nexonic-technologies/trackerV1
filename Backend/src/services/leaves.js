@@ -60,19 +60,18 @@ export default function leaves() {
           if (policy && Array.isArray(policy.leaves)) {
             const policyLeaf = policy.leaves.find(l => l.leaveType.toString() === body.leaveTypeId.toString());
             if (policyLeaf) {
-              employee.leaveStatus.push({
+              const newBucket = {
                 leaveType: body.leaveTypeId,
                 usedThisMonth: 0,
                 usedThisYear: 0,
                 carriedForward: 0,
                 available: policyLeaf.maxDaysPerYear || 0
-              });
-              await employee.save();
+              };
+              employee.leaveStatus.push(newBucket);
+              ctx.pendingLeaveBucket = { empId, newBucket };
               
-              // Refetch bucket reference
-              bucket = employee.leaveStatus.find(
-                (i) => i.leaveType.toString() === body.leaveTypeId.toString()
-              );
+              // Refetch bucket reference from in-memory array
+              bucket = newBucket;
             }
           }
         }
@@ -92,6 +91,14 @@ export default function leaves() {
     // AFTER CREATE ➝ Triggered once leave request is newly submitted
     afterCreate: async (ctx) => {
       const { docId } = ctx;
+      if (ctx.pendingLeaveBucket) {
+        const { empId, newBucket } = ctx.pendingLeaveBucket;
+        await Employee.updateOne(
+          { _id: empId, 'leaveStatus.leaveType': { $ne: newBucket.leaveType } },
+          { $push: { leaveStatus: newBucket } }
+        );
+      }
+
       const leaveDoc = await Leave.findById(docId);
       if (!leaveDoc) return;
 
