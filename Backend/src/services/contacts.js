@@ -27,7 +27,7 @@ export default function contacts() {
 
       // Handle conversion logic
       if (body.status === 'Converted' && contact.status !== 'Converted') {
-        // If not already linked to a client, create one or validate
+        // If not already linked to a client, check or prepare creation
         if (!body.convertedClientId && !contact.convertedClientId) {
           const clientName = body.companyName || contact.companyName || `${body.firstName || contact.firstName} ${body.lastName || contact.lastName || ''} Inc.`;
           
@@ -36,8 +36,8 @@ export default function contacts() {
           if (existingClient) {
             body.convertedClientId = existingClient._id;
           } else {
-            // Create client
-            const newClient = await models.clients.create({
+            // Store payload for post-commit afterUpdate execution
+            ctx.createClientPayload = {
               name: clientName,
               ownerName: `${body.firstName || contact.firstName} ${body.lastName || contact.lastName || ''}`.trim(),
               email: body.email || contact.email,
@@ -50,10 +50,17 @@ export default function contacts() {
               }],
               leadStatus: 'New',
               Status: 'Inactive'
-            });
-            body.convertedClientId = newClient._id;
+            };
           }
         }
+      }
+    },
+
+    async afterUpdate(ctx) {
+      if (ctx.createClientPayload) {
+        const { default: models } = await import('../models/Collection.js');
+        const newClient = await models.clients.create(ctx.createClientPayload);
+        await models.contacts.updateOne({ _id: ctx.docId }, { $set: { convertedClientId: newClient._id } });
       }
     }
   };

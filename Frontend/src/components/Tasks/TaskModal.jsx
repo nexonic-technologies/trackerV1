@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../../context/authProvider";
-import axiosInstance from "../../api/axiosInstance";
-import InlineEdit from "../../components/Common/InLineEdit";
-import { updateTaskById } from "./updateTaskById";
+import { useAuth } from "@providers/AuthProvider";
+import axiosInstance from "@api/axiosInstance";
+import InlineEdit from "@components/Common/InLineEdit";
+import { updateTaskById } from "@utilities/updateTaskById";
 import { MdAdd, MdPlayArrow, MdSchedule, MdFlag, MdLabel, MdPersonAdd, MdMoreVert, MdContentCopy, MdDelete } from "react-icons/md";
 import toast from "react-hot-toast";
-import ShareButton from "../../utils/Sharebutton";
-import ProfileImage from "../../components/Common/ProfileImage";
+import ShareButton from "@utilities/Sharebutton";
+import ProfileImage from "@components/Common/ProfileImage";
 
 const TaskModal = ({ task, onClose, onUpdate }) => {
   const { user } = useAuth();
@@ -21,14 +21,12 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
 
   useEffect(() => {
     if (task) {
-      // Fetch task with proper population for assignedTo
       fetchTaskWithPopulation();
       fetchComments();
       fetchEmployees();
     }
   }, [task]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -55,7 +53,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
 
       let taskData = response.data.data;
 
-      // If assignedTo is still array of strings, manually populate
       if (taskData.assignedTo && taskData.assignedTo.length > 0 && typeof taskData.assignedTo[0] === 'string') {
         const populatedAssignedTo = await Promise.all(
           taskData.assignedTo.map(async (userId) => {
@@ -76,7 +73,7 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
       setFormData(taskData);
     } catch (error) {
       console.error('Error fetching task with population:', error);
-      setFormData(task); // Fallback to original task
+      setFormData(task);
     }
   };
 
@@ -90,25 +87,17 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
   };
 
   const fetchComments = async () => {
-    if (!task.commentsThread) {
-      // console.log('No commentsThread found');
-      return;
-    }
+    if (!task.commentsThread) return;
     try {
       const threadId = typeof task.commentsThread === 'object' ? task.commentsThread._id : task.commentsThread;
-      if (!threadId) {
-        // console.log('No valid thread ID');
-        return;
-      }
+      if (!threadId) return;
 
       const populateFields = {
         "comments.commentedBy": "basicInfo.firstName,basicInfo.lastName"
       };
       const url = `/populate/read/commentsthreads/${threadId}`;
-
       const response = await axiosInstance.post(url, { populateFields });
 
-      // If population didn't work, fetch user details manually
       const commentsWithUsers = await Promise.all(
         (response.data.data?.comments || []).map(async (comment) => {
           if (typeof comment.commentedBy === 'string') {
@@ -164,7 +153,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
       const updatedAssigned = currentAssigned.filter(u => u._id !== userId);
       await updateTaskById(task._id, { assignedTo: updatedAssigned.map(u => u._id) });
 
-      // Update local state only
       setFormData(prev => ({
         ...prev,
         assignedTo: updatedAssigned
@@ -181,7 +169,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
       const updatedAssigned = [...currentAssigned.map(u => u._id), userId];
       await updateTaskById(task._id, { assignedTo: updatedAssigned });
 
-      // Fetch user details and update local state
       const userResponse = await axiosInstance.post(`/populate/read/employees/${userId}`, {
         fields: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage"
       });
@@ -221,7 +208,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
     if (!newComment.trim()) return;
     setLoading(true);
     try {
-      // Comment thread should already exist from task creation
       if (!task.commentsThread) {
         console.error('No comment thread found for task');
         toast.error('Comment thread not found');
@@ -262,7 +248,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
 
   return (
     <div className="w-full">
-      {/* Header - Full Width */}
       <div className="flex items-center gap-3 mb-6 pb-4 border-b">
         <select
           value={formData.status || ''}
@@ -282,7 +267,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
           <div className="relative" ref={dropdownRef}>
             {formData.assignedTo?.filter(Boolean).length > 0 ? (
               formData.assignedTo.filter(Boolean).length === 1 ? (
-                // Single user - clickable to show dropdown
                 <div
                   className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
                   onClick={(e) => {
@@ -308,7 +292,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
                   </span>
                 </div>
               ) : (
-                // Multiple users - show count and dropdown toggle
                 <div
                   className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
                   onClick={(e) => {
@@ -322,7 +305,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
                 </div>
               )
             ) : (
-              // No assignee - show dropdown toggle
               <div
                 className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
                 onClick={(e) => {
@@ -401,11 +383,7 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
       </div>
 
       <div className="flex h-full">
-        {/* Main Content */}
         <div className="w-3/4 pr-6">
-
-
-          {/* Title */}
           <div className="text-2xl font-bold mb-4">
             <InlineEdit
               value={formData.title}
@@ -414,7 +392,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
             />
           </div>
 
-          {/* Content Sections */}
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold text-gray-700 mb-2">Category</h3>
@@ -466,7 +443,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
             </div>
           </div>
 
-          {/* Activities and Comments */}
           <div className="mt-8 border-t pt-6">
             <div className="flex gap-4 mb-4">
               <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded font-medium">Activities</button>
@@ -506,16 +482,13 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
           </div>
         </div>
 
-        {/* Right Sidebar */}
         <div className="w-1/4 pl-6 border-l">
           <div className="space-y-6">
-            {/* Timer */}
             <div className="flex items-center gap-2">
               <MdPlayArrow className="text-green-500" size={20} />
               <span className="font-mono text-lg">00:00:00</span>
             </div>
 
-            {/* Date Fields */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <MdSchedule className="text-orange-500" size={16} />
@@ -558,7 +531,6 @@ const TaskModal = ({ task, onClose, onUpdate }) => {
               </div>
             </div>
 
-            {/* About the Task */}
             <div className="border-t pt-4">
               <h4 className="font-semibold mb-3">About the Task</h4>
               <div className="space-y-4 text-sm">

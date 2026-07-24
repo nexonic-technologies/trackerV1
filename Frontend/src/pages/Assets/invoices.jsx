@@ -66,7 +66,7 @@ const Invoices = () => {
         }
       });
       // Show only Approved, Received, or Pending Approval POs
-      const activePOs = (res.data?.data || []).filter(po => 
+      const activePOs = (res.data?.data || []).filter(po =>
         ["Approved", "Received", "Pending Approval"].includes(po.status)
       );
       setPurchaseOrders(activePOs);

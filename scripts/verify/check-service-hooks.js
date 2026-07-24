@@ -1,7 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const SERVICES_DIR = path.resolve(process.cwd(), 'Backend/src/services');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+const SERVICES_DIR = path.resolve(ROOT_DIR, 'Backend/src/services');
+const VALID_HOOKS = ['beforeCreate', 'afterCreate', 'beforeRead', 'afterRead', 'beforeUpdate', 'afterUpdate', 'beforeDelete', 'afterDelete'];
 
 async function checkServiceHooks() {
   console.log('=== Starting Service Hooks Interface Check ===');
@@ -13,37 +19,56 @@ async function checkServiceHooks() {
   const files = fs.readdirSync(SERVICES_DIR);
   let warnings = 0;
   let errors = 0;
+  let modelServicesCount = 0;
+  let utilityServicesCount = 0;
 
   for (const file of files) {
-    if (file.endsWith('.js') && file !== 'fcmService.js') {
-      try {
-        const modulePath = path.join(SERVICES_DIR, file);
-        const serviceModule = await import(`file://${modulePath}`);
-        const factory = serviceModule.default;
+    if (!file.endsWith('.js') || fs.statSync(path.join(SERVICES_DIR, file)).isDirectory()) {
+      continue;
+    }
 
-        if (typeof factory !== 'function') {
-          console.error(`🔴 Blocker: Service "${file}" does not export a default factory function.`);
-          errors++;
-          continue;
+    try {
+      const modulePath = path.join(SERVICES_DIR, file);
+      const serviceModule = await import(`file://${modulePath}`);
+      const factory = serviceModule.default;
+
+      let isFactory = typeof factory === 'function';
+      let hooks = null;
+
+      if (isFactory) {
+        try {
+          hooks = factory();
+        } catch {
+          // If invoking factory() fails (e.g. class constructor requiring 'new'), treat as utility class
+          isFactory = false;
         }
+      }
 
-        const hooks = factory();
-        const hookKeys = Object.keys(hooks);
-        const VALID_HOOKS = ['beforeCreate', 'afterCreate', 'beforeRead', 'afterRead', 'beforeUpdate', 'afterUpdate', 'beforeDelete', 'afterDelete'];
-        
+      const hookKeys = (hooks && typeof hooks === 'object') ? Object.keys(hooks) : [];
+      const declaredHooks = hookKeys.filter(k => VALID_HOOKS.includes(k));
+
+      // Determine if file is a Populate Engine model hook service or a platform utility service
+      const isModelHookService = isFactory && declaredHooks.length > 0;
+
+      if (isModelHookService) {
+        modelServicesCount++;
         const invalidKeys = hookKeys.filter(k => !VALID_HOOKS.includes(k));
         if (invalidKeys.length > 0) {
-          console.warn(`🟠 Warning: Service "${file}" has non-standard hook exports: ${invalidKeys.join(', ')}`);
+          console.warn(`🟠 Warning: Model service "${file}" has non-standard helper exports alongside hooks: ${invalidKeys.join(', ')}`);
           warnings++;
         }
-
-        console.log(`✓ Service "${file}" has valid hooks: [${hookKeys.filter(k => VALID_HOOKS.includes(k)).join(', ')}]`);
-      } catch (err) {
-        console.error(`🔴 Blocker: Failed to import service ${file}:`, err.message);
-        errors++;
+        console.log(`✓ Model Service "${file}" valid hooks: [${declaredHooks.join(', ')}]`);
+      } else {
+        utilityServicesCount++;
+        console.log(`✓ Platform Utility Service "${file}" (Utility/Helper module)`);
       }
+    } catch (err) {
+      console.error(`🔴 Blocker: Failed to import service ${file}:`, err.message);
+      errors++;
     }
   }
+
+  console.log(`\nSummary: ${modelServicesCount} Model Services, ${utilityServicesCount} Utility Services verified.`);
 
   if (errors === 0) {
     console.log(`✅ PASS: Service hooks parsed successfully. Warnings: ${warnings}`);

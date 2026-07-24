@@ -1,4 +1,14 @@
-import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+const requireBackend = createRequire(path.resolve(ROOT_DIR, 'Backend/package.json'));
+const mongoose = requireBackend('mongoose').default || requireBackend('mongoose');
+
 import models from '../../Backend/src/models/Collection.js';
 import onboardingService from '../../Backend/src/services/onboardings.js';
 import { jobs as onboardingJobs } from '../../Backend/src/cron/OnboardingCron.js';

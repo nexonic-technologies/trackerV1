@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../../api/axiosInstance";
+import axiosInstance from "@api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import StatCard from "../../../components/Common/StatCard";
+import StatCard from "@components/Common/StatCard";
 import { Search, Building2, ArrowRight, LayoutGrid, Clock, CheckCircle2 } from "lucide-react";
 
 const ClientTasksPage = () => {

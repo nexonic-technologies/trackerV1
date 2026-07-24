@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axiosInstance from "../../../api/axiosInstance";
-import EntityFormPage from "../../../components/Forms/EntityFormPage";
+import axiosInstance from "@api/axiosInstance";
+import EntityFormPage from "@components/Forms/EntityFormPage";
 import { SidebarForm } from "../../../constants/SidebarFrom";
 import toast from "react-hot-toast";
 import { Plus, Trash2, Sparkles, Package, Loader2 } from "lucide-react";

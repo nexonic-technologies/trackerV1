@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node ../scripts/verify/run.js",
     "dev": "nodemon server.js",
     "start": "node --max-old-space-size=4096 server.js",
     "dev:monitor": "nodemon server.js",

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import axiosInstance from '../../api/axiosInstance';
-import TableGenerator from '../../components/Common/TableGenerator';
+import axiosInstance from '@api/axiosInstance';
+import TableGenerator from '@components/Common/TableGenerator';
 import { BarChart3, PieChart, Calendar, Filter, TrendingUp, ChevronDown, X } from 'lucide-react';
-import { MODULES, STAT_CARD, APP_SHELL } from '../../constants/uiTokens';
+import { MODULES, STAT_CARD, APP_SHELL } from '@constants/uiTokens';
 
 const TaskReports = () => {
     const [reportData, setReportData] = useState([]);

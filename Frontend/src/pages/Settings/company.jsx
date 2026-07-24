@@ -19,8 +19,8 @@ import {
   Trash2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import axiosInstance from '../../api/axiosInstance';
-import FormPageLayout from '../../components/Forms/FormPageLayout';
+import axiosInstance from '@api/axiosInstance';
+import FormPageLayout from '@components/Forms/FormPageLayout';
 
 const DEFAULT_COMPANY_STATE = {
   _id: '',

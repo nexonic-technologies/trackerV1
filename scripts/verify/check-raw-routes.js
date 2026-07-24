@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const ROUTES_DIR = path.resolve(process.cwd(), 'Backend/src/routes');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+const ROUTES_DIR = path.resolve(ROOT_DIR, 'Backend/src/routes');
 
 const ALLOWED_RAW_ROUTES = [
   'agentAuth.js',

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import InlineEdit from "../../components/Common/InLineEdit";
-import { useAuth } from "../../context/authProvider";
-import { updateTaskById } from "./updateTaskById";
-import AddComment from "../../components/Common/AddComment";
+import InlineEdit from "@components/Common/InLineEdit";
+import { useAuth } from "@providers/AuthProvider";
+import { updateTaskById } from "@utilities/updateTaskById";
+import AddComment from "@components/Common/AddComment";
 
 export default function Task({ task, fetchTask, onStatusChange }) {
   const { user } = useAuth();

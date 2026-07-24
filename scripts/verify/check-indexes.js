@@ -1,9 +1,14 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const INDEXER_FILE = path.resolve(process.cwd(), 'Backend/src/services/databaseIndexer.js');
-const SERVICES_DIR = path.resolve(process.cwd(), 'Backend/src/services');
-const ROUTES_DIR = path.resolve(process.cwd(), 'Backend/src/routes');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+const INDEXER_FILE = path.resolve(ROOT_DIR, 'Backend/src/services/databaseIndexer.js');
+const SERVICES_DIR = path.resolve(ROOT_DIR, 'Backend/src/services');
+const ROUTES_DIR = path.resolve(ROOT_DIR, 'Backend/src/routes');
 
 // Extends variable names to DB model names
 function resolveModelFromVar(varName) {
