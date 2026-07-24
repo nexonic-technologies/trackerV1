@@ -8,21 +8,21 @@ import MyPayslipsTab from "@components/payroll/MyPayslipsTab";
 import PeriodClosuresTab from "@components/payroll/PeriodClosuresTab";
 import ProfileImage from "@components/Common/ProfileImage";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const TABS = [
-  { key: "runs",       label: "Payroll Runs",     icon: Play,    roles: ["hr admin","admin","superadmin","super admin","hr"] },
-  { key: "structures", label: "Salary Structures", icon: Users,   roles: ["hr admin","admin","superadmin","super admin","hr"] },
-  { key: "closures",   label: "Period Closures",  icon: Calendar, roles: ["hr admin","admin","superadmin","super admin","hr", "finance manager", "finance"] },
-  { key: "payslips",   label: "My Payslips",       icon: Receipt, roles: [] },
+  { key: "runs", label: "Payroll Runs", icon: Play, roles: ["hr admin", "admin", "superadmin", "super admin", "hr"] },
+  { key: "structures", label: "Salary Structures", icon: Users, roles: ["hr admin", "admin", "superadmin", "super admin", "hr"] },
+  { key: "closures", label: "Period Closures", icon: Calendar, roles: ["hr admin", "admin", "superadmin", "super admin", "hr", "finance manager", "finance"] },
+  { key: "payslips", label: "My Payslips", icon: Receipt, roles: [] },
 ];
 
-const PRIVILEGED = ["hr admin","admin","superadmin","super admin","hr"];
+const PRIVILEGED = ["hr admin", "admin", "superadmin", "super admin", "hr"];
 
 export default function PayrollPage() {
   const { userRole, loading: roleLoading } = useUserRole();
   const roleName = (userRole || "").toLowerCase();
-  const isHR     = PRIVILEGED.includes(roleName);
+  const isHR = PRIVILEGED.includes(roleName);
 
   const visibleTabs = TABS.filter(t => t.roles.length === 0 || t.roles.includes(roleName));
   const [active, setActive] = useState("");
@@ -70,16 +70,16 @@ export default function PayrollPage() {
         })}
       </div>
 
-      {resolvedActive === "runs"       && <PayrollRunsTab />}
+      {resolvedActive === "runs" && <PayrollRunsTab />}
       {resolvedActive === "structures" && <SalaryStructuresTab />}
-      {resolvedActive === "closures"   && <PeriodClosuresTab />}
-      {resolvedActive === "payslips"   && <MyPayslipsTab />}
+      {resolvedActive === "closures" && <PeriodClosuresTab />}
+      {resolvedActive === "payslips" && <MyPayslipsTab />}
     </div>
   );
 }
 
 export function PayslipModal({ rec, onClose }) {
-  const emp    = rec?.employeeId;
+  const emp = rec?.employeeId;
   const earned = rec?.earnedBreakdown
     ? (rec.earnedBreakdown instanceof Map ? Object.fromEntries(rec.earnedBreakdown) : rec.earnedBreakdown)
     : null;
@@ -87,15 +87,15 @@ export function PayslipModal({ rec, onClose }) {
     ? (rec.deductionBreakdown instanceof Map ? Object.fromEntries(rec.deductionBreakdown) : rec.deductionBreakdown)
     : null;
 
-  const earnedEntries   = earned   ? Object.entries(earned)   : [];
+  const earnedEntries = earned ? Object.entries(earned) : [];
   const deductedEntries = deducted ? Object.entries(deducted) : [];
 
   const STATUS_CHIP = {
-    Draft:      "pay-status-chip pay-status-chip--draft",
+    Draft: "pay-status-chip pay-status-chip--draft",
     Processing: "pay-status-chip pay-status-chip--processing",
-    Processed:  "pay-status-chip pay-status-chip--processed",
-    Approved:   "pay-status-chip pay-status-chip--approved",
-    Paid:       "pay-status-chip pay-status-chip--paid",
+    Processed: "pay-status-chip pay-status-chip--processed",
+    Approved: "pay-status-chip pay-status-chip--approved",
+    Paid: "pay-status-chip pay-status-chip--paid",
   };
 
   return (
