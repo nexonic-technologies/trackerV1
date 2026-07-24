@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
-import useGenericAPI from "../../components/useGenericAPI";
-import PageLoader from "../../components/Common/PageLoader";
-import StatCard from "../../components/Common/StatCard";
+import axiosInstance from "@api/axiosInstance";
+import { useGenericAPI } from "@hooks/useGenericAPI";
+import PageLoader from "@components/Common/PageLoader";
+import StatCard from "@components/Common/StatCard";
 import {
   BadgeDollarSign, Users, Award, Play, CheckCircle, 
   Clock, AlertCircle, BarChart3, ListFilter, Kanban, 

@@ -1,12 +1,3 @@
-export {
-    AuthService,
-    EmployeeService,
-    PayrollService,
-    TaskService,
-    TicketService,
-    MasterDataService,
-    AttendanceService,
-    LeaveService
-} from './domainServices';
+export { AuthService, EmployeeService, PayrollService, TaskService, TicketService, MasterDataService, AttendanceService, LeaveService, CRMService } from './domainServices';
 export { default as formSubmitQueue } from './formSubmitQueue';
 export { socketService } from './socketService';

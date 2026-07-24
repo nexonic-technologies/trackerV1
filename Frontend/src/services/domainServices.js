@@ -212,3 +212,42 @@ export class LeaveService {
   }
 }
 
+export class CRMService {
+  static async getQuotations(options = {}) {
+    const req = PopulateApi.READ('quotations', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async getQuotationById(id, options = {}) {
+    const req = PopulateApi.READ('quotations', id, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async createQuotation(data) {
+    const req = PopulateApi.CREATE('quotations', data);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async updateQuotation(id, data) {
+    const req = PopulateApi.UPDATE('quotations', id, data);
+    const response = await axiosInstance.put(req.url, req.payload);
+    return response.data;
+  }
+  static async getOrders(options = {}) {
+    const req = PopulateApi.READ('orders', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async getPayments(options = {}) {
+    const req = PopulateApi.READ('payments', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+  static async getContacts(options = {}) {
+    const req = PopulateApi.READ('contacts', null, options);
+    const response = await axiosInstance.post(req.url, req.payload);
+    return response.data;
+  }
+}
+
+
