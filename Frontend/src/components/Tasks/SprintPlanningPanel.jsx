@@ -1,14 +1,3 @@
-/**
- * SprintPlanningPanel.jsx
- *
- * Lightweight two-column drag-and-drop sprint planning.
- * Library: @dnd-kit/core (touch + keyboard + smooth demo)
- *
- * Left column:  Backlog tasks (no sprint assigned)
- * Right column: Tasks in selected upcoming sprint (drop zone)
- *
- * On drop: PUT /populate/update/sprints/:id  { $addToSet: { tasks: taskId } }
- */
 import { useState, useEffect } from "react";
 import {
   DndContext,
@@ -22,14 +11,13 @@ import {
   closestCenter,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
 import {
   Layers, GripVertical, CalendarRange, CheckCircle2,
   Clock, ChevronDown, RefreshCw, Plus, X,
 } from "lucide-react";
 
-// ── Priority badge styles ─────────────────────────────────────────────────────
 const PRIORITY_STYLES = {
   "Weekly Priority": { bg: "var(--module-hr-light)",       text: "var(--module-hr)" },
   "High":            { bg: "var(--tracker-danger-light)",  text: "var(--tracker-danger)" },
@@ -37,7 +25,6 @@ const PRIORITY_STYLES = {
   "Low":             { bg: "var(--tracker-success-light)", text: "var(--tracker-success)" },
 };
 
-// ── Draggable task card ───────────────────────────────────────────────────────
 const TaskCard = ({ task, isDragOverlay = false }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task._id });
   const pStyle = PRIORITY_STYLES[task.priorityLevel] || PRIORITY_STYLES["Low"];
@@ -79,7 +66,6 @@ const TaskCard = ({ task, isDragOverlay = false }) => {
   );
 };
 
-// ── Sprint drop zone ──────────────────────────────────────────────────────────
 const SprintDropZone = ({ sprint, tasks }) => {
   const { setNodeRef, isOver } = useDroppable({ id: sprint._id });
 
@@ -108,7 +94,6 @@ const SprintDropZone = ({ sprint, tasks }) => {
   );
 };
 
-// ── Create Sprint Modal ───────────────────────────────────────────────────────
 const CreateSprintModal = ({ onClose, onCreated, userId }) => {
   const today     = new Date().toISOString().split("T")[0];
   const twoWeeks  = new Date(Date.now() + 14 * 86_400_000).toISOString().split("T")[0];
@@ -151,8 +136,6 @@ const CreateSprintModal = ({ onClose, onCreated, userId }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fadeIn">
-
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -172,10 +155,7 @@ const CreateSprintModal = ({ onClose, onCreated, userId }) => {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-
-          {/* Name */}
           <div>
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
               Sprint Name <span className="text-red-400">*</span>
@@ -190,7 +170,6 @@ const CreateSprintModal = ({ onClose, onCreated, userId }) => {
             />
           </div>
 
-          {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
@@ -217,7 +196,6 @@ const CreateSprintModal = ({ onClose, onCreated, userId }) => {
             </div>
           </div>
 
-          {/* Duration preview */}
           {durationDays && (
             <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-xl text-[11px] text-blue-600 font-medium">
               <CalendarRange size={12} />
@@ -230,14 +208,12 @@ const CreateSprintModal = ({ onClose, onCreated, userId }) => {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
               {error}
             </p>
           )}
 
-          {/* Actions */}
           <div className="flex items-center justify-end gap-2 pt-1">
             <button
               type="button"
@@ -265,7 +241,6 @@ const CreateSprintModal = ({ onClose, onCreated, userId }) => {
   );
 };
 
-// ── Main panel ───────────────────────────────────────────────────────────────
 const SprintPlanningPanel = () => {
   const { user } = useAuth();
 
@@ -282,7 +257,6 @@ const SprintPlanningPanel = () => {
     useSensor(KeyboardSensor)
   );
 
-  // ── Data fetchers ──────────────────────────────────────────────────────────
   const fetchSprints = async () => {
     try {
       const res = await axiosInstance.post("/populate/read/sprints", {
@@ -315,7 +289,6 @@ const SprintPlanningPanel = () => {
     fetchBacklogs();
   }, []);
 
-  // ── Drag handlers ──────────────────────────────────────────────────────────
   const handleDragStart = ({ active }) => {
     setActiveDrag(backlogTasks.find(t => t._id === active.id) || null);
   };
@@ -341,7 +314,6 @@ const SprintPlanningPanel = () => {
     }
   };
 
-  // ── Sprint created callback ────────────────────────────────────────────────
   const handleSprintCreated = async (newSprint) => {
     setShowCreateModal(false);
     const res = await axiosInstance.post("/populate/read/sprints", {
@@ -351,20 +323,16 @@ const SprintPlanningPanel = () => {
     }).catch(() => null);
     const list = res?.data?.data || [];
     setSprints(list);
-    // auto-select the newly created sprint
     const found = list.find(s => s._id === newSprint?._id) || newSprint;
     if (found) setSelectedSprint(found);
   };
 
-  // ── Derived state ──────────────────────────────────────────────────────────
   const sprintTaskIds     = new Set((selectedSprint?.tasks || []).map(String));
   const availableBacklogs = backlogTasks.filter(t => !sprintTaskIds.has(t._id));
   const inSprintTasks     = backlogTasks.filter(t => sprintTaskIds.has(t._id));
 
   return (
     <div className="flex flex-col h-full overflow-hidden p-1" data-module="project">
-
-      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 pb-3 border-b border-hairline-soft flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="lmx-icon-tile"><Layers size={16} /></div>
@@ -374,7 +342,6 @@ const SprintPlanningPanel = () => {
           </div>
         </div>
 
-        {/* Sprint selector */}
         <div className="relative sm:ml-auto">
           <select
             id="sprint-planning-select"
@@ -392,7 +359,6 @@ const SprintPlanningPanel = () => {
           <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
         </div>
 
-        {/* Sprint dates pill */}
         {selectedSprint && (
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-hairline bg-surface text-xs font-medium text-ink-muted flex-shrink-0">
             <CalendarRange size={11} />
@@ -402,7 +368,6 @@ const SprintPlanningPanel = () => {
           </div>
         )}
 
-        {/* New Sprint button */}
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
@@ -411,7 +376,6 @@ const SprintPlanningPanel = () => {
           <Plus size={13} /> New Sprint
         </button>
 
-        {/* Refresh */}
         <button
           type="button"
           onClick={() => { fetchSprints(); fetchBacklogs(); }}
@@ -422,7 +386,6 @@ const SprintPlanningPanel = () => {
         </button>
       </div>
 
-      {/* ── DnD columns ── */}
       <div className="flex-1 overflow-hidden mt-4">
         <DndContext
           sensors={sensors}
@@ -431,8 +394,6 @@ const SprintPlanningPanel = () => {
           onDragEnd={handleDragEnd}
         >
           <div className="flex gap-4 h-full overflow-hidden">
-
-            {/* Left: Backlog */}
             <div className="flex flex-col w-1/2 min-w-0">
               <div className="flex items-center justify-between mb-2.5 flex-shrink-0">
                 <h3 className="text-[12px] font-bold text-ink-muted uppercase tracking-wider">
@@ -451,7 +412,6 @@ const SprintPlanningPanel = () => {
               </div>
             </div>
 
-            {/* Right: Sprint drop zone */}
             <div className="flex flex-col w-1/2 min-w-0">
               <div className="flex items-center justify-between mb-2.5 flex-shrink-0">
                 <h3 className="text-[12px] font-bold uppercase tracking-wider" style={{ color: "var(--module-project)" }}>
@@ -475,7 +435,6 @@ const SprintPlanningPanel = () => {
             </div>
           </div>
 
-          {/* Drag overlay */}
           <DragOverlay>
             {activeDrag && (
               <div className="w-72 rotate-1 scale-105">
@@ -486,7 +445,6 @@ const SprintPlanningPanel = () => {
         </DndContext>
       </div>
 
-      {/* ── Create Sprint Modal ── */}
       {showCreateModal && (
         <CreateSprintModal
           onClose={() => setShowCreateModal(false)}
