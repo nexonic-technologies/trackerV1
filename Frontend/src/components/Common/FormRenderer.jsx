@@ -8,7 +8,7 @@ import {
   getNestedValue,
   setNestedValue,
   stripMetaFields,
-} from "../../utils/formPatch";
+} from "@utils/formPatch";
 
 // Resolve Country Name -> ISO Code
 const getCountryCode = (countryName) => {
@@ -333,8 +333,8 @@ const CustomDatePicker = ({ value, onChange, label, required }) => {
                 viewMode === "days"
                   ? handlePrevMonth
                   : viewMode === "months"
-                  ? () => setCurrentDate(new Date(year - 1, month, 1))
-                  : () => setYearPageStart((prev) => prev - 12)
+                    ? () => setCurrentDate(new Date(year - 1, month, 1))
+                    : () => setYearPageStart((prev) => prev - 12)
               }
               className="p-1 rounded-[6px] hover:bg-surface-1 text-ink transition-colors cursor-pointer min-w-[28px] min-h-[28px] flex items-center justify-center border border-hairline-soft"
             >
@@ -379,8 +379,8 @@ const CustomDatePicker = ({ value, onChange, label, required }) => {
                 viewMode === "days"
                   ? handleNextMonth
                   : viewMode === "months"
-                  ? () => setCurrentDate(new Date(year + 1, month, 1))
-                  : () => setYearPageStart((prev) => prev + 12)
+                    ? () => setCurrentDate(new Date(year + 1, month, 1))
+                    : () => setYearPageStart((prev) => prev + 12)
               }
               className="p-1 rounded-[6px] hover:bg-surface-1 text-ink transition-colors cursor-pointer min-w-[28px] min-h-[28px] flex items-center justify-center border border-hairline-soft"
             >
@@ -416,8 +416,8 @@ const CustomDatePicker = ({ value, onChange, label, required }) => {
                           ${selected
                             ? 'bg-[var(--module-accent)] text-white font-bold'
                             : isToday
-                            ? 'border border-[var(--module-accent)] text-[var(--module-accent)] bg-[var(--module-accent-light)]'
-                            : 'hover:bg-surface-1 text-ink'}
+                              ? 'border border-[var(--module-accent)] text-[var(--module-accent)] bg-[var(--module-accent-light)]'
+                              : 'hover:bg-surface-1 text-ink'}
                         `}
                       >
                         {cell.day}
@@ -693,7 +693,7 @@ const FormRenderer = ({
       const countryName = getNestedValue(parentContext, countryPath) || getNestedValue(parentContext, "country");
       const countryCode = getCountryCode(countryName);
 
-      const stateList = countryCode 
+      const stateList = countryCode
         ? State.getStatesOfCountry(countryCode).map(s => ({ value: s.name, label: s.name }))
         : [];
       const selectedOpt = stateList.find(o => o.value === value) || null;
@@ -717,7 +717,7 @@ const FormRenderer = ({
     if (isCity) {
       const countryPath = field.name.replace("city", "country");
       const statePath = field.name.replace("city", "state");
-      
+
       const countryName = getNestedValue(parentContext, countryPath) || getNestedValue(parentContext, "country");
       const stateName = getNestedValue(parentContext, statePath) || getNestedValue(parentContext, "state");
 
@@ -795,7 +795,7 @@ const FormRenderer = ({
                       {renderField(subField, item[subField.name], (val) => {
                         const updated = [...subFormValue];
                         updated[index] = { ...updated[index], [subField.name]: val };
-                        
+
                         // Auto-calculate line total for quotation items
                         if (field.name === "items" && (subField.name === "quantity" || subField.name === "unitPrice" || subField.name === "discount" || subField.name === "tax")) {
                           const qty = Number(updated[index].quantity) || 0;
@@ -804,7 +804,7 @@ const FormRenderer = ({
                           const tax = Number(updated[index].tax) || 0;
                           updated[index].total = (qty * price) - discount + tax;
                         }
-                        
+
                         onFieldChange(updated);
                       }, item)}
                     </div>

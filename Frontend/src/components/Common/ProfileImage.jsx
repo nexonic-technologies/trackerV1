@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axiosInstance from '../../api/axiosInstance';
+import axiosInstance from '@api/axiosInstance';
 
 const ProfileImage = ({
   profileImage,
@@ -23,7 +23,7 @@ const ProfileImage = ({
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     const baseUrl = axiosInstance.defaults.baseURL.replace('/api', '');
-    
+
     if (typeof imagePath === 'string' && imagePath.startsWith('http')) return imagePath;
 
     if (typeof imagePath === 'string' && imagePath.includes('serve/')) {

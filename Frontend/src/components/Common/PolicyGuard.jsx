@@ -1,5 +1,5 @@
 import React from "react";
-import { usePermission } from "../../context/permissionProvider";
+import { usePermission } from "@context/permissionProvider";
 
 /**
  * Permission guard component — backward-compatible bridge.
