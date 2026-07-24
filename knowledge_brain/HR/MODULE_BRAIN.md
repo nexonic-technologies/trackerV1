@@ -1,28 +1,26 @@
 # HR Module Brain
 
 ## Overview
-This module contains 5 models, 3 services, and 0 frontend files.
+This module contains models and services for HR management, employee lifecycle tracking, onboarding automation, and salary revision management.
 
 ## Backend Models
-| Model | File | Lines | Key Fields | Notes |
-|---|---|---|---|---|
-| Agent | Agent.js | 40 | — | Refs: clients, departments |
-| Department | Department.js | 26 | — | Refs: leavepolicies |
-| Designation | Designation.js | 20 | — | |
-| Employee | Employee.js | 93 | status (enum: Active/Inactive/Terminated) | Refs: designations, departments, roles, employees, leavetypes. Note: Employee.status is NOT dynamic — intentionally kept as fixed enum. |
-| HRPolicy | HRPolicy.js | 57 | `status` (String, no enum), `metaStatus` (String, default: active) | Status driven by StatusConfig (`modelName: 'hrpolicies'`). Refs: Employee, Department. |
-| Role | Role.js | 34 | — | |
-
-> **Dynamic status (as of 2026-06-10)**: HRPolicy — `enum: ['Draft','Active','Archived']` removed from `status`. Values now from `statusconfigs.workflowStatuses`. `metaStatus` added (default: `'active'`).
-> Employee.status remains a fixed enum — it is a system field, not a user-configurable workflow.
+| Model | File | Key Fields / Ref | Notes |
+|---|---|---|---|
+| Employee | Employee.js | `salaryStructure` (Ref: salarystructures), `isDeleted` | Enforces optimistic concurrency (`__v`), soft-delete, and SalaryStructure ref |
+| EmployeeLifecycleHistory | EmployeeLifecycleHistory.js | `employeeId`, `changeType`, `effectiveDate`, `previousValue`, `newValue` | Immutable career timeline & audit history log |
+| Onboarding | Onboarding.js | `employeeId`, `candidateId`, `status`, `completionPercent`, `checklist` | 8-state onboarding machine with SLA tracking |
+| OnboardingTemplate | OnboardingTemplate.js | `department`, `designation`, `employmentType`, `checklist` | Configurable onboarding checklist template |
+| HRPolicy | HRPolicy.js | `status`, `metaStatus`, `applicableDepartments` | Status driven by StatusConfig |
+| Department | Department.js | `name`, `leavePolicy` | Refs: leavepolicies |
+| Designation | Designation.js | `title`, `level` | Org designation master |
+| Role | Role.js | `name`, `permissionVersion` | CBAC permission role master |
 
 ## Backend Services (Business Logic Hooks)
-| Service File | Lines | Exported Functions |
-|---|---|---|
-| AgentInviteService.js | 115 |  |
-| agents.js | 36 |  |
-| employee.js | 26 |  |
-
-## Dynamic API Usage
-| File | Method | URL | Target Model |
-|---|---|---|---|
+| Service File | Description / Functionality |
+|---|---|
+| lifecycleHistoryService.js | Centralized utility for recording career lifecycle events (joining, promotion, transfer, salary revision, status change) |
+| salaryRevisionService.js | Centralized service for versioning SalaryStructure documents, closing effective date windows, updating Employee.salaryStructure pointer, and logging history |
+| employeelifecyclehistories.js | Service hook for EmployeeLifecycleHistory model |
+| employees.js | Hook enforcing salaryDetails mutation guard, optimistic concurrency `__v` checks, and automatic history logging |
+| candidates.js | Candidate stage hooks including atomic transaction Hire flow with salaryRevisionService & lifecycleHistoryService initialization |
+| OnboardingCron.js | Scheduled daily SLA check at 08:00 AM for target date breach detection and notification reminders |

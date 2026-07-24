@@ -165,11 +165,24 @@ export default function employeesService() {
     },
 
     /**
-     * beforeUpdate: Hash password and block updates if active asset allocations exist.
-     * Also updates Leave Status Buckets if department, designation, or override changes.
+     * beforeUpdate: Guard salaryDetails mutations, check optimistic concurrency __v,
+     * hash password, check asset allocations on termination, and merge leave balances.
      */
     async beforeUpdate(ctx) {
       const { body, docId, existingDoc } = ctx;
+
+      // 1. Guard against direct mutation of legacy salaryDetails
+      if (body?.salaryDetails && Object.keys(body.salaryDetails).length > 0) {
+        throw new Error('Direct mutation of Employee.salaryDetails is prohibited. Please use salaryRevisionService or update via SalaryStructure model.');
+      }
+
+      // 2. Optimistic Concurrency Control Check (__v)
+      if (body?.__v !== undefined && existingDoc?.__v !== undefined && body.__v !== existingDoc.__v) {
+        const err = new Error(`[ConcurrencyConflict] Document has been updated by another user (expected version ${existingDoc.__v}, received ${body.__v}). Please refresh.`);
+        err.statusCode = 409;
+        throw err;
+      }
+
       if (body?.authInfo?.password) {
         const salt = await bcrypt.genSalt(12);
         body.authInfo.password = await bcrypt.hash(body.authInfo.password, salt);
@@ -220,6 +233,70 @@ export default function employeesService() {
       }
 
       return body;
+    },
+
+    /**
+     * afterUpdate: Log EmployeeLifecycleHistory on designation, department, manager, or status changes.
+     */
+    async afterUpdate(ctx) {
+      const { docId, body, existingDoc, user } = ctx;
+      if (!docId || !existingDoc) return;
+
+      try {
+        const { default: lifecycleHistoryService } = await import('./lifecycleHistoryService.js');
+        const oldProf = existingDoc.professionalInfo || {};
+        const newProf = body?.professionalInfo || {};
+
+        // Designation Change / Promotion
+        if (newProf.designation && newProf.designation.toString() !== oldProf.designation?.toString()) {
+          await lifecycleHistoryService.logEvent({
+            employeeId: docId,
+            changeType: 'DesignationChange',
+            previousValue: oldProf.designation,
+            newValue: newProf.designation,
+            changedBy: user?.id,
+            reason: body.changeReason || 'Designation updated'
+          });
+        }
+
+        // Department Change / Transfer
+        if (newProf.department && newProf.department.toString() !== oldProf.department?.toString()) {
+          await lifecycleHistoryService.logEvent({
+            employeeId: docId,
+            changeType: 'DepartmentChange',
+            previousValue: oldProf.department,
+            newValue: newProf.department,
+            changedBy: user?.id,
+            reason: body.changeReason || 'Department transfer'
+          });
+        }
+
+        // Manager Change
+        if (newProf.reportingManager && newProf.reportingManager.toString() !== oldProf.reportingManager?.toString()) {
+          await lifecycleHistoryService.logEvent({
+            employeeId: docId,
+            changeType: 'ManagerChange',
+            previousValue: oldProf.reportingManager,
+            newValue: newProf.reportingManager,
+            changedBy: user?.id,
+            reason: body.changeReason || 'Reporting manager changed'
+          });
+        }
+
+        // Status Change
+        if (body.status && body.status !== existingDoc.status) {
+          await lifecycleHistoryService.logEvent({
+            employeeId: docId,
+            changeType: 'StatusChange',
+            previousValue: existingDoc.status,
+            newValue: body.status,
+            changedBy: user?.id,
+            reason: body.changeReason || 'Employee status changed'
+          });
+        }
+      } catch (err) {
+        console.warn('[EmployeeService.afterUpdate] Lifecycle history logging failed:', err.message);
+      }
     }
   };
 }

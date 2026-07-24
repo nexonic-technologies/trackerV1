@@ -1,128 +1,86 @@
-import cron from "node-cron";
-import models from "../models/Collection.js";
-import NotificationDispatcher from "../services/NotificationDispatcher.js";
+import cron from 'node-cron';
+import Onboarding from '../models/Onboarding.js';
+import GeneralSettings from '../models/GeneralSettings.js';
+import asyncNotificationService from '../services/asyncNotificationService.js';
 
-export const jobs = [
-  {
-    name: "OnboardingCron",
-    defaultExpression: "30 01 * * *", // Runs daily at 01:30 AM
-    run: async () => {
-      try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+class OnboardingCron {
+  constructor() {
+    this.cronTask = null;
+  }
 
-        // ── 1. DAY-1 JOINING ACTIVATION GATE ──────────────────────────────────
-        // Activates employees whose onboarding checklist/docs reached 100% (Ready To Join) when joining day arrives
-        const readyToJoinOnboardings = await models.onboardings.find({
-          status: 'Ready To Join',
-          joiningDate: { $lte: today }
-        });
+  async init() {
+    try {
+      const settings = await GeneralSettings.findOne().lean();
+      const cronSchedule = settings?.cron?.onboardingCronSchedule || '0 8 * * *'; // Default 8:00 AM daily
+      const isEnabled = settings?.cron?.onboardingCronEnabled !== false;
 
-        for (const onb of readyToJoinOnboardings) {
-          onb.status = 'Completed';
-          onb.joinedAt = onb.joinedAt || new Date();
-          onb.completedAt = new Date();
-          await onb.save();
-
-          await models.employees.findByIdAndUpdate(onb.employeeId, {
-            status: 'Active',
-            'professionalInfo.confirmDate': new Date()
-          });
-
-          // Dispatch Welcome & Day-1 Activation Notifications
-          try {
-            const recipients = [onb.employeeId.toString()];
-            if (onb.reportingTo) recipients.push(onb.reportingTo.toString());
-            if (onb.createdBy) recipients.push(onb.createdBy.toString());
-
-            await NotificationDispatcher.dispatch({
-              recipients: [...new Set(recipients)],
-              sender: onb.createdBy,
-              title: "Welcome Aboard! Onboarding Completed",
-              message: `Joining date arrived! Employee onboarding completed and account activated.`,
-              type: 'system',
-              meta: { model: 'onboardings', modelId: onb._id },
-              path: '/hrms'
-            });
-          } catch (nErr) {
-            console.warn('[OnboardingCron] Notification warning:', nErr.message);
-          }
-        }
-
-        // ── 2. SLA BREACH DETECTION ───────────────────────────────────────────
-        const overdueOnboardings = await models.onboardings.find({
-          status: { $in: ['Pending', 'In Progress', 'Documents Pending', 'Verification Pending'] },
-          targetCompletionDate: { $lt: today },
-          slaBreached: { $ne: true }
-        });
-
-        for (const onb of overdueOnboardings) {
-          onb.slaBreached = true;
-          onb.slaBreachedAt = new Date();
-          await onb.save();
-
-          try {
-            const recipients = [];
-            if (onb.reportingTo) recipients.push(onb.reportingTo.toString());
-            if (onb.createdBy) recipients.push(onb.createdBy.toString());
-
-            if (recipients.length > 0) {
-              await NotificationDispatcher.dispatch({
-                recipients: [...new Set(recipients)],
-                sender: onb.createdBy,
-                title: "⚠️ Onboarding SLA Breached",
-                message: `Onboarding checklist for employee ${onb.employeeId} has breached target completion deadline.`,
-                type: 'system',
-                meta: { model: 'onboardings', modelId: onb._id },
-                path: '/hrms'
-              });
-            }
-          } catch (nErr) {
-            console.warn('[OnboardingCron] SLA breach alert failed:', nErr.message);
-          }
-        }
-
-        // ── 3. NO-SHOW DETECTION ─────────────────────────────────────────────
-        const cutoffDate = new Date(today.getTime() - 3 * 86400000); // 3 days after joining date
-        const noShowCandidates = await models.onboardings.find({
-          status: { $in: ['Pending', 'In Progress', 'Documents Pending'] },
-          joiningDate: { $lt: cutoffDate },
-          completionPercent: { $lt: 30 }
-        });
-
-        for (const onb of noShowCandidates) {
-          onb.status = 'No Show';
-          onb.remarks = (onb.remarks || '') + ' [Auto-flagged No Show by system: 3 days past joining date with <30% checklist completion]';
-          await onb.save();
-
-          await models.employees.findByIdAndUpdate(onb.employeeId, {
-            status: 'Inactive'
-          });
-
-          try {
-            const recipients = [];
-            if (onb.reportingTo) recipients.push(onb.reportingTo.toString());
-            if (onb.createdBy) recipients.push(onb.createdBy.toString());
-
-            if (recipients.length > 0) {
-              await NotificationDispatcher.dispatch({
-                recipients: [...new Set(recipients)],
-                sender: onb.createdBy,
-                title: "🚨 Candidate No-Show Flagged",
-                message: `Candidate for onboarding ${onb._id} flag set to No Show (3 days past joining date).`,
-                type: 'system',
-                meta: { model: 'onboardings', modelId: onb._id },
-                path: '/hrms'
-              });
-            }
-          } catch (nErr) {
-            console.warn('[OnboardingCron] No show alert failed:', nErr.message);
-          }
-        }
-
-      } catch (err) {
-        console.error("❌ [OnboardingCron] Execution failed:", err);
+      if (!isEnabled) {
+        console.log('ℹ️ Onboarding Cron is disabled in GeneralSettings.');
+        return;
       }
+
+      this.cronTask = cron.schedule(cronSchedule, async () => {
+        console.log('⏰ [OnboardingCron] Starting daily onboarding SLA check...');
+        await this.runTask();
+      });
+
+      console.log(`✅ [OnboardingCron] Scheduled daily at: ${cronSchedule}`);
+    } catch (err) {
+      console.error('❌ [OnboardingCron] Initialization error:', err.message);
     }
   }
-];
+
+  async runTask() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Find active onboardings that are not terminal (Completed/Cancelled)
+      const activeOnboardings = await Onboarding.find({
+        status: { $in: ['Pending', 'In Progress', 'Documents Pending', 'Verification Pending'] }
+      }).populate('employeeId candidateId reportingTo').lean();
+
+      let overdueCount = 0;
+
+      for (const onb of activeOnboardings) {
+        const isOverdue = onb.targetCompletionDate && new Date(onb.targetCompletionDate) < today;
+
+        if (isOverdue) {
+          overdueCount++;
+          // Update status to Overdue if not completed
+          await Onboarding.findByIdAndUpdate(onb._id, { status: 'Overdue' });
+
+          const empName = onb.employeeId?.basicInfo?.firstName || 'New Hired Employee';
+          const notificationTitle = `Onboarding Overdue: ${empName}`;
+          const notificationBody = `Onboarding checklist for ${empName} breached target completion date (${new Date(onb.targetCompletionDate).toLocaleDateString()}). Progress: ${onb.completionPercent}%.`;
+
+          // Notify reporting manager
+          if (onb.reportingTo?._id) {
+            await asyncNotificationService.queuePushNotification(
+              onb.reportingTo._id,
+              notificationTitle,
+              notificationBody,
+              { type: 'onboarding_overdue', onboardingId: onb._id.toString() }
+            );
+          }
+
+          // Queue email reminder to employee work email if available
+          const workEmail = onb.employeeId?.authInfo?.workEmail || onb.candidateId?.email;
+          if (workEmail) {
+            await asyncNotificationService.queueEmail(
+              workEmail,
+              `Reminder: Action Required for Your Onboarding Checklist`,
+              `<p>Dear ${empName},</p><p>Your onboarding checklist is currently <strong>${onb.completionPercent}% complete</strong>. Please upload any missing documents or complete assigned induction tasks at your earliest convenience.</p>`
+            );
+          }
+        }
+      }
+
+      console.log(`✅ [OnboardingCron] SLA check complete. Flagged ${overdueCount} overdue onboarding(s).`);
+    } catch (err) {
+      console.error('❌ [OnboardingCron] Error during task execution:', err.message);
+    }
+  }
+}
+
+export default new OnboardingCron();

@@ -326,12 +326,12 @@ export default async function buildReportQuery(ctx) {
 
     // --- APPLY POLICY VALIDATION ---
     const filterStub = { aggregate: true, stages: pipeline };
-    aggregateValidator({ 
-      filter: filterStub, 
-      role, 
+    aggregateValidator({
+      filter: filterStub,
+      role,
       action: 'read', // validating lookups requires read access to target models
-      modelName, 
-      getPolicy 
+      modelName,
+      getPolicy
     });
 
     const result = await Model.aggregate(pipeline);
