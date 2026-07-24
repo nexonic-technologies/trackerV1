@@ -5,24 +5,24 @@ import { Play, CheckCircle2, BadgeDollarSign, X, Loader2, Eye } from "lucide-rea
 import ProfileImage from "@components/Common/ProfileImage";
 import { PayslipModal } from "@pages/payroll/index";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const STATUS_CHIP = {
-  Draft:      "pay-status-chip pay-status-chip--draft",
+  Draft: "pay-status-chip pay-status-chip--draft",
   Processing: "pay-status-chip pay-status-chip--processing",
-  Computed:   "pay-status-chip pay-status-chip--processed",
-  Approved:   "pay-status-chip pay-status-chip--approved",
-  Paid:       "pay-status-chip pay-status-chip--paid",
+  Computed: "pay-status-chip pay-status-chip--processed",
+  Approved: "pay-status-chip pay-status-chip--approved",
+  Paid: "pay-status-chip pay-status-chip--paid",
 };
 
 function fmt(n) { return (n || 0).toLocaleString("en-IN"); }
 
 export default function PayrollRunsTab() {
-  const [runs, setRuns]             = useState([]);
-  const [employees, setEmployees]   = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [runs, setRuns] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [detailRun, setDetailRun]   = useState(null);
+  const [detailRun, setDetailRun] = useState(null);
   const [detailSlip, setDetailSlip] = useState(null);
 
   const fetchRuns = useCallback(async () => {
@@ -63,10 +63,10 @@ export default function PayrollRunsTab() {
   };
 
   const stats = [
-    { label: "Total Runs",  value: runs.length },
-    { label: "Processing",  value: runs.filter(r => r.status === "Processing").length },
+    { label: "Total Runs", value: runs.length },
+    { label: "Processing", value: runs.filter(r => r.status === "Processing").length },
     { label: "Pending Approval", value: runs.filter(r => r.status === "Computed").length },
-    { label: "Paid",        value: runs.filter(r => r.status === "Paid").length },
+    { label: "Paid", value: runs.filter(r => r.status === "Paid").length },
   ];
 
   if (loading) return (
@@ -185,9 +185,9 @@ export default function PayrollRunsTab() {
 }
 
 function RunCreateModal({ employees, onClose, onCreated }) {
-  const now  = new Date();
-  const [month, setMonth]       = useState(now.getMonth() + 1);
-  const [year, setYear]         = useState(now.getFullYear());
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(now.getFullYear());
   const [selected, setSelected] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -200,7 +200,7 @@ function RunCreateModal({ employees, onClose, onCreated }) {
         month, year,
         employeeIds: selected.length > 0 ? selected : []
       });
-      toast.success(`Payroll run for ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month - 1]} ${year} started`);
+      toast.success(`Payroll run for ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][month - 1]} ${year} started`);
       onCreated();
     } catch (e) {
       toast.error(e.response?.data?.message || "Failed to start run");
@@ -226,7 +226,7 @@ function RunCreateModal({ employees, onClose, onCreated }) {
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-muted mb-1.5">Month</label>
               <select value={month} onChange={e => setMonth(+e.target.value)} className="lmx-input">
-                {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (
+                {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (
                   <option key={i} value={i + 1}>{m}</option>
                 ))}
               </select>
@@ -278,7 +278,7 @@ function RunCreateModal({ employees, onClose, onCreated }) {
 
 function RunDetailDrawer({ run, onClose, onViewSlip }) {
   const [payrolls, setPayrolls] = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     PayrollService.getPayrolls({
