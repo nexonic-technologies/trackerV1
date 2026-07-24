@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import KanbanBoard from "../../components/Common/KambanBoard";
+import KanbanBoard from "@components/Common/KambanBoard";
 import GanttView from "@components/Tasks/GanttView";
-import TaskSkeleton from "../../components/Common/TaskSkeleton";
+import TaskSkeleton from "@components/Common/TaskSkeleton";
 import { User, Plus, Search, X, ChevronDown, SlidersHorizontal, LayoutGrid, CalendarDays, Download } from "lucide-react";
 
 const STATUS_COLS = [

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../api/axiosInstance';
+import axiosInstance from '@api/axiosInstance';
 import {
     CheckCircleIcon,
     XCircleIcon,
@@ -17,7 +17,7 @@ import {
     EyeSlashIcon,
     Bars3Icon,
 } from '@heroicons/react/24/solid';
-import { WIDGET_REGISTRY, WIDGET_GROUPS } from '../Dashboard/config/dashboardConfig';
+import { WIDGET_REGISTRY, WIDGET_GROUPS } from '../dashboard/config/dashboardConfig';
 import { usePermission } from '../../context/permissionProvider';
 
 // ─── Constants ────────────────────────────────────────────────────────────────

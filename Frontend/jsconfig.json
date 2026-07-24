@@ -22,6 +22,7 @@
       "@styles/*": ["src/styles/*"],
       "@utilities": ["src/utilities/index.js"],
       "@utilities/*": ["src/utilities/*"],
+      "@utils/*": ["src/utils/*"],
       "@widgets": ["src/widgets/index.js"],
       "@widgets/*": ["src/widgets/*"]
     }

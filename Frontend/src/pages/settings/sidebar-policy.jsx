@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../api/axiosInstance';
+import axiosInstance from '@api/axiosInstance';
 
 const SidebarPolicy = () => {
     const [sidebars, setSidebars] = useState([]);

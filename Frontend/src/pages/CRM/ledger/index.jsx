@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../../api/axiosInstance";
-import TableGenerator from "../../../components/Common/TableGenerator";
+import axiosInstance from "@api/axiosInstance";
+import TableGenerator from "@components/Common/TableGenerator";
 import toast from "react-hot-toast";
 
 const CRMClientLedger = () => {

@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import axiosInstance from "../../../api/axiosInstance";
-import TableGenerator from "../../../components/Common/TableGenerator";
-import FloatingCard from "../../../components/Common/FloatingCard";
-import FormRenderer from "../../../components/Common/FormRenderer";
+import axiosInstance from "@api/axiosInstance";
+import TableGenerator from "@components/Common/TableGenerator";
+import FloatingCard from "@components/Common/FloatingCard";
+import FormRenderer from "@components/Common/FormRenderer";
 import toast from "react-hot-toast";
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -11,7 +10,7 @@ const initials = (name = "") =>
   name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 
 const ACCENT_COLORS = [
-  "#6366f1","#8b5cf6","#0ea5e9","#10b981","#f59e0b","#ef4444","#ec4899","#14b8a6",
+  "#6366f1", "#8b5cf6", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#14b8a6",
 ];
 const avatarColor = (str = "") => {
   let h = 0;
@@ -20,19 +19,19 @@ const avatarColor = (str = "") => {
 };
 
 const LEAD_STATUS_META = {
-  New:          { dot: "bg-blue-400",    chip: "bg-blue-50   text-blue-700   border-blue-200"   },
-  Qualified:    { dot: "bg-violet-400",  chip: "bg-violet-50 text-violet-700 border-violet-200" },
-  Proposal:     { dot: "bg-amber-400",   chip: "bg-amber-50  text-amber-700  border-amber-200"  },
-  Negotiation:  { dot: "bg-orange-400",  chip: "bg-orange-50 text-orange-700 border-orange-200" },
-  "Closed Won": { dot: "bg-green-400",   chip: "bg-green-50  text-green-700  border-green-200"  },
-  "Closed Lost":{ dot: "bg-red-400",     chip: "bg-red-50    text-red-700    border-red-200"    },
+  New: { dot: "bg-blue-400", chip: "bg-blue-50   text-blue-700   border-blue-200" },
+  Qualified: { dot: "bg-violet-400", chip: "bg-violet-50 text-violet-700 border-violet-200" },
+  Proposal: { dot: "bg-amber-400", chip: "bg-amber-50  text-amber-700  border-amber-200" },
+  Negotiation: { dot: "bg-orange-400", chip: "bg-orange-50 text-orange-700 border-orange-200" },
+  "Closed Won": { dot: "bg-green-400", chip: "bg-green-50  text-green-700  border-green-200" },
+  "Closed Lost": { dot: "bg-red-400", chip: "bg-red-50    text-red-700    border-red-200" },
 };
 
 const MILESTONE_STATUS_META = {
-  Pending:      "bg-gray-100   text-gray-600",
-  "In Progress":"bg-blue-100   text-blue-700",
-  Completed:    "bg-green-100  text-green-700",
-  "On Hold":    "bg-amber-100  text-amber-700",
+  Pending: "bg-gray-100   text-gray-600",
+  "In Progress": "bg-blue-100   text-blue-700",
+  Completed: "bg-green-100  text-green-700",
+  "On Hold": "bg-amber-100  text-amber-700",
 };
 
 const getLeadScore = (client) => {
@@ -58,8 +57,8 @@ const Avatar = ({ name, size = 34 }) => (
 // ── Milestone slide-over ────────────────────────────────────────
 const MilestoneSheet = ({ client, onClose, onSaved }) => {
   const [milestones, setMilestones] = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [saving,     setSaving]     = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ milestoneId: "", status: "Pending", dueDate: "", notes: "" });
   const [error, setError] = useState("");
 
@@ -111,7 +110,7 @@ const MilestoneSheet = ({ client, onClose, onSaved }) => {
           <div className="space-y-1.5">
             <label className="text-sm font-medium" style={{ color: "var(--tracker-ink)" }}>Status</label>
             <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} className="lmx-input">
-              {["Pending","In Progress","Completed","On Hold"].map((s) => <option key={s} value={s}>{s}</option>)}
+              {["Pending", "In Progress", "Completed", "On Hold"].map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div className="space-y-1.5">
@@ -164,7 +163,7 @@ const MilestoneDetailSheet = ({ client, onClose }) => {
                 </div>
                 <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${MILESTONE_STATUS_META[m.status] || MILESTONE_STATUS_META.Pending}`}>{m.status}</span>
               </div>
-              {m.dueDate && <p className="text-xs mt-2.5 ml-9" style={{ color: "var(--tracker-ink-muted)" }}>📅 {new Date(m.dueDate).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}</p>}
+              {m.dueDate && <p className="text-xs mt-2.5 ml-9" style={{ color: "var(--tracker-ink-muted)" }}>📅 {new Date(m.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>}
               {m.notes && <p className="text-xs mt-1.5 ml-9" style={{ color: "var(--tracker-ink-muted)" }}>{m.notes}</p>}
             </div>
           ))}
@@ -343,14 +342,14 @@ const CRMContacts = () => {
 
   const filtered = query.trim()
     ? tableData.filter((r) => [r.name, r.companyName, r.email, r.phone].some(
-        (v) => v && v.toLowerCase().includes(query.toLowerCase())
-      ))
+      (v) => v && v.toLowerCase().includes(query.toLowerCase())
+    ))
     : tableData;
 
   const stats = [
-    { label: "Total",     value: tableData.length, color: "text-gray-750" },
+    { label: "Total", value: tableData.length, color: "text-gray-750" },
     { label: "Converted", value: tableData.filter((r) => r.status === "Converted").length, color: "text-green-600" },
-    { label: "New",       value: tableData.filter((r) => r.status === "New").length, color: "text-blue-600" },
+    { label: "New", value: tableData.filter((r) => r.status === "New").length, color: "text-blue-600" },
   ];
 
   return (
@@ -389,17 +388,16 @@ const CRMContacts = () => {
         hiddenColumns={["_id", "contactData"]}
         customRender={{
           status: (row) => (
-            <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
-              row.status === "Converted"
+            <span className={`px-2 py-1 text-xs rounded-full font-semibold ${row.status === "Converted"
                 ? "bg-green-100 text-green-800"
                 : row.status === "Qualified"
-                ? "bg-purple-100 text-purple-800"
-                : row.status === "Contacted"
-                ? "bg-blue-100 text-blue-800"
-                : row.status === "Lost"
-                ? "bg-red-100 text-red-800"
-                : "bg-gray-100 text-gray-800"
-            }`}>
+                  ? "bg-purple-100 text-purple-800"
+                  : row.status === "Contacted"
+                    ? "bg-blue-100 text-blue-800"
+                    : row.status === "Lost"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+              }`}>
               {row.status}
             </span>
           ),

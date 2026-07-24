@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance from "@api/axiosInstance";
 import toast from "react-hot-toast";
-import SearchableDropdown from "../../components/Common/SearchableDropdown";
+import SearchableDropdown from "@components/Common/SearchableDropdown";
 
 
 const Register = () => {

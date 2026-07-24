@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import useGenericAPI from "../../../components/useGenericAPI";
-import PageLoader from "../../../components/Common/PageLoader";
+import { useGenericAPI } from "@hooks/useGenericAPI";
+import PageLoader from "@components/Common/PageLoader";
 import {
   ChevronLeft, Building, User, Mail, Phone, MapPin, 
   DollarSign, FileText, Calendar, Plus, RefreshCw,

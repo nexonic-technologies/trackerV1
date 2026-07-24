@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import ActivityGanttView from '../../components/Tasks/ActivityGanttView';
-import SprintScheduler from '../../components/Tasks/SprintScheduler';
+import ActivityGanttView from '@components/Tasks/ActivityGanttView';
+import SprintScheduler from '@components/Tasks/SprintScheduler';
 import { ChevronLeft, ChevronRight, Calendar, Plus } from 'lucide-react';
-import { useAuth } from '../../context/authProvider';
+import { useAuth } from '@providers/AuthProvider';
 
 /**
  * Activity Timeline page — Full-page Gantt view of employee work activities.

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../api/axiosInstance";
-import TableGenerator from "../../components/Common/TableGenerator";
+import axiosInstance from "@api/axiosInstance";
+import TableGenerator from "@components/Common/TableGenerator";
 import toast from "react-hot-toast";
-import { StatusBadge } from "../../components/StatusBadge";
+import { StatusBadge } from "@components/StatusBadge";
 import { MdAdd, MdClose } from "react-icons/md";
 import { Country, State, City } from "country-state-city";
 import SearchableDropdown from "../../components/Common/SearchableDropdown";

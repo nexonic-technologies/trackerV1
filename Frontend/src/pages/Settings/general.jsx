@@ -5,8 +5,8 @@ import {
   Bell, Plus, Trash2, Edit2, AlertCircle, Save, CheckCircle, ShieldAlert
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import axiosInstance from '../../api/axiosInstance';
-import FormPageLayout from '../../components/Forms/FormPageLayout';
+import axiosInstance from '@api/axiosInstance';
+import FormPageLayout from '@components/Forms/FormPageLayout';
 
 const TIMEZONES = [
   'Asia/Kolkata', 'UTC', 'GMT', 'Europe/London', 'America/New_York', 'America/Los_Angeles', 'Asia/Singapore'

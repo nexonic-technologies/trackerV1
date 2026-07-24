@@ -1,5 +1,9 @@
 import { fork } from 'child_process';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const VERIFY_SCRIPTS = [
   'check-raw-routes.js',
@@ -11,15 +15,10 @@ const VERIFY_SCRIPTS = [
 ];
 
 const args = process.argv.slice(2);
-const isSystem = args.includes('--system');
 const modelArg = args.find(arg => arg.startsWith('--model='));
+const isSystem = args.includes('--system') || args.includes('--coverage') || !modelArg;
 
-if (!isSystem && !modelArg) {
-  console.error('❌ Error: Please specify either --system or --model=<ModelName> (e.g. --model=Ticket)');
-  process.exit(1);
-}
-
-const scriptsDir = path.resolve(process.cwd(), 'scripts/verify');
+const scriptsDir = __dirname;
 
 function runScript(scriptName) {
   return new Promise((resolve, reject) => {

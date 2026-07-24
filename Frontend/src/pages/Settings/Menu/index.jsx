@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../../api/axiosInstance";
-import TableGenerator from "../../../components/Common/TableGenerator";
-import { entityFormPath } from "../../../utils/formRoutes";
+import axiosInstance from "@api/axiosInstance";
+import TableGenerator from "@components/Common/TableGenerator";
+import { entityFormPath } from "@utils/formRoutes";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
-import { usePermission } from "../../../context/permissionProvider";
+import { usePermission } from "@context/permissionProvider";
 
 const Menu = () => {
   const navigate = useNavigate();
