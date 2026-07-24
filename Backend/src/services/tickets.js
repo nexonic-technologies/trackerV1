@@ -220,15 +220,14 @@ export default function tickets() {
       const userId = user?.id;
       // Handle comment push (for backward compatibility if legacy code attempts to push)
       if (body.$push?.comments) {
-        const { default: models } = await import('../models/Collection.js');
         const commentBody = body.$push.comments;
-        await models.ticket_comments.create({
+        ctx.pendingCommentPayload = {
           ticketId: docId,
           commentedBy: userId,
           commenterModel: role?.toString() === 'agent' ? 'agents' : 'employees',
           message: commentBody.message || commentBody.comment || commentBody,
           isPublic: commentBody.isPublic !== undefined ? commentBody.isPublic : true
-        });
+        };
         delete body.$push;
         return { body };
       }
@@ -281,6 +280,10 @@ export default function tickets() {
         const { default: models } = await import('../models/Collection.js');
         const { emitTicketEvent } = await import('./ticketSocketEmitter.js');
         const { default: fcmService } = await import('./fcmService.js');
+
+        if (ctx.pendingCommentPayload) {
+          await models.ticket_comments.create(ctx.pendingCommentPayload);
+        }
 
         const commenterModel = role?.toString() === 'agent' ? 'agents' : 'employees';
 

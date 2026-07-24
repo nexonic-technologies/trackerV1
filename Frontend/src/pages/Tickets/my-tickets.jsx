@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
-import TableGenerator from "../../components/Common/TableGenerator";
-import FormRenderer from "../../components/Common/FormRenderer";
-import ProfileImage from "../../components/Common/ProfileImage";
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
+import TableGenerator from "@components/Common/TableGenerator";
+import FormRenderer from "@components/Common/FormRenderer";
+import ProfileImage from "@components/Common/ProfileImage";
 import { Plus, User, X, Pencil, Search, ChevronDown, SlidersHorizontal } from "lucide-react";
 
 const PRIORITY_CLS = {

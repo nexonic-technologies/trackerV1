@@ -1,13 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/authProvider";
-import axiosInstance from "../../api/axiosInstance";
-import EntityFormPage from "../../components/Forms/EntityFormPage";
+import { useAuth } from "@providers/AuthProvider";
+import axiosInstance from "@api/axiosInstance";
+import EntityFormPage from "@components/Forms/EntityFormPage";
 import {
   TASK_CREATE_TABS,
   buildTaskCreateFields,
 } from "../../constants/taskCreateForm";
-import { enqueueFormSubmit } from "../../services/formSubmitQueue";
-import { formDraftKey } from "../../utils/formDrafts";
+import { enqueueFormSubmit } from "@services/formSubmitQueue";
+import { formDraftKey } from "@utils/formDrafts";
 import toast from "react-hot-toast";
 
 const TaskFormPage = () => {

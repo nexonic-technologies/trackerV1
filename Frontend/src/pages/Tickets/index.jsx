@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
-import TableGenerator from "../../components/Common/TableGenerator";
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
+import TableGenerator from "@components/Common/TableGenerator";
 import { useNavigate } from "react-router-dom";
 import { entityFormPath } from "../../utils/formRoutes";
-import FormDraftBanner from "../../components/Forms/FormDraftBanner";
-import ProfileImage from "../../components/Common/ProfileImage";
-import FilterDropdown from "../../components/Common/FilterDropdown";
+import FormDraftBanner from "@components/Forms/FormDraftBanner";
+import ProfileImage from "@components/Common/ProfileImage";
+import FilterDropdown from "@components/Common/FilterDropdown";
 import {
   Plus, TicketCheck, Pencil, ArrowRightCircle,
   CheckCircle2, Search, X, SlidersHorizontal

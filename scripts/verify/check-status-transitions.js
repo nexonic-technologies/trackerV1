@@ -1,11 +1,19 @@
 import fs from 'fs';
 import path from 'path';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
-dotenv.config({ path: path.resolve(process.cwd(), 'Backend/.env') });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '../../');
 
-const SERVICES_DIR = path.resolve(process.cwd(), 'Backend/src/services');
+const requireBackend = createRequire(path.resolve(ROOT_DIR, 'Backend/package.json'));
+const mongoose = requireBackend('mongoose').default || requireBackend('mongoose');
+const dotenv = requireBackend('dotenv');
+
+dotenv.config({ path: path.resolve(ROOT_DIR, 'Backend/.env') });
+
+const SERVICES_DIR = path.resolve(ROOT_DIR, 'Backend/src/services');
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tracker';
 
 function extractStatusLiterals(content) {

@@ -6,12 +6,14 @@
 
 const path  = require("path");
 const fs    = require("fs");
+const { createRequire } = require("module");
 
 // ─── Resolve Backend root ────────────────────────────────────────────────────
 const backendRoot = path.resolve(__dirname, "../../Backend");
+const requireBackend = createRequire(path.join(backendRoot, "package.json"));
 
 // ─── Load .env from Backend ──────────────────────────────────────────────────
-require("dotenv").config({ path: path.join(backendRoot, ".env") });
+requireBackend("dotenv").config({ path: path.join(backendRoot, ".env") });
 
 let passed = 0;
 let failed = 0;

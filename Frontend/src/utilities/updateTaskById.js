@@ -1,4 +1,4 @@
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance from "@api/axiosInstance";
 
 export const updateTaskById = async (taskId, updateData) => {
   try {

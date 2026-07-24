@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance from "@api/axiosInstance";
 import toast from "react-hot-toast";
-import FileViewerModal from "../../components/Common/FileViewerModal";
+import FileViewerModal from "@components/Common/FileViewerModal";
 import {
   ChevronLeft, Paperclip, X, Upload, FileIcon, FileText,
   FileSpreadsheet, FileArchive, PlayCircle, Music, ImageIcon,

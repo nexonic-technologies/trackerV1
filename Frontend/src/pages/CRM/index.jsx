@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
-import useGenericAPI from "../../components/useGenericAPI";
-import PageLoader from "../../components/Common/PageLoader";
-import StatCard from "../../components/Common/StatCard";
+import { useGenericAPI } from "@hooks/useGenericAPI";
+import PageLoader from "@components/Common/PageLoader";
+import StatCard from "@components/Common/StatCard";
 import {
-  BadgeDollarSign, Users, Award, Play, CheckCircle, 
-  Clock, AlertCircle, BarChart3, ListFilter, Kanban, 
+  BadgeDollarSign, Users, Award, Play, CheckCircle,
+  Clock, AlertCircle, BarChart3, ListFilter, Kanban,
   TrendingUp, ArrowRight, User, Plus, RefreshCw,
   FolderMinus, Calendar
 } from "lucide-react";
@@ -15,20 +14,20 @@ import toast from "react-hot-toast";
 const LEAD_STAGES = ['New', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'];
 
 const STAGE_COLORS = {
-  'New':         'border-t-blue-500 bg-blue-50/20 text-blue-700 dark:text-blue-300',
-  'Qualified':   'border-t-violet-500 bg-violet-50/20 text-violet-700 dark:text-violet-300',
-  'Proposal':    'border-t-amber-500 bg-amber-50/20 text-amber-700 dark:text-amber-300',
+  'New': 'border-t-blue-500 bg-blue-50/20 text-blue-700 dark:text-blue-300',
+  'Qualified': 'border-t-violet-500 bg-violet-50/20 text-violet-700 dark:text-violet-300',
+  'Proposal': 'border-t-amber-500 bg-amber-50/20 text-amber-700 dark:text-amber-300',
   'Negotiation': 'border-t-orange-500 bg-orange-50/20 text-orange-700 dark:text-orange-300',
-  'Closed Won':  'border-t-emerald-500 bg-emerald-50/20 text-emerald-700 dark:text-emerald-300',
+  'Closed Won': 'border-t-emerald-500 bg-emerald-50/20 text-emerald-700 dark:text-emerald-300',
   'Closed Lost': 'border-t-rose-500 bg-rose-50/20 text-rose-700 dark:text-rose-300',
 };
 
 const STAGE_DOTS = {
-  'New':         'bg-blue-500',
-  'Qualified':   'bg-violet-500',
-  'Proposal':    'bg-amber-500',
+  'New': 'bg-blue-500',
+  'Qualified': 'bg-violet-500',
+  'Proposal': 'bg-amber-500',
   'Negotiation': 'bg-orange-500',
-  'Closed Won':  'bg-emerald-500',
+  'Closed Won': 'bg-emerald-500',
   'Closed Lost': 'bg-rose-500',
 };
 
@@ -157,7 +156,7 @@ export default function CRMIndex() {
 
   return (
     <div data-module="project" className="h-full flex flex-col gap-4 bg-canvas text-ink" style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
-      
+
       {/* ─── HEADER ─── */}
       <div className="flex flex-wrap items-center justify-between gap-4 flex-shrink-0">
         <div>
@@ -190,11 +189,10 @@ export default function CRMIndex() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 text-[13px] font-medium rounded-t-[8px] transition cursor-pointer border-b-2 -mb-[8px] ${
-                activeTab === t.id 
-                  ? "border-[var(--module-accent)] text-[var(--module-accent)] bg-surface" 
+              className={`flex items-center gap-2 px-4 py-2 text-[13px] font-medium rounded-t-[8px] transition cursor-pointer border-b-2 -mb-[8px] ${activeTab === t.id
+                  ? "border-[var(--module-accent)] text-[var(--module-accent)] bg-surface"
                   : "border-transparent text-ink-subtle hover:text-ink hover:bg-surface-1/50"
-              }`}
+                }`}
             >
               <Icon className="h-4 w-4" />
               {t.label}
@@ -208,14 +206,14 @@ export default function CRMIndex() {
         <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {/* Stat Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard title="Total Accounts"   value={stats.totalClients} icon={Users} color="blue" />
-            <StatCard title="Active Leads"     value={stats.activeLeads} icon={ListFilter} color="yellow" />
-            <StatCard title="Meetings Logged"  value={stats.completedMeetings} icon={Calendar} color="purple" />
-            <StatCard title="Est. Pipeline"    value={fmtCurrency(stats.totalPipelineVal)} icon={BadgeDollarSign} color="green" />
+            <StatCard title="Total Accounts" value={stats.totalClients} icon={Users} color="blue" />
+            <StatCard title="Active Leads" value={stats.activeLeads} icon={ListFilter} color="yellow" />
+            <StatCard title="Meetings Logged" value={stats.completedMeetings} icon={Calendar} color="purple" />
+            <StatCard title="Est. Pipeline" value={fmtCurrency(stats.totalPipelineVal)} icon={BadgeDollarSign} color="green" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            
+
             {/* Quick Actions */}
             <div className="bg-surface rounded-tracker-card border border-hairline p-5 shadow-sm space-y-3">
               <h3 className="text-[14px] font-medium text-ink">Quick Links</h3>
@@ -279,11 +277,10 @@ export default function CRMIndex() {
                         {meeting.location && <p className="text-[10px] text-ink-tertiary mt-0.5">📍 {meeting.location}</p>}
                       </div>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${
-                      meeting.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                      meeting.status === 'Cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                      'bg-amber-50 text-amber-600 border-amber-100'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${meeting.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                        meeting.status === 'Cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                          'bg-amber-50 text-amber-600 border-amber-100'
+                      }`}>
                       {meeting.status}
                     </span>
                   </div>
@@ -303,10 +300,10 @@ export default function CRMIndex() {
           {LEAD_STAGES.map(stage => {
             const stageClients = clients.filter(c => c.leadStatus === stage);
             const isOverThis = draggedOverStage === stage;
-            
+
             return (
-              <div 
-                key={stage} 
+              <div
+                key={stage}
                 className={`flex-shrink-0 w-[270px] flex flex-col bg-surface-1/40 rounded-tracker-card border border-hairline-soft overflow-hidden transition-colors ${isOverThis ? 'bg-accent/5 border-dashed border-accent' : ''}`}
                 onDragOver={(e) => handleDragOver(e, stage)}
                 onDragLeave={() => setDraggedOverStage(null)}
@@ -322,9 +319,9 @@ export default function CRMIndex() {
                 <div className="flex-1 overflow-y-auto p-2 space-y-2.5">
                   {stageClients.map(client => {
                     const stats = clientValues[client._id] || { total: 0, count: 0, pending: 0 };
-                    
+
                     return (
-                      <div 
+                      <div
                         key={client._id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, client._id)}
@@ -360,7 +357,7 @@ export default function CRMIndex() {
       {activeTab === "analytics" && (
         <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            
+
             {/* Sales Funnel Conversion counts */}
             <div className="bg-surface rounded-tracker-card border border-hairline p-5 shadow-sm space-y-4">
               <h3 className="text-[14px] font-medium text-ink border-b border-hairline-soft pb-2">Deal Funnel (Counts)</h3>
@@ -369,7 +366,7 @@ export default function CRMIndex() {
                   const val = stageStats.counts[stage] || 0;
                   const maxVal = Math.max(...Object.values(stageStats.counts), 1);
                   const pct = (val / maxVal) * 100;
-                  
+
                   return (
                     <div key={stage} className="space-y-1">
                       <div className="flex justify-between items-center text-[12px]">
@@ -377,8 +374,8 @@ export default function CRMIndex() {
                         <span className="font-bold text-ink">{val} Lead{val !== 1 ? 's' : ''}</span>
                       </div>
                       <div className="h-5 bg-surface-1 rounded-[6px] overflow-hidden relative">
-                        <div 
-                          className="h-full rounded-[6px] bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700" 
+                        <div
+                          className="h-full rounded-[6px] bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700"
                           style={{ width: `${Math.max(pct, 1)}%` }}
                         />
                       </div>
@@ -396,7 +393,7 @@ export default function CRMIndex() {
                   const val = stageStats.values[stage] || 0;
                   const maxVal = Math.max(...Object.values(stageStats.values), 1);
                   const pct = (val / maxVal) * 100;
-                  
+
                   return (
                     <div key={stage} className="space-y-1">
                       <div className="flex justify-between items-center text-[12px]">
@@ -404,8 +401,8 @@ export default function CRMIndex() {
                         <span className="font-bold text-emerald-600 dark:text-emerald-400">{fmtCurrency(val)}</span>
                       </div>
                       <div className="h-5 bg-surface-1 rounded-[6px] overflow-hidden relative">
-                        <div 
-                          className="h-full rounded-[6px] bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700" 
+                        <div
+                          className="h-full rounded-[6px] bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700"
                           style={{ width: `${Math.max(pct, 1)}%` }}
                         />
                       </div>

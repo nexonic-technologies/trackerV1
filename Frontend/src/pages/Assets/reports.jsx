@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../api/axiosInstance";
-import TableGenerator from "../../components/Common/TableGenerator";
+import axiosInstance from "@api/axiosInstance";
+import TableGenerator from "@components/Common/TableGenerator";
 import toast from "react-hot-toast";
-import { StatusBadge } from "../../components/StatusBadge";
+import { StatusBadge } from "@components/StatusBadge";
 import { MdRefresh } from "react-icons/md";
 
 const Reports = () => {

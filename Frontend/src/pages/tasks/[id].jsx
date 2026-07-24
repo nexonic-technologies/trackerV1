@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
-import { 
-  FileText, CheckCircle, AlertCircle, Trash2, 
-  Plus, X, Upload, MoreHorizontal, UserPlus, 
-  Check, MessageSquare, Tag, Info, ExternalLink, ChevronDown, ListTodo, Paperclip, Send
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
+import {
+  FileText, CheckCircle, AlertCircle, Trash2,
+  Plus, X, Upload, MoreHorizontal, UserPlus,
+  Check, MessageSquare, Info, ExternalLink, ChevronDown, ListTodo, Paperclip, Send
 } from "lucide-react";
 import toast from "react-hot-toast";
-import JobSessionTimer from "../../components/Tasks/JobSessionTimer";
-import DeliveryStageBadge from "../../components/Tasks/DeliveryStageBadge";
-import SessionHistory from "../../components/Tasks/SessionHistory";
+import JobSessionTimer from "@components/Tasks/JobSessionTimer";
+import DeliveryStageBadge from "@components/Tasks/DeliveryStageBadge";
+import SessionHistory from "@components/Tasks/SessionHistory";
 
 const TaskDetailPage = () => {
   const { id } = useParams();
@@ -36,7 +36,7 @@ const TaskDetailPage = () => {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
   const [showTagInput, setShowTagInput] = useState(false);
-  
+
   // Checklist State
   const [checklist, setChecklist] = useState(() => {
     try {
@@ -209,7 +209,7 @@ const TaskDetailPage = () => {
     try {
       const { _id, createdAt, updatedAt, commentsThread, ...duplicateBody } = task;
       duplicateBody.title = `${duplicateBody.title} (Copy)`;
-      
+
       if (duplicateBody.clientId?._id) duplicateBody.clientId = duplicateBody.clientId._id;
       if (duplicateBody.projectTypeId?._id) duplicateBody.projectTypeId = duplicateBody.projectTypeId._id;
       if (duplicateBody.taskTypeId?._id) duplicateBody.taskTypeId = duplicateBody.taskTypeId._id;
@@ -346,7 +346,7 @@ const TaskDetailPage = () => {
   return (
     <div className="bg-canvas">
       <div className="w-full max-w-6xl mx-auto bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col">
-        
+
         {/* ─── Header Section ─── */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -461,10 +461,10 @@ const TaskDetailPage = () => {
 
         {/* ─── Body Section ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-4 min-h-[600px]">
-          
+
           {/* Left Column (Seamless Main Content Panel) */}
           <div className="lg:col-span-3 p-8 space-y-8 bg-white select-text">
-            
+
             {/* Title & Notes (Seamless Flat Typography) */}
             <div className="space-y-4">
               {editingTitle ? (
@@ -484,7 +484,7 @@ const TaskDetailPage = () => {
                   {task.title || "Untitled Task"}
                 </h1>
               )}
-              
+
               {editingDesc ? (
                 <textarea
                   value={descInput}
@@ -496,9 +496,8 @@ const TaskDetailPage = () => {
               ) : (
                 <p
                   onClick={() => setEditingDesc(true)}
-                  className={`text-xs leading-relaxed cursor-pointer hover:bg-slate-50 rounded px-1 -ml-1 py-1 transition-colors ${
-                    task.userStory ? "text-ink-muted" : "text-ink-subtle italic"
-                  }`}
+                  className={`text-xs leading-relaxed cursor-pointer hover:bg-slate-50 rounded px-1 -ml-1 py-1 transition-colors ${task.userStory ? "text-ink-muted" : "text-ink-subtle italic"
+                    }`}
                 >
                   {task.userStory || "Add task notes..."}
                 </p>
@@ -535,9 +534,8 @@ const TaskDetailPage = () => {
                         type="text"
                         value={item.text}
                         onChange={(e) => updateChecklistItemText(item.id, e.target.value)}
-                        className={`flex-1 text-xs text-ink bg-transparent border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none py-0.5 ${
-                          item.done ? "line-through text-ink-muted" : ""
-                        }`}
+                        className={`flex-1 text-xs text-ink bg-transparent border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none py-0.5 ${item.done ? "line-through text-ink-muted" : ""
+                          }`}
                       />
                       <button
                         onClick={() => removeChecklistItem(item.id)}
@@ -689,7 +687,7 @@ const TaskDetailPage = () => {
 
           {/* Right Column (Sidebar parameters) */}
           <div className="lg:col-span-1 p-6 bg-slate-50 border-l border-slate-200 space-y-6">
-            
+
             {/* ── Activity Timer (Job Session) ── */}
             <div>
               <label className="text-[10px] font-bold text-ink-subtle uppercase tracking-wider mb-2 block">Activity Timer</label>
@@ -816,7 +814,7 @@ const TaskDetailPage = () => {
                     </button>
                   </span>
                 ))}
-                
+
                 {showTagInput ? (
                   <input
                     type="text"
@@ -846,7 +844,7 @@ const TaskDetailPage = () => {
               <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
                 <Info size={14} className="text-slate-400" /> About the task
               </h3>
-              
+
               <div className="space-y-3">
                 <div>
                   <label className="text-[9px] font-bold text-ink-subtle uppercase tracking-wider block">Created By</label>

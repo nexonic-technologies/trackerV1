@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Download, FileText, Image, Video, FileSpreadsheet, File as LucideFile, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import axiosInstance from '../../api/axiosInstance';
+import axiosInstance from '@api/axiosInstance';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (!bytes) return '0 Bytes';
@@ -280,11 +280,10 @@ const FileViewerModal = ({ file, onClose }) => {
                 <button
                   key={idx}
                   onClick={() => handleSheetChange(idx)}
-                  className={`px-4 py-2 text-[12.5px] font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
-                    currentSheetIdx === idx
-                      ? 'border-[var(--module-ticket)] text-[var(--module-ticket)] bg-[var(--tracker-surface)]'
-                      : 'border-transparent text-[var(--tracker-ink-subtle)] hover:text-[var(--tracker-ink)] hover:bg-[var(--tracker-surface-1)]'
-                  }`}
+                  className={`px-4 py-2 text-[12.5px] font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${currentSheetIdx === idx
+                    ? 'border-[var(--module-ticket)] text-[var(--module-ticket)] bg-[var(--tracker-surface)]'
+                    : 'border-transparent text-[var(--tracker-ink-subtle)] hover:text-[var(--tracker-ink)] hover:bg-[var(--tracker-surface-1)]'
+                    }`}
                 >
                   {sheet}
                 </button>

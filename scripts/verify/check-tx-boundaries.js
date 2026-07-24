@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const SERVICES_DIR = path.resolve(process.cwd(), 'Backend/src/services');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+const SERVICES_DIR = path.resolve(ROOT_DIR, 'Backend/src/services');
 
 function parseBeforeHooks(content) {
   const hooks = [];

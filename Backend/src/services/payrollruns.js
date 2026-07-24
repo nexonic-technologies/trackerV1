@@ -127,28 +127,13 @@ export default function payrollruns() {
         }
 
         if (body.status === 'Paid') {
-          // Bulk-mark all linked payrolls as Paid
-          const { default: Payroll } = await import('../models/Payroll.js');
-          await Payroll.updateMany(
-            { _id: { $in: existingDoc.payrollIds }, status: { $ne: 'Paid' } },
-            { $set: { status: 'Paid', paidAt: new Date() } }
-          );
-
-          // Lock attendance records for this payroll period
-          // Prevents post-payment attendance edits from silently affecting future payroll
-          const { default: Attendance } = await import('../models/Attendance.js');
-          const lockStart = new Date(existingDoc.year, existingDoc.month - 1, 1);
-          const lockEnd   = new Date(existingDoc.year, existingDoc.month, 0);
-          lockEnd.setHours(23, 59, 59, 999);
-
-          await Attendance.updateMany(
-            {
-              employee:        { $in: existingDoc.employeeIds },
-              date:            { $gte: lockStart, $lte: lockEnd },
-              payrollLockedAt: null  // only lock unlocked records
-            },
-            { $set: { payrollLockedAt: new Date(), payrollLockedBy: userId } }
-          );
+          ctx.pendingPaidActions = {
+            payrollIds: existingDoc.payrollIds,
+            employeeIds: existingDoc.employeeIds,
+            year: existingDoc.year,
+            month: existingDoc.month,
+            userId
+          };
 
           body.paidAt = new Date();
           body.payrollAuditEvents = [...(existingDoc.payrollAuditEvents || []), {

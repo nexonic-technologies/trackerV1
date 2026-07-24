@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axiosInstance from "../../../api/axiosInstance";
-import { useAuth } from "../../../context/authProvider";
-import KanbanBoard from "../../../components/Common/KambanBoard";
-import GanttView from "../gantt-view";
-import TaskSkeleton from "../../../components/Common/TaskSkeleton";
-import StatCard from "../../../components/Common/StatCard";
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
+import KanbanBoard from "@components/Common/KambanBoard";
+import GanttView from "@components/Tasks/GanttView";
+import TaskSkeleton from "@components/Common/TaskSkeleton";
+import StatCard from "@components/Common/StatCard";
 import { ArrowLeft, Building2, LayoutGrid, Clock, CheckCircle2, Plus, CalendarDays, Download } from "lucide-react";
 
 const STATUS_COLS = [

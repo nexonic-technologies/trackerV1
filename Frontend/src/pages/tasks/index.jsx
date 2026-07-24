@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
-import axiosInstance from "../../api/axiosInstance";
-import { useAuth } from "../../context/authProvider";
+import axiosInstance from "@api/axiosInstance";
+import { useAuth } from "@providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import KanbanBoard from "../../components/Common/KambanBoard";
-import GanttView from "./gantt-view";
-import EmployeeGanttView from "./employee-gantt-view";
-import SprintPlanningPanel from "./sprint-planning-panel";
-import TaskSkeleton from "../../components/Common/TaskSkeleton";
-import FormDraftBanner from "../../components/Forms/FormDraftBanner";
-import FilterDropdown from "../../components/Common/FilterDropdown";
+import KanbanBoard from "@components/Common/KambanBoard";
+import GanttView from "@components/Tasks/GanttView";
+import EmployeeGanttView from "@components/Tasks/EmployeeGanttView";
+import SprintPlanningPanel from "@components/Tasks/SprintPlanningPanel";
+import TaskSkeleton from "@components/Common/TaskSkeleton";
+import FormDraftBanner from "@components/Forms/FormDraftBanner";
+import FilterDropdown from "@components/Common/FilterDropdown";
 import { FolderKanban, Plus, Search, X, ChevronDown, SlidersHorizontal, LayoutGrid, CalendarDays, Download, Users, GanttChartSquare, Layers } from "lucide-react";
 
 const STATUS_COLS = [

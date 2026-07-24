@@ -1,45 +1,45 @@
 import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import { PayrollService, EmployeeService } from "@services";
 import toast from "react-hot-toast";
-import { Play, CheckCircle2, BadgeDollarSign, X, ChevronDown, Loader2, Eye } from "lucide-react";
-import ProfileImage from "../../components/Common/ProfileImage";
-import { PayslipModal } from "./index";
+import { Play, CheckCircle2, BadgeDollarSign, X, Loader2, Eye } from "lucide-react";
+import ProfileImage from "@components/Common/ProfileImage";
+import { PayslipModal } from "@pages/Payroll/index";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const STATUS_CHIP = {
-  Draft:      "pay-status-chip pay-status-chip--draft",
+  Draft: "pay-status-chip pay-status-chip--draft",
   Processing: "pay-status-chip pay-status-chip--processing",
-  Computed:   "pay-status-chip pay-status-chip--processed",
-  Approved:   "pay-status-chip pay-status-chip--approved",
-  Paid:       "pay-status-chip pay-status-chip--paid",
+  Computed: "pay-status-chip pay-status-chip--processed",
+  Approved: "pay-status-chip pay-status-chip--approved",
+  Paid: "pay-status-chip pay-status-chip--paid",
 };
 
 function fmt(n) { return (n || 0).toLocaleString("en-IN"); }
 
 export default function PayrollRunsTab() {
-  const [runs, setRuns]             = useState([]);
-  const [employees, setEmployees]   = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [runs, setRuns] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [detailRun, setDetailRun]   = useState(null);
+  const [detailRun, setDetailRun] = useState(null);
   const [detailSlip, setDetailSlip] = useState(null);
 
   const fetchRuns = useCallback(async () => {
     try {
       setLoading(true);
       const [rRes, eRes] = await Promise.all([
-        axiosInstance.post("/populate/read/payrollruns", {
+        PayrollService.getRuns({
           sort: { createdAt: -1 }, limit: 100,
           populateFields: { initiatedBy: "basicInfo.firstName,basicInfo.lastName", approvedBy: "basicInfo.firstName,basicInfo.lastName" }
         }),
-        axiosInstance.post("/populate/read/employees", {
+        EmployeeService.getEmployees({
           filter: { status: "Active" },
           fields: "basicInfo.firstName,basicInfo.lastName,professionalInfo.empId"
         })
       ]);
-      setRuns(rRes.data.data || []);
-      setEmployees(eRes.data.data || []);
+      setRuns(rRes.data || []);
+      setEmployees(eRes.data || []);
     } catch { toast.error("Failed to load payroll runs"); }
     finally { setLoading(false); }
   }, []);
@@ -48,7 +48,7 @@ export default function PayrollRunsTab() {
 
   const handleApprove = async (run) => {
     try {
-      await axiosInstance.put(`/populate/update/payrollruns/${run._id}`, { status: "Approved" });
+      await PayrollService.updateRun(run._id, { status: "Approved" });
       toast.success("Run approved");
       fetchRuns();
     } catch (e) { toast.error(e.response?.data?.message || "Approve failed"); }
@@ -56,17 +56,17 @@ export default function PayrollRunsTab() {
 
   const handlePay = async (run) => {
     try {
-      await axiosInstance.put(`/populate/update/payrollruns/${run._id}`, { status: "Paid" });
+      await PayrollService.updateRun(run._id, { status: "Paid" });
       toast.success("Marked as Paid — all payslips updated");
       fetchRuns();
     } catch (e) { toast.error(e.response?.data?.message || "Pay failed"); }
   };
 
   const stats = [
-    { label: "Total Runs",  value: runs.length },
-    { label: "Processing",  value: runs.filter(r => r.status === "Processing").length },
+    { label: "Total Runs", value: runs.length },
+    { label: "Processing", value: runs.filter(r => r.status === "Processing").length },
     { label: "Pending Approval", value: runs.filter(r => r.status === "Computed").length },
-    { label: "Paid",        value: runs.filter(r => r.status === "Paid").length },
+    { label: "Paid", value: runs.filter(r => r.status === "Paid").length },
   ];
 
   if (loading) return (
@@ -77,7 +77,6 @@ export default function PayrollRunsTab() {
 
   return (
     <div className="space-y-5">
-      {/* Stat strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map(s => (
           <div key={s.label} className="pay-stat-card">
@@ -87,7 +86,6 @@ export default function PayrollRunsTab() {
         ))}
       </div>
 
-      {/* Header row */}
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-ink-muted">{runs.length} run{runs.length !== 1 ? "s" : ""}</p>
         <button onClick={() => setShowCreate(true)} className="tracker-btn-accent flex items-center gap-2">
@@ -95,7 +93,6 @@ export default function PayrollRunsTab() {
         </button>
       </div>
 
-      {/* Run list */}
       <div className="space-y-3">
         {runs.length === 0 && (
           <div className="pay-card p-8 text-center">
@@ -131,7 +128,6 @@ export default function PayrollRunsTab() {
               </div>
             </div>
 
-            {/* Progress bar for Processing status */}
             {run.status === "Processing" && run.totalEmployees > 0 && (
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-1">
@@ -145,7 +141,6 @@ export default function PayrollRunsTab() {
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-hairline-soft">
               <button onClick={() => setDetailRun(run)}
                 className="tracker-btn-ghost flex items-center gap-1.5 text-[12px] py-1.5">
@@ -168,7 +163,6 @@ export default function PayrollRunsTab() {
         ))}
       </div>
 
-      {/* Create run modal */}
       {showCreate && (
         <RunCreateModal
           employees={employees}
@@ -177,7 +171,6 @@ export default function PayrollRunsTab() {
         />
       )}
 
-      {/* Run detail drawer */}
       {detailRun && (
         <RunDetailDrawer
           run={detailRun}
@@ -191,12 +184,10 @@ export default function PayrollRunsTab() {
   );
 }
 
-// ── RunCreateModal ─────────────────────────────────────────────────────────────
-
 function RunCreateModal({ employees, onClose, onCreated }) {
-  const now  = new Date();
-  const [month, setMonth]       = useState(now.getMonth() + 1);
-  const [year, setYear]         = useState(now.getFullYear());
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(now.getFullYear());
   const [selected, setSelected] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -205,11 +196,11 @@ function RunCreateModal({ employees, onClose, onCreated }) {
   const handleCreate = async () => {
     try {
       setSubmitting(true);
-      await axiosInstance.post("/populate/create/payrollruns", {
+      await PayrollService.createRun({
         month, year,
         employeeIds: selected.length > 0 ? selected : []
       });
-      toast.success(`Payroll run for ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month - 1]} ${year} started`);
+      toast.success(`Payroll run for ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][month - 1]} ${year} started`);
       onCreated();
     } catch (e) {
       toast.error(e.response?.data?.message || "Failed to start run");
@@ -235,7 +226,7 @@ function RunCreateModal({ employees, onClose, onCreated }) {
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-muted mb-1.5">Month</label>
               <select value={month} onChange={e => setMonth(+e.target.value)} className="lmx-input">
-                {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (
+                {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (
                   <option key={i} value={i + 1}>{m}</option>
                 ))}
               </select>
@@ -285,17 +276,15 @@ function RunCreateModal({ employees, onClose, onCreated }) {
   );
 }
 
-// ── RunDetailDrawer ───────────────────────────────────────────────────────────
-
 function RunDetailDrawer({ run, onClose, onViewSlip }) {
   const [payrolls, setPayrolls] = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axiosInstance.post("/populate/read/payrolls", {
+    PayrollService.getPayrolls({
       filter: { payrollRunId: run._id },
       populateFields: { employeeId: "basicInfo.firstName,basicInfo.lastName,basicInfo.profileImage,professionalInfo.empId" }
-    }).then(r => setPayrolls(r.data.data || []))
+    }).then(r => setPayrolls(r.data || []))
       .catch(() => toast.error("Failed to load payroll records"))
       .finally(() => setLoading(false));
   }, [run._id]);

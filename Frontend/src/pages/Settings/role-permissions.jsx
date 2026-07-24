@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../api/axiosInstance';
+import axiosInstance from '@api/axiosInstance';
 import {
     CheckCircleIcon,
     XCircleIcon,
@@ -17,8 +17,8 @@ import {
     EyeSlashIcon,
     Bars3Icon,
 } from '@heroicons/react/24/solid';
-import { WIDGET_REGISTRY, WIDGET_GROUPS } from '../Dashboard/config/dashboardConfig';
-import { usePermission } from '../../context/permissionProvider';
+import { WIDGET_REGISTRY, WIDGET_GROUPS } from '@pages/Dashboard/config/dashboardConfig';
+import { usePermission } from '@context/permissionProvider';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -109,8 +109,8 @@ const SaveBar = ({ onSave, saving, message }) => (
     <div className="flex justify-end items-center gap-3 pt-3 mt-auto shrink-0">
         {message && (
             <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${message.includes('Error') || message.includes('failed') || message.includes('Failed')
-                    ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400'
-                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400'
+                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
                 }`}>
                 {message}
             </span>

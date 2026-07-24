@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Save, Loader } from 'lucide-react';
-import api from '../../../api/axiosInstance';
+import api from '@api/axiosInstance';
 
 const EmailConfig = () => {
   const [config, setConfig] = useState({

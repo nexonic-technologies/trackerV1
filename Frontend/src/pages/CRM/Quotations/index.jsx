@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../../api/axiosInstance";
-import TableGenerator from "../../../components/Common/TableGenerator";
-import FloatingCard from "../../../components/Common/FloatingCard";
-import FormRenderer from "../../../components/Common/FormRenderer";
+import axiosInstance from "@api/axiosInstance";
+import TableGenerator from "@components/Common/TableGenerator";
+import FloatingCard from "@components/Common/FloatingCard";
+import FormRenderer from "@components/Common/FormRenderer";
 import toast from "react-hot-toast";
 
 const CRMQuotations = () => {

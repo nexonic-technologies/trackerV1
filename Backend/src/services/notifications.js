@@ -92,8 +92,6 @@ export default function notificationsService() {
     async beforeUpdate(ctx) {
       const { body, docId, userId } = ctx;
       if (body.isRead !== undefined || body.isClicked !== undefined || body.isDeleted !== undefined) {
-         const { default: models } = await import('../models/Collection.js');
-         
          const updateFields = {};
          if (body.isRead !== undefined) {
            updateFields.isRead = body.isRead;
@@ -107,15 +105,23 @@ export default function notificationsService() {
            updateFields.isDeleted = body.isDeleted;
          }
 
-         await models.NotificationReceptionist.updateOne(
-           { notificationId: docId, receiver: userId },
-           { $set: updateFields }
-         );
+         ctx.receptionistUpdatePayload = { notificationId: docId, receiver: userId, updateFields };
          
          // Prevent these fields from being saved to the main notifications collection
          delete body.isRead;
          delete body.isClicked;
          delete body.isDeleted;
+      }
+    },
+
+    async afterUpdate(ctx) {
+      if (ctx.receptionistUpdatePayload) {
+        const { default: models } = await import('../models/Collection.js');
+        const { notificationId, receiver, updateFields } = ctx.receptionistUpdatePayload;
+        await models.NotificationReceptionist.updateOne(
+          { notificationId, receiver },
+          { $set: updateFields }
+        );
       }
     }
   };

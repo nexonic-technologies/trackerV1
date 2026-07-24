@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import { PayrollService } from "@services";
 import toast from "react-hot-toast";
-import { Calendar, Lock, Unlock, Eye, Plus, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, Lock, Unlock, Eye, Plus, X, Loader2, AlertCircle } from "lucide-react";
 
 const STATUS_CHIP = {
   Open: "bg-emerald-100 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 rounded-full",
@@ -42,12 +42,12 @@ export default function PeriodClosuresTab() {
       if (filterStatus) filter.status = filterStatus;
       if (filterFY) filter.financialYearLabel = filterFY;
 
-      const res = await axiosInstance.post("/populate/read/periodclosures", { 
+      const res = await PayrollService.getPeriodClosures({ 
         filter,
         limit: 1000,
         sort: { createdAt: -1 }
       });
-      setClosures(res.data.data || []);
+      setClosures(res.data || []);
     } catch (error) {
       toast.error("Failed to load period closures");
       console.error(error);
@@ -77,7 +77,6 @@ export default function PeriodClosuresTab() {
 
   return (
     <div className="space-y-5">
-      {/* Stat strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, idx) => (
           <div key={idx} className="pay-stat-card">
@@ -87,7 +86,6 @@ export default function PeriodClosuresTab() {
         ))}
       </div>
 
-      {/* Header row with filters */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <select 
@@ -119,7 +117,6 @@ export default function PeriodClosuresTab() {
         </button>
       </div>
 
-      {/* Period closures list */}
       <div className="space-y-3">
         {closures.length === 0 && (
           <div className="pay-card p-8 text-center">
@@ -151,7 +148,6 @@ export default function PeriodClosuresTab() {
               </div>
             </div>
 
-            {/* Module closure status */}
             <div className="mt-3 pt-3 border-t border-hairline-soft">
               <div className="flex flex-wrap gap-2">
                 {Object.entries(closure.modules || {}).map(([moduleName, moduleData]) => (
@@ -168,7 +164,6 @@ export default function PeriodClosuresTab() {
               </div>
             </div>
 
-            {/* Summary stats */}
             {closure.summary && (
               <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px] text-ink-muted">
                 <div>
@@ -194,7 +189,6 @@ export default function PeriodClosuresTab() {
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-hairline-soft">
               <button 
                 onClick={() => setDetailClosure(closure)}
@@ -223,7 +217,6 @@ export default function PeriodClosuresTab() {
         ))}
       </div>
 
-      {/* Create modal */}
       {showCreate && (
         <CreateClosureModal 
           onClose={() => setShowCreate(false)} 
@@ -231,7 +224,6 @@ export default function PeriodClosuresTab() {
         />
       )}
 
-      {/* Detail drawer */}
       {detailClosure && (
         <ClosureDetailDrawer 
           closure={detailClosure}
@@ -244,7 +236,7 @@ export default function PeriodClosuresTab() {
 
   async function handleQuickClose(closure) {
     try {
-      await axiosInstance.post(`/populate/update/periodclosures/${closure._id}`, { status: 'Closed' });
+      await PayrollService.updatePeriodClosure(closure._id, { status: 'Closed' });
       toast.success("Period closed successfully");
       fetchClosures();
     } catch (error) {
@@ -257,7 +249,7 @@ export default function PeriodClosuresTab() {
     if (!reason) return;
 
     try {
-      await axiosInstance.post(`/populate/update/periodclosures/${closure._id}`, { 
+      await PayrollService.updatePeriodClosure(closure._id, { 
         status: 'Reopened',
         reopenReason: reason
       });
@@ -268,8 +260,6 @@ export default function PeriodClosuresTab() {
     }
   }
 }
-
-// ── CreateClosureModal ─────────────────────────────────────────────────────────
 
 function CreateClosureModal({ onClose, onCreated }) {
   const [startDate, setStartDate] = useState("");
@@ -289,7 +279,7 @@ function CreateClosureModal({ onClose, onCreated }) {
 
     try {
       setSubmitting(true);
-      await axiosInstance.post("/populate/create/periodclosures", { startDate, endDate });
+      await PayrollService.createPeriodClosure({ startDate, endDate });
       toast.success("Period closure created successfully");
       onCreated();
     } catch (error) {
@@ -358,15 +348,13 @@ function CreateClosureModal({ onClose, onCreated }) {
   );
 }
 
-// ── ClosureDetailDrawer ───────────────────────────────────────────────────────
-
 function ClosureDetailDrawer({ closure, onClose, onUpdated }) {
   const [closingModule, setClosingModule] = useState(null);
   const [moduleRemarks, setModuleRemarks] = useState("");
 
   const handleModuleClose = async (moduleName) => {
     try {
-      await axiosInstance.post(`/populate/update/periodclosures/${closure._id}`, {
+      await PayrollService.updatePeriodClosure(closure._id, {
         [`modules.${moduleName}.closed`]: true,
         [`modules.${moduleName}.closedAt`]: new Date().toISOString(),
         [`modules.${moduleName}.remarks`]: moduleRemarks
@@ -398,7 +386,6 @@ function ClosureDetailDrawer({ closure, onClose, onUpdated }) {
         </div>
 
         <div className="overflow-y-auto flex-1 p-5 space-y-5">
-          {/* Overall status */}
           <div className="flex items-center justify-between p-4 bg-surface-1 rounded-lg">
             <div>
               <p className="text-[11px] text-ink-subtle uppercase tracking-[0.4px]">Overall Status</p>
@@ -407,7 +394,6 @@ function ClosureDetailDrawer({ closure, onClose, onUpdated }) {
             <span className={STATUS_CHIP[closure.status] || STATUS_CHIP.Open}>{closure.status}</span>
           </div>
 
-          {/* Module closure controls */}
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-muted mb-3">Module Controls</p>
             <div className="space-y-2">
@@ -439,7 +425,6 @@ function ClosureDetailDrawer({ closure, onClose, onUpdated }) {
             </div>
           </div>
 
-          {/* Summary statistics */}
           {closure.summary && (
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-muted mb-3">Period Summary</p>
@@ -468,7 +453,6 @@ function ClosureDetailDrawer({ closure, onClose, onUpdated }) {
             </div>
           )}
 
-          {/* Audit trail */}
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-muted mb-3">Audit Trail</p>
             <div className="space-y-2 text-[12px]">
@@ -518,7 +502,6 @@ function ClosureDetailDrawer({ closure, onClose, onUpdated }) {
           <button onClick={onClose} className="tracker-btn-secondary">Close</button>
         </div>
 
-        {/* Module close confirmation modal */}
         {closingModule && (
           <div className="absolute inset-0 bg-surface/95 flex items-center justify-center p-4">
             <div className="w-full max-w-sm space-y-4">

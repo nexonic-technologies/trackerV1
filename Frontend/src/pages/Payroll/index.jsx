@@ -1,34 +1,32 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { BadgeDollarSign, Play, Users, Receipt, X, BarChart3, Calendar } from "lucide-react";
-import { useAuth } from "../../context/authProvider";
-import { useUserRole } from "../../hooks/useUserRole";
-import PayrollRunsTab      from "./PayrollRunsTab";
-import SalaryStructuresTab from "./SalaryStructuresTab";
-import MyPayslipsTab       from "./MyPayslipsTab";
-import PeriodClosuresTab   from "./PeriodClosuresTab";
-import ProfileImage        from "../../components/Common/ProfileImage";
+import { useUserRole } from "@hooks/useUserRole";
+import PayrollRunsTab from "@components/payroll/PayrollRunsTab";
+import SalaryStructuresTab from "@components/payroll/SalaryStructuresTab";
+import MyPayslipsTab from "@components/payroll/MyPayslipsTab";
+import PeriodClosuresTab from "@components/payroll/PeriodClosuresTab";
+import ProfileImage from "@components/Common/ProfileImage";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const TABS = [
-  { key: "runs",       label: "Payroll Runs",     icon: Play,    roles: ["hr admin","admin","superadmin","super admin","hr"] },
-  { key: "structures", label: "Salary Structures", icon: Users,   roles: ["hr admin","admin","superadmin","super admin","hr"] },
-  { key: "closures",   label: "Period Closures",  icon: Calendar, roles: ["hr admin","admin","superadmin","super admin","hr", "finance manager", "finance"] },
-  { key: "payslips",   label: "My Payslips",       icon: Receipt, roles: [] },
+  { key: "runs", label: "Payroll Runs", icon: Play, roles: ["hr admin", "admin", "superadmin", "super admin", "hr"] },
+  { key: "structures", label: "Salary Structures", icon: Users, roles: ["hr admin", "admin", "superadmin", "super admin", "hr"] },
+  { key: "closures", label: "Period Closures", icon: Calendar, roles: ["hr admin", "admin", "superadmin", "super admin", "hr", "finance manager", "finance"] },
+  { key: "payslips", label: "My Payslips", icon: Receipt, roles: [] },
 ];
 
-const PRIVILEGED = ["hr admin","admin","superadmin","super admin","hr"];
+const PRIVILEGED = ["hr admin", "admin", "superadmin", "super admin", "hr"];
 
 export default function PayrollPage() {
   const { userRole, loading: roleLoading } = useUserRole();
   const roleName = (userRole || "").toLowerCase();
-  const isHR     = PRIVILEGED.includes(roleName);
+  const isHR = PRIVILEGED.includes(roleName);
 
   const visibleTabs = TABS.filter(t => t.roles.length === 0 || t.roles.includes(roleName));
   const [active, setActive] = useState("");
 
-  // Wait for role to resolve before picking default tab
   const resolvedActive = active || (roleLoading ? "" : isHR ? "runs" : "payslips");
 
   if (roleLoading) return (
@@ -40,7 +38,6 @@ export default function PayrollPage() {
 
   return (
     <div className="space-y-6" data-module="payroll">
-      {/* Page header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <p className="lmx-page-eyebrow mb-1">PAYROLL</p>
@@ -60,7 +57,6 @@ export default function PayrollPage() {
         )}
       </div>
 
-      {/* Tab bar */}
       <div className="lmx-tab-bar">
         {visibleTabs.map(t => {
           const Icon = t.icon;
@@ -74,19 +70,16 @@ export default function PayrollPage() {
         })}
       </div>
 
-      {/* Tab content */}
-      {resolvedActive === "runs"       && <PayrollRunsTab />}
+      {resolvedActive === "runs" && <PayrollRunsTab />}
       {resolvedActive === "structures" && <SalaryStructuresTab />}
-      {resolvedActive === "closures"   && <PeriodClosuresTab />}
-      {resolvedActive === "payslips"   && <MyPayslipsTab />}
+      {resolvedActive === "closures" && <PeriodClosuresTab />}
+      {resolvedActive === "payslips" && <MyPayslipsTab />}
     </div>
   );
 }
 
-// ── PayslipModal ── exported for reuse across tabs ─────────────────────────────
-
 export function PayslipModal({ rec, onClose }) {
-  const emp    = rec?.employeeId;
+  const emp = rec?.employeeId;
   const earned = rec?.earnedBreakdown
     ? (rec.earnedBreakdown instanceof Map ? Object.fromEntries(rec.earnedBreakdown) : rec.earnedBreakdown)
     : null;
@@ -94,16 +87,15 @@ export function PayslipModal({ rec, onClose }) {
     ? (rec.deductionBreakdown instanceof Map ? Object.fromEntries(rec.deductionBreakdown) : rec.deductionBreakdown)
     : null;
 
-  // Fallback for legacy records that still use old flat fields
-  const earnedEntries   = earned   ? Object.entries(earned)   : [];
+  const earnedEntries = earned ? Object.entries(earned) : [];
   const deductedEntries = deducted ? Object.entries(deducted) : [];
 
   const STATUS_CHIP = {
-    Draft:      "pay-status-chip pay-status-chip--draft",
+    Draft: "pay-status-chip pay-status-chip--draft",
     Processing: "pay-status-chip pay-status-chip--processing",
-    Processed:  "pay-status-chip pay-status-chip--processed",
-    Approved:   "pay-status-chip pay-status-chip--approved",
-    Paid:       "pay-status-chip pay-status-chip--paid",
+    Processed: "pay-status-chip pay-status-chip--processed",
+    Approved: "pay-status-chip pay-status-chip--approved",
+    Paid: "pay-status-chip pay-status-chip--paid",
   };
 
   return (
@@ -111,7 +103,6 @@ export function PayslipModal({ rec, onClose }) {
       <div className="bg-surface rounded-tracker-xl w-full max-w-md overflow-hidden"
         style={{ boxShadow: "var(--tracker-shadow-overlay)" }}>
 
-        {/* Header */}
         <div className="pay-gradient-hero px-6 py-5 text-white">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">PAYSLIP</p>
@@ -139,10 +130,7 @@ export function PayslipModal({ rec, onClose }) {
           )}
         </div>
 
-        {/* Salary breakdown */}
         <div className="p-5 max-h-[60vh] overflow-y-auto">
-
-          {/* Earnings section */}
           {earnedEntries.length > 0 ? (
             <>
               <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-subtle mb-2">Earnings</p>
@@ -164,14 +152,12 @@ export function PayslipModal({ rec, onClose }) {
               </div>
             </>
           ) : (
-            /* Legacy flat-field fallback */
             <div className="pay-row pay-row--total">
               <span className="pay-row__label">Gross Salary</span>
               <span className="pay-row__value pay-amount-sm pay-amount-gross">₹{(rec.grossSalary || 0).toLocaleString("en-IN")}</span>
             </div>
           )}
 
-          {/* Deductions section */}
           {deductedEntries.length > 0 && (
             <>
               <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-ink-subtle mt-4 mb-2">Deductions</p>
@@ -184,13 +170,11 @@ export function PayslipModal({ rec, onClose }) {
             </>
           )}
 
-          {/* Net salary */}
           <div className="pay-row pay-row--net pay-row--total mt-2 pt-2 border-t-2 border-hairline">
             <span className="pay-row__label text-[15px] font-semibold text-ink">Net Salary</span>
             <span className="pay-row__value pay-amount-lg">₹{(rec.netSalary || 0).toLocaleString("en-IN")}</span>
           </div>
 
-          {/* Day summary footer */}
           <div className="mt-4 pt-3 border-t border-hairline-soft flex items-center justify-between text-[12px] text-ink-muted">
             <span>{rec.presentDays || 0} / {rec.workingDays || 0} days present</span>
             {rec.lopDays > 0 && (
